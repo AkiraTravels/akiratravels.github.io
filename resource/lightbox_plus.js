@@ -523,8 +523,8 @@ Lightbox.prototype = {
       var loading = document.getElementById('loadingImage');
       if (loading)
       {
-        loading.style.left = [(self._img.width - 30) / 2,'px'].join('');
-        loading.style.top  = [(self._img.height - 30) / 2,'px'].join('');
+        loading.style.left = [(self._img.width - 50) / 2,'px'].join('');
+        loading.style.top  = [(self._img.height - 50) / 2,'px'].join('');
       }
       if (caption)
       {
