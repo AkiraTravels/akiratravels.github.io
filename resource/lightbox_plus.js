@@ -496,12 +496,12 @@ Lightbox.prototype = {
   {
     var self = this;
     if (self._open == -1) return;
-    var heightmargin = 1;
+    var heightmargin = 2;
     var caption = document.getElementById('lightboxCaption');
     if (caption)
       heightmargin += caption.clientHeight || caption.offsetHeight;
-    var targ = { w:self._page.win.w - 1, h:self._page.win.h - heightmargin };
-    var zoom = { x:15, y:15 };
+    var targ = { w:self._page.win.w - 2, h:self._page.win.h - heightmargin };
+    var zoom = { x:1, y:1 };
     var navi = { p:9, n:9, y:0 };
     if (!self._expanded)
     { // shrink image with the same aspect
