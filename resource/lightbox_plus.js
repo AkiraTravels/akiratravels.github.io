@@ -496,11 +496,11 @@ Lightbox.prototype = {
   {
     var self = this;
     if (self._open == -1) return;
-    var heightmargin = 30;
+    var heightmargin = 1;
     var caption = document.getElementById('lightboxCaption');
     if (caption)
       heightmargin += caption.clientHeight || caption.offsetHeight;
-    var targ = { w:self._page.win.w - 30, h:self._page.win.h - heightmargin };
+    var targ = { w:self._page.win.w - 1, h:self._page.win.h - heightmargin };
     var zoom = { x:15, y:15 };
     var navi = { p:9, n:9, y:0 };
     if (!self._expanded)
@@ -1039,7 +1039,7 @@ Spica.Event.run(function() {
     effectimg:'../resource/zzoop.gif',
     effectpos:{x:-40,y:-20},
     effectclass:'effectable',
-    resizable:true,
+    resizable:false,
     animation:true
   });
 });
