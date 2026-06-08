@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理画面 — 旅の記録</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="admin-body">
+
+<nav class="nav">
+  <div class="nav-logo" onclick="location.href='../index.html'">旅<span>の</span>記録 <small>— 管理画面</small></div>
+  <div class="nav-actions">
+    <span id="admin-user" class="admin-user-label"></span>
+    <button class="nav-btn secondary" id="logout-btn" onclick="adminLogout()">ログアウト</button>
+  </div>
+</nav>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="admin-login-screen">
+  <div class="login-box">
+    <div class="login-title">管理者ログイン</div>
+    <div class="form-group">
+      <label class="form-label">メールアドレス</label>
+      <input type="email" class="form-input" id="login-email" placeholder="admin@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">パスワード</label>
+      <input type="password" class="form-input" id="login-password">
+    </div>
+    <button class="submit-btn" onclick="doLogin()">ログイン</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
+
+<!-- ADMIN MAIN -->
+<div id="admin-main" class="admin-main" style="display:none">
+
+  <!-- TABS -->
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('post')">✏️ 新規投稿</button>
+    <button class="admin-tab" onclick="switchAdminTab('posts')">📋 投稿一覧</button>
+    <button class="admin-tab" onclick="switchAdminTab('countries')">🌍 国管理</button>
+  </div>
+
+  <!-- NEW POST TAB -->
+  <div id="tab-post" class="admin-tab-content">
+    <div class="admin-section-title">新規投稿 / 編集</div>
+
+    <div class="admin-form">
+      <input type="hidden" id="edit-post-id">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">国・地域 <span class="required">*</span></label>
+          <select class="form-select" id="post-country"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">日付 <span class="required">*</span></label>
+          <input type="date" class="form-input" id="post-date">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">タイトル <span class="required">*</span></label>
+        <input type="text" class="form-input" id="post-title" placeholder="例: リスボン旧市街を歩く">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">場所・地名</label>
+        <input type="text" class="form-input" id="post-location" placeholder="例: アルファマ地区, リスボン">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">投稿の説明（全体キャプション）</label>
+        <textarea class="form-textarea" id="post-caption" placeholder="この投稿についての説明..."></textarea>
+      </div>
+
+      <!-- MEDIA SECTION -->
+      <div class="media-section">
+        <div class="media-section-header">
+          <div class="form-label">メディア（写真・動画）</div>
+          <button class="add-media-btn" onclick="addMediaRow()">＋ メディアを追加</button>
+        </div>
+
+        <div class="cloudinary-info">
+          <div class="cloudinary-info-title">☁️ Cloudinary へのアップロード手順</div>
+          <div class="cloudinary-info-text">
+            1. <a href="https://cloudinary.com/console/media_library" target="_blank">Cloudinary Media Library</a> を開く<br>
+            2. 写真・動画をアップロード<br>
+            3. ファイルを右クリック →「Copy URL」でURLをコピー<br>
+            4. 下のフォームにURLを貼り付け
+          </div>
+        </div>
+
+        <div id="media-rows"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="submit-btn" onclick="submitPost()">投稿する</button>
+        <button class="cancel-btn" onclick="resetPostForm()" id="cancel-edit-btn" style="display:none">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POSTS LIST TAB -->
+  <div id="tab-posts" class="admin-tab-content" style="display:none">
+    <div class="admin-section-title">投稿一覧</div>
+    <div id="admin-posts-list"></div>
+  </div>
+
+  <!-- COUNTRIES TAB -->
+  <div id="tab-countries" class="admin-tab-content" style="display:none">
+    <div class="admin-section-title">国・地域の管理</div>
+
+    <div class="admin-form" style="max-width:400px">
+      <input type="hidden" id="edit-country-id">
+      <div class="form-group">
+        <label class="form-label">国名 <span class="required">*</span></label>
+        <input type="text" class="form-input" id="country-name" placeholder="例: ポルトガル">
+      </div>
+      <div class="form-group">
+        <label class="form-label">国旗絵文字 <span class="required">*</span></label>
+        <input type="text" class="form-input" id="country-flag" placeholder="例: 🇵🇹">
+      </div>
+      <div class="form-group">
+        <label class="form-label">表示順（数字が小さいほど先頭）</label>
+        <input type="number" class="form-input" id="country-order" value="0">
+      </div>
+      <div class="form-actions">
+        <button class="submit-btn" onclick="submitCountry()">保存</button>
+        <button class="cancel-btn" onclick="resetCountryForm()" id="cancel-country-btn" style="display:none">キャンセル</button>
+      </div>
+    </div>
+
+    <div id="countries-list" style="margin-top:24px"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="../js/firebase-config.js"></script>
+<script type="module" src="../js/admin.js"></script>
+</body>
+</html>
