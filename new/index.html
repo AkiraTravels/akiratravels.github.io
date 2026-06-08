@@ -5,123 +5,114 @@
 <meta name="viewport" content="width=device-width, user-scalable=yes">
 <meta name="description" content="だから一人旅はやめられない。人にフォーカスを当てて書き下ろした旅行記です。">
 <title>AKIRA travels ～ だから一人旅はやめられない</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ===== Jekyll Cayman テーマ準拠 ===== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', Meiryo, sans-serif;
-  background: #fff;
-  color: #333;
-  font-size: 14px;
-  line-height: 1.7;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #606c71;               /* Cayman body text */
+  background-color: #fff;
 }
 
-/* ヘッダー */
-#site-header {
+/* ===== ヘッダー（Caymanの緑グラデ帯を踏襲） ===== */
+.page-header {
+  background-color: #159957;
+  background-image: linear-gradient(120deg, #155799, #159957);
+  padding: 2rem 1rem 1.5rem;
   text-align: center;
-  padding: 12px 8px 8px;
-  border-bottom: 2px solid #333;
-}
-#site-header img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
-#site-title-text {
-  font-size: 22px;
-  font-weight: bold;
-  padding: 10px 0 4px;
-  letter-spacing: 0.04em;
 }
 
-/* メインコンテンツ */
-#main-content {
-  max-width: 660px;
+/* ロゴ GIF */
+.header-logo {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto 0.8rem;
+}
+
+/* ===== メインコンテンツ ===== */
+.main-content {
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 16px 14px 40px;
-  text-align: center;
+  padding: 1.5rem 1rem 2rem;
+  font-size: 1.1rem;
 }
 
 /* キャッチコピー */
 .catchcopy {
-  font-size: 13px;
+  font-size: 1rem;
   font-weight: bold;
-  line-height: 2.0;
-  margin: 12px 0 20px;
-  text-align: left;
-  display: inline-block;
+  line-height: 1.9;
+  color: #333;
+  margin-bottom: 1.4rem;
 }
 
 /* 国リンクテーブル */
 .country-table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 auto 20px;
-  text-align: left;
+  margin-bottom: 1.2rem;
 }
 .country-table td {
-  padding: 5px 6px;
+  padding: 4px 6px;
   width: 50%;
   vertical-align: top;
 }
 .country-table a {
+  font-size: 1rem;
   font-weight: bold;
-  font-size: 14px;
-  color: #0000cc;
+  color: #1e6bb8;      /* Cayman link blue */
   text-decoration: none;
 }
-.country-table a:hover  { text-decoration: underline; color: #cc0000; }
-.country-table a:visited { color: #551a8b; }
-.country-count-note {
+.country-table a:hover  { text-decoration: underline; }
+.country-table a:visited { color: #6a737d; }
+.count-note {
+  font-size: 0.8rem;
   font-weight: normal;
-  font-size: 11px;
-  color: #888;
-  margin-left: 4px;
+  color: #6a737d;
+  margin-left: 3px;
 }
 
-/* フッター */
-#site-footer {
+/* ===== フッター ===== */
+.site-footer {
+  padding: 1rem 1rem 1.5rem;
+  border-top: 1px solid #e7e7e7;
   text-align: center;
-  padding: 12px 14px 20px;
-  border-top: 2px solid #333;
-  margin-top: 8px;
 }
-#site-footer img {
+.site-footer img {
   height: 28px;
   margin: 0 3px 4px;
   vertical-align: middle;
 }
 .copyright {
-  font-size: 11px;
-  color: #888;
-  margin-top: 10px;
-  letter-spacing: 0.03em;
+  font-size: 0.78rem;
+  color: #819198;
+  margin-top: 0.6rem;
 }
 
 /* 管理リンク */
 #admin-link {
-  position: fixed;
-  top: 6px; right: 8px;
-  z-index: 100;
-  font-size: 10px;
+  position: fixed; top: 6px; right: 8px; z-index: 100; font-size: 11px;
 }
 #admin-link a {
-  color: #888;
+  color: rgba(255,255,255,0.7);
   text-decoration: none;
-  background: rgba(255,255,255,0.88);
-  padding: 2px 7px;
-  border: 1px solid #ccc;
+  background: rgba(0,0,0,0.2);
+  padding: 2px 8px;
   border-radius: 3px;
 }
-#admin-link a:hover { color: #333; }
+#admin-link a:hover { color: #fff; }
 
 .status-msg {
-  font-size: 12px;
-  color: #888;
-  text-align: center;
-  padding: 16px 0;
+  font-size: 0.9rem; color: #999; padding: 1rem 0;
 }
 
-@media (max-width: 380px) {
-  .country-table a { font-size: 13px; }
-  .country-table td { padding: 4px 3px; }
+/* PC: 最大幅を活かした2カラム維持 */
+@media (min-width: 64rem) {
+  .main-content { padding: 2rem 6rem 3rem; }
 }
 </style>
 </head>
@@ -129,11 +120,19 @@ body {
 
 <div id="admin-link"></div>
 
-<div id="site-header">
-  <div id="site-title-text">AKIRA travels ～ だから一人旅はやめられない</div>
+<!-- HEADER: home.gif ロゴをそのまま使用 -->
+<div class="page-header">
+  <img
+    src="https://akiratravels.github.io/images/home.gif"
+    alt="AKIRA travels ～ だから一人旅はやめられない"
+    class="header-logo"
+    onerror="this.style.display='none';document.getElementById('header-fallback').style.display='block'">
+  <div id="header-fallback" style="display:none;color:#fff;font-size:1.4rem;font-weight:bold;letter-spacing:0.04em">
+    AKIRA travels ～ だから一人旅はやめられない
+  </div>
 </div>
 
-<div id="main-content">
+<div class="main-content">
   <p class="catchcopy">
     湖も、絶壁も、遺跡もいいけどやっぱり人が面白い<br>
     人にフォーカスを当てて書き下ろした旅行記です
@@ -141,24 +140,25 @@ body {
   <div id="country-list-area"><div class="status-msg">読み込み中...</div></div>
 </div>
 
-<div id="site-footer">
+<div class="site-footer">
   <a href="https://akiratravels.github.io/profile/index.html"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"></a>
   <a href="mailto:akira.mizui@gmail.com"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"></a>
-  <a href="https://www.facebook.com/akiratravels" target="_blank"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"></a>
-  <a href="https://m.me/akiratravels" target="_blank"><img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"></a>
+  <a href="https://www.facebook.com/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"></a>
+  <a href="https://m.me/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"></a>
   <div class="copyright" id="copyright-text"></div>
 </div>
 
 <script type="module">
 import { db, auth } from "./js/firebase-config.js";
-import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { collection, getDocs, query, orderBy }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 著作権年
-const startYear = 1998;
-const nowYear   = new Date().getFullYear();
+// 著作権年（動的）
+const y = new Date().getFullYear();
 document.getElementById('copyright-text').textContent =
-  `© ${startYear}–${nowYear} AKIRA travels. All rights reserved.`;
+  `© 1998–${y} AKIRA travels. All rights reserved.`;
 
 // 管理リンク
 onAuthStateChanged(auth, user => {
@@ -166,7 +166,7 @@ onAuthStateChanged(auth, user => {
     `<a href="admin/">${user ? '管理画面' : '管理者'}</a>`;
 });
 
-// 国一覧
+// 国一覧読み込み
 async function loadCountries() {
   const area = document.getElementById('country-list-area');
   try {
@@ -195,8 +195,9 @@ async function loadCountries() {
       for (const c of [countries[i], countries[i+1]]) {
         if (!c) { html += '<td></td>'; continue; }
         const n = postCount[c.id] || 0;
-        const countNote = n > 0 ? `<span class="country-count-note">(${n}件)</span>` : '';
-        html += `<td><a href="country.html?id=${c.id}">${c.flag ? c.flag + ' ' : ''}${c.name}</a>${countNote}</td>`;
+        const note = n ? `<span class="count-note">(${n}件)</span>` : '';
+        // 絵文字なし（PC・モバイル共通）
+        html += `<td><a href="country.html?id=${c.id}">${escHtml(c.name)}</a>${note}</td>`;
       }
       html += '</tr>';
     }
@@ -206,6 +207,12 @@ async function loadCountries() {
     area.innerHTML = `<div class="status-msg">読み込みに失敗しました<br><small>${e.message}</small></div>`;
     console.error(e);
   }
+}
+
+function escHtml(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 loadCountries();

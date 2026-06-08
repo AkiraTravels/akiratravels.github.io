@@ -4,129 +4,166 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, user-scalable=yes">
 <title>旅行記 — AKIRA travels</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'Noto Sans JP', 'Hiragino Kaku Gothic Pro', Meiryo, sans-serif;
-  background: #fff; color: #333; font-size: 14px; line-height: 1.7;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #606c71;
+  background-color: #fff;
 }
 
-#site-header {
-  text-align: center; padding: 10px 8px 8px;
-  border-bottom: 2px solid #333;
+/* ===== ヘッダー ===== */
+.page-header {
+  background-color: #159957;
+  background-image: linear-gradient(120deg, #155799, #159957);
+  padding: 1.5rem 1rem 1.2rem;
+  text-align: center;
 }
-#site-header a { text-decoration: none; color: inherit; }
-.site-title-link {
-  font-size: 18px; font-weight: bold;
-  display: inline-block; padding: 4px 0;
-  letter-spacing: 0.03em;
+.page-header a { text-decoration: none; }
+
+/* 国名タイトル（Caymanの h1 スタイル準拠） */
+.project-name {
+  font-size: 2rem;       /* Cayman: 3.25rem desktop / 2rem mobile */
+  font-weight: bold;
+  color: #fff;
+  margin: 0 0 0.3rem;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+@media (min-width: 42rem) {
+  .project-name { font-size: 3.25rem; }
 }
 
-#main-content {
-  max-width: 660px; margin: 0 auto;
-  padding: 16px 14px 40px; text-align: center;
+/* サイト名サブリンク */
+.site-name-link {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  display: inline-block;
+  margin-top: 0.4rem;
+}
+.site-name-link:hover { color: #fff; text-decoration: underline; }
+
+/* ===== MAIN ===== */
+.main-content {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 2rem;
+  font-size: 1rem;
+  text-align: center;
+}
+@media (min-width: 64rem) {
+  .main-content { padding: 2rem 6rem 3rem; }
 }
 
-/* 国バナー画像 */
-.country-banner { margin: 8px auto 14px; }
-.country-banner img {
-  max-width: 100%; height: auto;
-  border: 1px solid #ddd; display: block; margin: 0 auto;
-}
-
-/* 国の紹介文 */
+/* 紹介文 */
 .country-intro {
-  font-size: 13px; font-weight: bold;
-  line-height: 2.0; margin: 0 0 20px;
-  text-align: left; display: inline-block;
+  font-size: 1rem;
+  font-weight: bold;
+  line-height: 1.9;
+  color: #333;
+  margin-bottom: 1.2rem;
+  display: inline-block;
+  text-align: left;
 }
 
-/* 代表サムネイル */
+/* 代表写真 */
 .cover-thumb {
-  display: block; margin: 0 auto 10px; cursor: pointer;
+  display: block;
+  margin: 0 auto 0.8rem;
+  cursor: pointer;
   text-align: center;
 }
 .cover-thumb img {
-  max-width: 100%; max-height: 300px;
-  object-fit: cover; border: 1px solid #ddd;
-  display: block; margin: 0 auto;
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border: 1px solid #ddd;
+  display: block;
+  margin: 0 auto;
 }
-.cover-thumb-video {
-  background: #111; padding: 24px 40px;
-  display: inline-block; cursor: pointer;
-  margin: 0 auto 10px;
-}
-.cover-thumb-video .play-icon { font-size: 36px; color: #fff; }
-.cover-thumb-video .play-label { font-size: 12px; color: #aaa; margin-top: 4px; }
 
 /* 投稿チェーン */
-.post-chain { text-align: center; margin: 8px auto 0; }
-.chain-link-item { margin: 2px 0; line-height: 2.2; }
+.post-chain { text-align: center; margin-top: 0.5rem; }
+.chain-link-item { line-height: 2.3; }
 .chain-link-item a {
-  font-weight: bold; font-size: 14px;
-  color: #0000cc; text-decoration: none;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1e6bb8;
+  text-decoration: none;
 }
-.chain-link-item a:hover  { text-decoration: underline; color: #cc0000; }
-.chain-link-item a:visited { color: #551a8b; }
-.chain-date { font-size: 11px; color: #888; }
-.chain-arrow { color: #333; font-size: 14px; line-height: 1.2; }
+.chain-link-item a:hover  { text-decoration: underline; }
+.chain-link-item a:visited { color: #6a737d; }
+.chain-date { font-size: 0.8rem; color: #819198; }
+.chain-arrow { color: #555; font-size: 0.9rem; line-height: 1.2; }
 
 /* フッター */
-#site-footer {
-  text-align: center; padding: 12px 14px 20px;
-  border-top: 2px solid #333; margin-top: 8px;
+.site-footer {
+  padding: 1rem 1rem 1.5rem;
+  border-top: 1px solid #e7e7e7;
+  text-align: center;
 }
-#site-footer img { height: 28px; margin: 0 3px 4px; vertical-align: middle; }
-.copyright { font-size: 11px; color: #888; margin-top: 10px; letter-spacing: 0.03em; }
+.site-footer img { height: 28px; margin: 0 3px 4px; vertical-align: middle; }
+.copyright { font-size: 0.78rem; color: #819198; margin-top: 0.6rem; }
 
 /* 管理リンク */
 #admin-link {
-  position: fixed; top: 6px; right: 8px; z-index: 200; font-size: 10px;
+  position: fixed; top: 6px; right: 8px; z-index: 200; font-size: 11px;
 }
 #admin-link a {
-  color: #888; text-decoration: none; background: rgba(255,255,255,0.88);
-  padding: 2px 7px; border: 1px solid #ccc; border-radius: 3px;
+  color: rgba(255,255,255,0.7); text-decoration: none;
+  background: rgba(0,0,0,0.2); padding: 2px 8px; border-radius: 3px;
 }
-#admin-link a:hover { color: #333; }
+#admin-link a:hover { color: #fff; }
 
-.status-msg { font-size: 12px; color: #888; text-align: center; padding: 20px 0; }
+.status-msg { font-size: 0.9rem; color: #999; text-align: center; padding: 1.5rem 0; }
 
-/* ===== MODAL（写真・動画フィード） ===== */
+/* ===== MODAL（詳細フィード） ===== */
 #media-modal {
   display: none;
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.93);
-  z-index: 500; overflow-y: auto;
+  z-index: 500;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 #media-modal.open { display: block; }
 
+/* モーダルトップバー */
 .modal-topbar {
   position: sticky; top: 0; z-index: 501;
-  display: flex; align-items: center;
-  justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(4px);
 }
-.modal-topbar-title {
-  color: #fff; font-size: 14px; font-weight: bold;
-  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  margin-right: 8px;
+.modal-topbar-info { flex: 1; min-width: 0; margin-right: 8px; }
+.modal-post-title {
+  font-size: 15px; font-weight: bold; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.modal-post-date {
+  font-size: 11px; color: #aaa; margin-top: 1px;
 }
 .modal-close-btn {
-  background: rgba(255,255,255,0.18); color: #fff;
-  border: none; font-size: 20px;
-  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.18); color: #fff; border: none;
+  font-size: 20px; width: 34px; height: 34px; border-radius: 50%;
   cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
 }
 .modal-close-btn:hover { background: rgba(255,255,255,0.35); }
-.modal-post-date {
-  font-size: 11px; color: #aaa; text-align: center;
-  padding: 2px 12px 10px;
+
+/* 著作権（モーダル内フッター） */
+.modal-footer {
+  text-align: center;
+  padding: 16px 12px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
+.modal-footer-copyright { font-size: 11px; color: #555; }
 
 /* メディアアイテム */
 .modal-media-item { margin-bottom: 3px; }
@@ -145,53 +182,61 @@ body {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.28); cursor: pointer;
-  transition: opacity 0.25s;
+  transition: opacity 0.2s;
 }
 .video-overlay.hidden { opacity: 0; pointer-events: none; }
 .play-btn {
   width: 62px; height: 62px;
   background: rgba(255,255,255,0.92); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
 }
+.play-btn:hover { transform: scale(1.08); }
 .play-btn svg { width: 26px; height: 26px; fill: #222; margin-left: 4px; }
 
+/* キャプション（画像・動画直下） */
 .modal-caption {
-  padding: 10px 14px 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 10px 14px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
 }
 .modal-caption-text { color: #ddd; font-size: 13px; line-height: 1.8; white-space: pre-line; }
-.modal-caption-loc  { font-size: 11px; color: #999; margin-top: 5px; }
 </style>
 </head>
 <body>
 
 <div id="admin-link"></div>
 
-<div id="site-header">
-  <a href="index.html"><div class="site-title-link">AKIRA travels ～ だから一人旅はやめられない</div></a>
+<div class="page-header">
+  <h1 class="project-name" id="country-title">読み込み中...</h1>
+  <a href="index.html" class="site-name-link">← AKIRA travels トップへ</a>
 </div>
 
-<div id="main-content">
+<div class="main-content">
   <div id="country-content"><div class="status-msg">読み込み中...</div></div>
 </div>
 
-<div id="site-footer">
-  <a href="index.html"><img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME"></a>
+<div class="site-footer">
+  <a href="index.html"><img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME" onerror="this.style.display='none'"></a>
   <a href="https://akiratravels.github.io/profile/index.html"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"></a>
   <a href="mailto:akira.mizui@gmail.com"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"></a>
-  <a href="https://www.facebook.com/akiratravels" target="_blank"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"></a>
-  <a href="https://m.me/akiratravels" target="_blank"><img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"></a>
+  <a href="https://www.facebook.com/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"></a>
+  <a href="https://m.me/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"></a>
   <div class="copyright" id="copyright-text"></div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL（詳細ページ） -->
 <div id="media-modal">
   <div class="modal-topbar">
-    <div class="modal-topbar-title" id="modal-post-title"></div>
+    <div class="modal-topbar-info">
+      <div class="modal-post-title" id="modal-post-title"></div>
+      <div class="modal-post-date"  id="modal-post-date"></div>
+    </div>
     <button class="modal-close-btn" onclick="closeModal()">✕</button>
   </div>
-  <div class="modal-post-date" id="modal-post-date"></div>
   <div id="modal-media-feed"></div>
+  <div class="modal-footer">
+    <div class="modal-footer-copyright" id="modal-copyright"></div>
+  </div>
 </div>
 
 <script type="module">
@@ -199,13 +244,14 @@ import { db, auth } from "./js/firebase-config.js";
 import {
   collection, getDocs, getDoc, doc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 著作権年
-const startYear = 1998;
-const nowYear   = new Date().getFullYear();
-document.getElementById('copyright-text').textContent =
-  `© ${startYear}–${nowYear} AKIRA travels. All rights reserved.`;
+// 著作権（動的年）
+const y = new Date().getFullYear();
+const copyrightStr = `© 1998–${y} AKIRA travels. All rights reserved.`;
+document.getElementById('copyright-text').textContent  = copyrightStr;
+document.getElementById('modal-copyright').textContent = copyrightStr;
 
 // 管理リンク
 onAuthStateChanged(auth, user => {
@@ -213,16 +259,18 @@ onAuthStateChanged(auth, user => {
     `<a href="admin/">${user ? '管理画面' : '管理者'}</a>`;
 });
 
-// URL パラメータ
+// URLパラメータ
 const params    = new URLSearchParams(location.search);
 const countryId = params.get('id');
 if (!countryId) {
+  document.getElementById('country-title').textContent = 'エラー';
   document.getElementById('country-content').innerHTML =
     '<div class="status-msg">URLが正しくありません</div>';
 } else {
   loadCountryPage(countryId);
 }
 
+// ===== 国別ページ =====
 async function loadCountryPage(countryId) {
   const area = document.getElementById('country-content');
   try {
@@ -230,10 +278,14 @@ async function loadCountryPage(countryId) {
     if (!countryDoc.exists()) throw new Error('国が見つかりません');
     const country = { id: countryId, ...countryDoc.data() };
 
+    // タイトル：国名のみ（絵文字なし）
     document.title = `${country.name} 旅行記 — AKIRA travels`;
+    document.getElementById('country-title').textContent = country.name;
 
-    // where+orderBy複合クエリを避けてJSでフィルタ・ソート
-    const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('date', 'asc')));
+    // 投稿を JS でフィルタ（複合インデックス不要）
+    const postsSnap = await getDocs(
+      query(collection(db, 'posts'), orderBy('date', 'asc'))
+    );
     const posts = [];
     postsSnap.forEach(d => {
       const p = { id: d.id, ...d.data() };
@@ -246,20 +298,18 @@ async function loadCountryPage(countryId) {
       html += `<p class="country-intro">${escHtml(country.description).replace(/\n/g,'<br>')}</p>`;
     }
 
-    // 代表写真：全投稿の中から isCover=true の画像を探す、なければ最初の画像
-    let coverMedia = null;
-    let coverPost  = null;
-    for (const p of posts) {
-      const m = (p.media || []).find(m => m.isCover && m.type === 'image');
-      if (m) { coverMedia = m; coverPost = p; break; }
-    }
-    if (!coverMedia && posts.length > 0) {
+    // 代表写真（isCover優先 → 最初の画像）
+    let coverMedia = null, coverPost = null;
+    outer:
+    for (const pass of [true, false]) {
       for (const p of posts) {
-        const m = (p.media || []).find(m => m.type === 'image');
-        if (m) { coverMedia = m; coverPost = p; break; }
+        for (const m of (p.media || [])) {
+          if (m.type === 'image' && (pass ? m.isCover : true)) {
+            coverMedia = m; coverPost = p; break outer;
+          }
+        }
       }
     }
-
     if (coverMedia) {
       html += `
         <div class="cover-thumb" onclick="openModal('${coverPost.id}')">
@@ -268,7 +318,7 @@ async function loadCountryPage(countryId) {
         </div>`;
     }
 
-    // 投稿チェーン（▼でつなぐ）
+    // 投稿チェーン
     if (posts.length === 0) {
       html += '<div class="status-msg">まだ投稿がありません</div>';
     } else {
@@ -295,12 +345,13 @@ async function loadCountryPage(countryId) {
 let videoObserver = null;
 
 window.openModal = async function(postId) {
-  const modal  = document.getElementById('media-modal');
-  const feed   = document.getElementById('modal-media-feed');
+  const modal   = document.getElementById('media-modal');
+  const feed    = document.getElementById('modal-media-feed');
   const titleEl = document.getElementById('modal-post-title');
   const dateEl  = document.getElementById('modal-post-date');
 
-  feed.innerHTML    = '<div class="status-msg" style="color:#aaa;padding:48px 0">読み込み中...</div>';
+  // リセット
+  feed.innerHTML      = '<div class="status-msg" style="color:#aaa;padding:48px 0">読み込み中...</div>';
   titleEl.textContent = '';
   dateEl.textContent  = '';
   modal.classList.add('open');
@@ -311,8 +362,11 @@ window.openModal = async function(postId) {
     if (!d.exists()) throw new Error('投稿が見つかりません');
     const post = { id: postId, ...d.data() };
 
+    // トップバー：タイトル + 日付・場所
     titleEl.textContent = post.title;
-    dateEl.textContent  = formatDate(post.date) + (post.location ? '　📍 ' + post.location : '');
+    const datePart = formatDate(post.date);
+    const locPart  = post.location ? `　📍 ${post.location}` : '';
+    dateEl.textContent = datePart + locPart;
 
     feed.innerHTML = '';
     if (!post.media || post.media.length === 0) {
@@ -326,11 +380,13 @@ window.openModal = async function(postId) {
 
       let mediaHtml = '';
       if (m.type === 'image') {
+        // 画像：キャプションのみ（場所は不要）
         mediaHtml = `
           <div class="modal-media-wrapper">
             <img src="${m.url}" alt="${escHtml(m.caption||'')}" loading="lazy">
           </div>`;
       } else {
+        // 動画：オーバーレイ付き。再生終了後もタップで再再生
         const vid = `vid-${postId}-${idx}`;
         mediaHtml = `
           <div class="modal-media-wrapper">
@@ -343,10 +399,10 @@ window.openModal = async function(postId) {
           </div>`;
       }
 
-      const captionHtml = (m.caption || post.location) ? `
+      // キャプション（あれば表示、場所は表示しない）
+      const captionHtml = m.caption ? `
         <div class="modal-caption">
-          ${m.caption ? `<div class="modal-caption-text">${escHtml(m.caption)}</div>` : ''}
-          ${post.location ? `<div class="modal-caption-loc">📍 ${escHtml(post.location)}</div>` : ''}
+          <div class="modal-caption-text">${escHtml(m.caption)}</div>
         </div>` : '';
 
       item.innerHTML = mediaHtml + captionHtml;
@@ -363,43 +419,68 @@ window.openModal = async function(postId) {
 window.closeModal = function() {
   document.getElementById('media-modal').classList.remove('open');
   document.body.style.overflow = '';
-  document.querySelectorAll('#modal-media-feed video').forEach(v => v.pause());
+  document.querySelectorAll('#modal-media-feed video').forEach(v => {
+    v.pause();
+    v.currentTime = 0;
+  });
   if (videoObserver) { videoObserver.disconnect(); videoObserver = null; }
 };
 
+// ESCキー
 document.addEventListener('keydown', e => { if (e.key === 'Escape') window.closeModal(); });
 
+// 動画：タップで再生/停止。終了後もオーバーレイを復元してタップ可能に
 window.toggleVideo = function(vid) {
   const video   = document.getElementById(vid);
   const overlay = document.getElementById('ov-' + vid);
   if (!video) return;
-  if (video.paused) {
-    video.play();
-    overlay.classList.add('hidden');
-    video.onended = () => overlay.classList.remove('hidden');
+
+  if (video.paused || video.ended) {
+    // 終了後の再再生も含む
+    if (video.ended) video.currentTime = 0;
+    video.play().then(() => {
+      overlay.classList.add('hidden');
+    }).catch(() => {});
   } else {
     video.pause();
     overlay.classList.remove('hidden');
   }
 };
 
+// 動画終了時にオーバーレイを復元するイベントをフィードに委譲
+document.getElementById('modal-media-feed').addEventListener('ended', e => {
+  if (e.target.tagName === 'VIDEO') {
+    const vid     = e.target.id;
+    const overlay = document.getElementById('ov-' + vid);
+    if (overlay) overlay.classList.remove('hidden');
+  }
+}, true);
+
+// スクロールで60%入ったら自動再生
 function setupVideoObserver() {
   if (!('IntersectionObserver' in window)) return;
   if (videoObserver) videoObserver.disconnect();
+
   videoObserver = new IntersectionObserver(entries => {
     entries.forEach(e => {
       const v = e.target;
       if (e.isIntersecting && e.intersectionRatio >= 0.6) {
-        v.play().then(() => {
-          const ov = document.getElementById('ov-' + v.id);
-          if (ov) ov.classList.add('hidden');
-        }).catch(() => {});
+        if (v.paused && !v.ended) {
+          v.play().then(() => {
+            const ov = document.getElementById('ov-' + v.id);
+            if (ov) ov.classList.add('hidden');
+          }).catch(() => {});
+        }
       } else {
-        v.pause();
+        if (!v.paused) v.pause();
       }
     });
   }, { threshold: 0.6 });
-  document.querySelectorAll('#modal-media-feed video').forEach(v => videoObserver.observe(v));
+
+  document.querySelectorAll('#modal-media-feed video').forEach(v => {
+    videoObserver.observe(v);
+    // ended イベントはフィードの委譲で処理済み
+  });
 }
 
 // ===== UTILS =====
