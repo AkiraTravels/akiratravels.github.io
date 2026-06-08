@@ -13,14 +13,14 @@ import {
 onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('admin-main').style.display = 'block';
-    document.getElementById('logout-btn').style.display = 'inline-block';
-    document.getElementById('admin-user').textContent = user.email;
+    document.getElementById('admin-main').style.display   = 'block';
+    document.getElementById('logout-btn').style.display   = 'inline-block';
+    document.getElementById('admin-user').textContent     = user.email;
     initAdmin();
   } else {
     document.getElementById('login-screen').style.display = 'flex';
-    document.getElementById('admin-main').style.display = 'none';
-    document.getElementById('logout-btn').style.display = 'none';
+    document.getElementById('admin-main').style.display   = 'none';
+    document.getElementById('logout-btn').style.display   = 'none';
   }
 });
 
@@ -36,9 +36,7 @@ window.doLogin = async function() {
   }
 };
 
-window.adminLogout = async function() {
-  await signOut(auth);
-};
+window.adminLogout = async function() { await signOut(auth); };
 
 // ===== INIT =====
 async function initAdmin() {
@@ -62,13 +60,13 @@ window.switchAdminTab = function(tab) {
 
 // ===== COUNTRY SELECT =====
 async function loadCountrySelect() {
-  const sel = document.getElementById('post-country');
+  const sel  = document.getElementById('post-country');
   const snap = await getDocs(query(collection(db, 'countries'), orderBy('order', 'asc')));
   sel.innerHTML = '<option value="">国を選択...</option>';
   snap.forEach(d => {
-    const c = d.data();
+    const c   = d.data();
     const opt = document.createElement('option');
-    opt.value = d.id;
+    opt.value       = d.id;
     opt.textContent = `${c.flag} ${c.name}`;
     sel.appendChild(opt);
   });
@@ -78,15 +76,16 @@ async function loadCountrySelect() {
 let mediaRowCount = 0;
 
 window.addMediaRow = function(data = null) {
-  const idx = mediaRowCount++;
+  const idx       = mediaRowCount++;
   const container = document.getElementById('media-rows');
-  const row = document.createElement('div');
-  row.className = 'media-row';
-  row.id = `media-row-${idx}`;
+  const row       = document.createElement('div');
+  row.className   = 'media-row';
+  row.id          = `media-row-${idx}`;
 
-  const urlVal     = data?.url     || '';
-  const typeVal    = data?.type    || 'image';
-  const captionVal = data?.caption || '';
+  const urlVal     = data?.url        || '';
+  const typeVal    = data?.type       || 'image';
+  const captionVal = data?.caption    || '';
+  const isCover    = data?.isCover    || false;
 
   row.innerHTML = `
     <div class="media-row-header">
@@ -94,7 +93,6 @@ window.addMediaRow = function(data = null) {
       <button class="remove-media-btn" onclick="removeMediaRow(${idx})">×</button>
     </div>
 
-    <!-- Cloudinaryアップロード or URL入力 -->
     <div style="display:flex;gap:6px;margin-bottom:10px">
       <button class="add-media-btn" onclick="cloudinaryUpload(${idx})" style="flex:1">
         ☁️ Cloudinaryにアップロード
@@ -119,6 +117,15 @@ window.addMediaRow = function(data = null) {
     <!-- プレビュー -->
     <div id="media-preview-${idx}" style="margin-top:8px"></div>
 
+    <!-- 代表写真チェック -->
+    <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="media-cover-${idx}" ${isCover?'checked':''}
+        onchange="onCoverChange(${idx})">
+      <label for="media-cover-${idx}" style="font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted);cursor:pointer;letter-spacing:0.05em">
+        ★ 国別ページの代表写真に設定
+      </label>
+    </div>
+
     <div class="form-group" style="margin-top:10px;margin-bottom:0">
       <label class="form-label">このメディアのキャプション</label>
       <textarea class="form-textarea" id="media-caption-${idx}" style="min-height:60px"
@@ -127,8 +134,20 @@ window.addMediaRow = function(data = null) {
   `;
 
   container.appendChild(row);
-
   if (urlVal) previewMedia(idx);
+};
+
+// 代表写真は1つだけ — 他のチェックを外す
+window.onCoverChange = function(changedIdx) {
+  const checked = document.getElementById(`media-cover-${changedIdx}`)?.checked;
+  if (!checked) return;
+  document.querySelectorAll('.media-row').forEach(row => {
+    const idx = row.id.replace('media-row-', '');
+    if (idx !== String(changedIdx)) {
+      const cb = document.getElementById(`media-cover-${idx}`);
+      if (cb) cb.checked = false;
+    }
+  });
 };
 
 window.removeMediaRow = function(idx) {
@@ -141,8 +160,7 @@ window.previewMedia = function(idx) {
   const type = document.getElementById(`media-type-${idx}`)?.value;
   const prev = document.getElementById(`media-preview-${idx}`);
   if (!prev) return;
-  if (!url) { prev.innerHTML = ''; return; }
-
+  if (!url)  { prev.innerHTML = ''; return; }
   if (type === 'image') {
     prev.innerHTML = `<img src="${url}" class="media-preview-thumb" onerror="this.style.display='none'">`;
   } else {
@@ -153,39 +171,32 @@ window.previewMedia = function(idx) {
 // ===== CLOUDINARY UPLOAD =====
 window.cloudinaryUpload = async function(idx) {
   const { cloudName, uploadPreset } = CLOUDINARY_CONFIG;
-
   if (cloudName === 'YOUR_CLOUD_NAME') {
     showToast('firebase-config.js のCloudinary設定を入力してください', true);
     return;
   }
 
-  // ファイル選択ダイアログ
-  const input = document.createElement('input');
-  input.type = 'file';
+  const input  = document.createElement('input');
+  input.type   = 'file';
   input.accept = 'image/*,video/*';
 
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
-
-    const isVideo = file.type.startsWith('video/');
+    const isVideo    = file.type.startsWith('video/');
+    const resourceType = isVideo ? 'video' : 'image';
     showToast('アップロード中...');
-
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('upload_preset', uploadPreset);
-      formData.append('resource_type', isVideo ? 'video' : 'image');
-
-      const resourceType = isVideo ? 'video' : 'image';
-      const res = await fetch(
+      const res  = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
         { method: 'POST', body: formData }
       );
       const data = await res.json();
-
       if (data.secure_url) {
-        document.getElementById(`media-url-${idx}`).value = data.secure_url;
+        document.getElementById(`media-url-${idx}`).value  = data.secure_url;
         document.getElementById(`media-type-${idx}`).value = isVideo ? 'video' : 'image';
         previewMedia(idx);
         showToast('アップロード完了！');
@@ -197,7 +208,6 @@ window.cloudinaryUpload = async function(idx) {
       console.error(e);
     }
   };
-
   input.click();
 };
 
@@ -215,17 +225,21 @@ window.submitPost = async function() {
     return;
   }
 
-  // メディア収集
+  // メディア収集（isCover フラグ含む）
   const media = [];
   document.querySelectorAll('.media-row').forEach(row => {
-    const idx = row.id.replace('media-row-', '');
-    const url     = document.getElementById(`media-url-${idx}`)?.value?.trim();
-    const type    = document.getElementById(`media-type-${idx}`)?.value;
+    const idx      = row.id.replace('media-row-', '');
+    const url      = document.getElementById(`media-url-${idx}`)?.value?.trim();
+    const type     = document.getElementById(`media-type-${idx}`)?.value;
     const mcaption = document.getElementById(`media-caption-${idx}`)?.value?.trim() || '';
-    if (url) media.push({ url, type, caption: mcaption });
+    const isCover  = document.getElementById(`media-cover-${idx}`)?.checked || false;
+    if (url) media.push({ url, type, caption: mcaption, isCover });
   });
 
-  const postData = { countryId, title, date, location, caption, media, updatedAt: serverTimestamp() };
+  const postData = {
+    countryId, title, date, location, caption, media,
+    updatedAt: serverTimestamp()
+  };
 
   try {
     if (editId) {
@@ -240,22 +254,22 @@ window.submitPost = async function() {
     await loadPostsList();
     switchAdminTab('posts');
   } catch (e) {
-    showToast('保存に失敗しました', true);
+    showToast('保存に失敗しました: ' + e.message, true);
     console.error(e);
   }
 };
 
 window.resetPostForm = function() {
-  document.getElementById('edit-post-id').value = '';
-  document.getElementById('post-country').value = '';
-  document.getElementById('post-title').value = '';
-  document.getElementById('post-date').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('edit-post-id').value  = '';
+  document.getElementById('post-country').value  = '';
+  document.getElementById('post-title').value    = '';
+  document.getElementById('post-date').value     = new Date().toISOString().slice(0, 10);
   document.getElementById('post-location').value = '';
-  document.getElementById('post-caption').value = '';
+  document.getElementById('post-caption').value  = '';
   document.getElementById('media-rows').innerHTML = '';
   document.getElementById('cancel-edit-btn').style.display = 'none';
   mediaRowCount = 0;
-  addMediaRow(); // 最初の1行
+  addMediaRow();
 };
 
 // ===== POSTS LIST =====
@@ -263,6 +277,7 @@ async function loadPostsList() {
   const container = document.getElementById('admin-posts-list');
   container.innerHTML = '<div class="loading-state">読み込み中...</div>';
 
+  // orderBy単独なら複合インデックス不要
   const [postsSnap, countriesSnap] = await Promise.all([
     getDocs(query(collection(db, 'posts'), orderBy('date', 'desc'))),
     getDocs(collection(db, 'countries'))
@@ -278,20 +293,29 @@ async function loadPostsList() {
   }
 
   postsSnap.forEach(d => {
-    const post = { id: d.id, ...d.data() };
+    const post    = { id: d.id, ...d.data() };
     const country = countryMap[post.countryId] || {};
+    const coverMedia = (post.media || []).find(m => m.isCover);
+    const thumbSrc   = coverMedia?.type === 'image' ? coverMedia.url
+                     : (post.media || []).find(m => m.type === 'image')?.url || '';
+    const thumbHtml  = thumbSrc
+      ? `<img src="${thumbSrc}" style="width:44px;height:44px;object-fit:cover;border-radius:2px;flex-shrink:0" onerror="this.style.display='none'">`
+      : `<div style="width:44px;height:44px;background:#eee;border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px">📝</div>`;
+
     const item = document.createElement('div');
     item.className = 'admin-post-item';
     item.innerHTML = `
+      ${thumbHtml}
       <div class="admin-post-info">
         <div class="admin-post-title">${post.title}</div>
         <div class="admin-post-meta">
-          ${country.flag || ''} ${country.name || post.countryId} · ${formatDate(post.date)} · ${(post.media||[]).length} メディア
+          ${country.flag || ''} ${country.name || post.countryId} · ${formatDate(post.date)} · ${(post.media||[]).length}件
+          ${coverMedia ? ' · ★代表写真あり' : ''}
         </div>
       </div>
       <div class="admin-post-actions">
         <button class="edit-btn" onclick="editPost('${post.id}')">編集</button>
-        <button class="delete-btn" onclick="deletePost('${post.id}', '${post.title}')">削除</button>
+        <button class="delete-btn" onclick="deletePost('${post.id}', '${post.title.replace(/'/g,"\\'")}')">削除</button>
       </div>
     `;
     container.appendChild(item);
@@ -299,17 +323,16 @@ async function loadPostsList() {
 }
 
 window.editPost = async function(postId) {
-  const d = await getDoc(doc(db, 'posts', postId));
+  const d    = await getDoc(doc(db, 'posts', postId));
   const post = { id: d.id, ...d.data() };
 
-  document.getElementById('edit-post-id').value = post.id;
-  document.getElementById('post-country').value = post.countryId;
-  document.getElementById('post-title').value   = post.title;
-  document.getElementById('post-date').value    = post.date;
-  document.getElementById('post-location').value = post.location || '';
-  document.getElementById('post-caption').value  = post.caption || '';
+  document.getElementById('edit-post-id').value   = post.id;
+  document.getElementById('post-country').value   = post.countryId;
+  document.getElementById('post-title').value     = post.title;
+  document.getElementById('post-date').value      = post.date;
+  document.getElementById('post-location').value  = post.location  || '';
+  document.getElementById('post-caption').value   = post.caption   || '';
 
-  // メディア行リセットして再構築
   document.getElementById('media-rows').innerHTML = '';
   mediaRowCount = 0;
   (post.media || []).forEach(m => addMediaRow(m));
@@ -335,14 +358,15 @@ window.deletePost = async function(postId, title) {
 
 // ===== COUNTRIES =====
 window.submitCountry = async function() {
-  const name    = document.getElementById('country-name').value.trim();
-  const flag    = document.getElementById('country-flag').value.trim();
-  const order   = parseInt(document.getElementById('country-order').value) || 0;
-  const editId  = document.getElementById('edit-country-id').value;
+  const name   = document.getElementById('country-name').value.trim();
+  const flag   = document.getElementById('country-flag').value.trim();
+  const order  = parseInt(document.getElementById('country-order').value) || 0;
+  const desc   = document.getElementById('country-desc').value.trim();
+  const editId = document.getElementById('edit-country-id').value;
 
   if (!name || !flag) { showToast('国名と国旗絵文字は必須です', true); return; }
 
-  const data = { name, flag, order };
+  const data = { name, flag, order, description: desc };
   try {
     if (editId) {
       await updateDoc(doc(db, 'countries', editId), data);
@@ -362,9 +386,10 @@ window.submitCountry = async function() {
 
 window.resetCountryForm = function() {
   document.getElementById('edit-country-id').value = '';
-  document.getElementById('country-name').value = '';
-  document.getElementById('country-flag').value = '';
-  document.getElementById('country-order').value = '0';
+  document.getElementById('country-name').value    = '';
+  document.getElementById('country-flag').value    = '';
+  document.getElementById('country-order').value   = '0';
+  document.getElementById('country-desc').value    = '';
   document.getElementById('cancel-country-btn').style.display = 'none';
 };
 
@@ -382,8 +407,12 @@ async function loadCountriesList() {
   });
 
   container.innerHTML = '';
+  if (countriesSnap.empty) {
+    container.innerHTML = '<div class="loading-state">国が登録されていません</div>';
+    return;
+  }
   countriesSnap.forEach(d => {
-    const c = { id: d.id, ...d.data() };
+    const c    = { id: d.id, ...d.data() };
     const item = document.createElement('div');
     item.className = 'country-admin-item';
     item.innerHTML = `
@@ -391,20 +420,25 @@ async function loadCountriesList() {
       <div class="country-admin-name">${c.name}</div>
       <div class="country-admin-count">${countMap[c.id] || 0} 投稿 · 順序: ${c.order}</div>
       <div class="admin-post-actions">
-        <button class="edit-btn" onclick="editCountry('${c.id}', '${c.name}', '${c.flag}', ${c.order})">編集</button>
-        <button class="delete-btn" onclick="deleteCountry('${c.id}', '${c.name}')">削除</button>
+        <button class="edit-btn" onclick="editCountry('${c.id}')">編集</button>
+        <button class="delete-btn" onclick="deleteCountry('${c.id}', '${c.name.replace(/'/g,"\\'")}')">削除</button>
       </div>
     `;
     container.appendChild(item);
   });
 }
 
-window.editCountry = function(id, name, flag, order) {
+window.editCountry = async function(id) {
+  const d = await getDoc(doc(db, 'countries', id));
+  const c = d.data();
   document.getElementById('edit-country-id').value = id;
-  document.getElementById('country-name').value  = name;
-  document.getElementById('country-flag').value  = flag;
-  document.getElementById('country-order').value = order;
+  document.getElementById('country-name').value    = c.name  || '';
+  document.getElementById('country-flag').value    = c.flag  || '';
+  document.getElementById('country-order').value   = c.order ?? 0;
+  document.getElementById('country-desc').value    = c.description || '';
   document.getElementById('cancel-country-btn').style.display = 'inline-block';
+  switchAdminTab('countries');
+  window.scrollTo(0, 0);
 };
 
 window.deleteCountry = async function(id, name) {
@@ -430,7 +464,7 @@ function formatDate(d) {
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
+  t.className   = 'toast' + (isError ? ' error' : '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }

@@ -2,18 +2,17 @@
 
 import { db, auth } from "./firebase-config.js";
 import {
-  collection, getDocs, getDoc, doc, query, where, orderBy
+  collection, getDocs, getDoc, doc, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// ===== AUTH: ナビゲーションに管理画面リンクを表示 =====
+// ===== AUTH =====
 onAuthStateChanged(auth, user => {
   const area = document.getElementById('auth-area');
-  if (user) {
-    area.innerHTML = `<a href="admin/" class="nav-btn">管理画面</a>`;
-  } else {
-    area.innerHTML = `<a href="admin/" class="nav-btn secondary">管理者ログイン</a>`;
-  }
+  if (!area) return;
+  area.innerHTML = user
+    ? `<a href="admin/" class="nav-btn">管理画面</a>`
+    : `<a href="admin/" class="nav-btn secondary">管理者</a>`;
 });
 
 // ===== ROUTING =====
@@ -41,18 +40,17 @@ function showPage(name) {
   window.scrollTo(0, 0);
 }
 
-// ===== HOME: 国一覧を読み込む =====
+// ===== HOME =====
 async function loadCountries() {
   const grid = document.getElementById('country-grid');
   grid.innerHTML = '<div class="loading-state">読み込み中...</div>';
-
   try {
-    const countriesSnap = await getDocs(
-      query(collection(db, 'countries'), orderBy('order', 'asc'))
-    );
-    const postsSnap = await getDocs(collection(db, 'posts'));
+    // orderBy単独 → 複合インデックス不要
+    const [countriesSnap, postsSnap] = await Promise.all([
+      getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
+      getDocs(collection(db, 'posts'))
+    ]);
 
-    // 国ごとの投稿数を集計
     const postCount = {};
     postsSnap.forEach(d => {
       const cid = d.data().countryId;
@@ -65,13 +63,13 @@ async function loadCountries() {
       return;
     }
 
-    countriesSnap.forEach(docSnap => {
-      const c = { id: docSnap.id, ...docSnap.data() };
+    countriesSnap.forEach(snap => {
+      const c     = { id: snap.id, ...snap.data() };
       const count = postCount[c.id] || 0;
-      const card = document.createElement('div');
+      const card  = document.createElement('div');
       card.className = 'country-card';
       card.innerHTML = `
-        <div class="country-flag">${c.flag}</div>
+        <div class="country-flag">${c.flag || ''}</div>
         <div class="country-name">${c.name}</div>
         <div class="country-count">${count} 投稿</div>
       `;
@@ -79,33 +77,31 @@ async function loadCountries() {
       grid.appendChild(card);
     });
   } catch (e) {
-    grid.innerHTML = '<div class="loading-state">読み込みに失敗しました</div>';
+    grid.innerHTML = '<div class="loading-state">読み込みに失敗しました<br><small>' + e.message + '</small></div>';
     console.error(e);
   }
 }
 
-// ===== COUNTRY PAGE: 投稿一覧 =====
+// ===== COUNTRY PAGE =====
 async function loadCountryPage(countryId) {
   const container = document.getElementById('posts-list');
   container.innerHTML = '<div class="loading-state">読み込み中...</div>';
-
   try {
-    // 国情報
     const countryDoc = await getDoc(doc(db, 'countries', countryId));
+    if (!countryDoc.exists()) throw new Error('国が見つかりません');
     const country = { id: countryId, ...countryDoc.data() };
-    document.getElementById('country-page-title').textContent = `${country.flag} ${country.name}`;
+    document.getElementById('country-page-title').textContent = `${country.flag || ''} ${country.name}`;
 
-    // 投稿一覧
-    const postsSnap = await getDocs(
-      query(
-        collection(db, 'posts'),
-        where('countryId', '==', countryId),
-        orderBy('date', 'asc')
-      )
-    );
+    // where+orderBy複合クエリを避け、全件取得してJSでフィルタ＆ソート
+    const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('date', 'asc')));
+    const posts = [];
+    postsSnap.forEach(d => {
+      const p = { id: d.id, ...d.data() };
+      if (p.countryId === countryId) posts.push(p);
+    });
 
     container.innerHTML = '';
-    if (postsSnap.empty) {
+    if (posts.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">✈️</div>
@@ -116,10 +112,9 @@ async function loadCountryPage(countryId) {
 
     // 日付でグループ化
     const groups = {};
-    postsSnap.forEach(d => {
-      const post = { id: d.id, ...d.data() };
-      if (!groups[post.date]) groups[post.date] = [];
-      groups[post.date].push(post);
+    posts.forEach(p => {
+      if (!groups[p.date]) groups[p.date] = [];
+      groups[p.date].push(p);
     });
 
     Object.keys(groups).sort().forEach(date => {
@@ -127,20 +122,19 @@ async function loadCountryPage(countryId) {
       dateGroup.className = 'date-group';
 
       const label = document.createElement('div');
-      label.className = 'date-label';
-      label.textContent = formatDate(date);
+      label.className     = 'date-label';
+      label.textContent   = formatDate(date);
       dateGroup.appendChild(label);
 
       groups[date].forEach(post => {
-        const firstMedia = post.media?.[0];
-        let thumbHtml = '';
-        if (firstMedia?.type === 'image') {
-          thumbHtml = `<div class="post-thumb"><img src="${firstMedia.url}" alt="" onerror="this.parentElement.textContent='📷'"></div>`;
-        } else if (firstMedia?.type === 'video') {
-          thumbHtml = `<div class="post-thumb">🎬</div>`;
-        } else {
-          thumbHtml = `<div class="post-thumb">📝</div>`;
-        }
+        // 代表写真: isCoverフラグ優先、なければ最初の画像
+        const coverMedia = (post.media || []).find(m => m.isCover && m.type === 'image')
+                        || (post.media || []).find(m => m.type === 'image');
+        const thumbHtml  = coverMedia
+          ? `<div class="post-thumb"><img src="${coverMedia.url}" alt="" onerror="this.parentElement.textContent='📷'"></div>`
+          : post.media?.find(m => m.type === 'video')
+            ? `<div class="post-thumb">🎬</div>`
+            : `<div class="post-thumb">📝</div>`;
 
         const item = document.createElement('div');
         item.className = 'post-item';
@@ -155,31 +149,29 @@ async function loadCountryPage(countryId) {
         item.onclick = () => goPost(post.id);
         dateGroup.appendChild(item);
       });
-
       container.appendChild(dateGroup);
     });
   } catch (e) {
-    container.innerHTML = '<div class="loading-state">読み込みに失敗しました</div>';
+    container.innerHTML = '<div class="loading-state">読み込みに失敗しました<br><small>' + e.message + '</small></div>';
     console.error(e);
   }
 }
 
-// ===== POST DETAIL PAGE =====
+// ===== POST DETAIL =====
 async function loadPostPage(postId) {
   const feed = document.getElementById('media-feed');
   feed.innerHTML = '<div class="loading-state" style="padding:40px 20px;text-align:center">読み込み中...</div>';
-
   try {
     const postDoc = await getDoc(doc(db, 'posts', postId));
+    if (!postDoc.exists()) throw new Error('投稿が見つかりません');
     const post = { id: postId, ...postDoc.data() };
 
     document.getElementById('post-page-title').textContent = post.title;
-    document.getElementById('post-page-date').textContent =
+    document.getElementById('post-page-date').textContent  =
       formatDate(post.date) + (post.location ? ' · ' + post.location : '');
     document.getElementById('back-to-country').onclick = () => goCountry(post.countryId);
 
     feed.innerHTML = '';
-
     if (!post.media || post.media.length === 0) {
       feed.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📷</div><div class="empty-state-text">メディアがありません</div></div>`;
       return;
@@ -221,14 +213,14 @@ async function loadPostPage(postId) {
 
     setupVideoObserver();
   } catch (e) {
-    feed.innerHTML = '<div class="loading-state">読み込みに失敗しました</div>';
+    feed.innerHTML = '<div class="loading-state">読み込みに失敗しました<br><small>' + e.message + '</small></div>';
     console.error(e);
   }
 }
 
 // ===== VIDEO =====
 window.toggleVideo = function(vid) {
-  const video = document.getElementById(vid);
+  const video   = document.getElementById(vid);
   const overlay = document.getElementById('ov-' + vid);
   if (video.paused) {
     video.play();
@@ -255,7 +247,6 @@ function setupVideoObserver() {
       }
     });
   }, { threshold: 0.6 });
-
   document.querySelectorAll('#media-feed video').forEach(v => obs.observe(v));
 }
 
@@ -266,19 +257,21 @@ window.toggleLike = function(btn) {
 };
 
 window.copyLink = function() {
-  navigator.clipboard.writeText(location.href).catch(() => {});
+  navigator.clipboard?.writeText(location.href).catch(() => {});
   showToast('リンクをコピーしました');
 };
 
 function formatDate(d) {
+  if (!d) return '';
   const dt = new Date(d + 'T00:00:00');
   return `${dt.getFullYear()}年${dt.getMonth()+1}月${dt.getDate()}日`;
 }
 
 function showToast(msg, isError = false) {
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
-  t.className = 'toast' + (isError ? ' error' : '');
+  t.className   = 'toast' + (isError ? ' error' : '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
