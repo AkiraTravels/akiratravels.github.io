@@ -1,224 +1,297 @@
-import { db, auth, CLOUDINARY_CONFIG } from '../js/firebase-config.js';
-import { 
-  collection, getDocs, doc, addDoc, updateDoc, deleteDoc, query, orderBy, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { 
-  signInWithEmailAndPassword, signOut, onAuthStateChanged 
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { collection, addDoc, getDocs, orderBy, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { db, auth, CLOUDINARY_CONFIG } from "../js/firebase-config.js";
 
-let countries = [];
-let allPosts = [];
-let mediaRows = [];
-let editPostId = null;
-let editCountryId = null;
+// 定数定義：動画の代わりに登録するブランクのダミー画像URL
+const DUMMY_IMAGE_URL = "https://placehold.co/600x400?text=Video+Post";
 
-const $ = id => document.getElementById(id);
+// グローバル状態管理
+const localMediaMap = new Map();
+let countriesCache = []; 
+let parsedPosts = [];    
 
-onAuthStateChanged(auth, user => {
-  if (user) {
-    $('login-screen').style.display = 'none';
-    $('admin-main').style.display = 'block';
-    $('header-user').style.display = 'flex';
-    $('user-email').textContent = user.email;
-    loadAll();
-  } else {
-    $('login-screen').style.display = 'block';
-    $('admin-main').style.display = 'none';
-    $('header-user').style.display = 'none';
+// 1. 認証チェック & 初期化
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "./login.html";
+    return;
   }
+  await loadCountriesMaster();
+  initTabSystem();
 });
 
-$('btn-login').onclick = async () => {
-  const email = $('login-email').value.trim();
-  const pass = $('login-password').value;
-  $('login-error').textContent = '';
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-  } catch (err) {
-    $('login-error').textContent = 'ログインに失敗しました。';
-  }
-};
-$('btn-logout').onclick = () => signOut(auth);
+// ログアウト
+document.getElementById('btn-logout').addEventListener('click', () => {
+  signOut(auth).then(() => window.location.href = "./login.html");
+});
 
-async function loadAll() {
-  await Promise.all([loadCountries(), loadPosts()]);
+// タブ制御
+function initTabSystem() {
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
 }
 
-async function loadCountries() {
-  countries = [];
+// 国一覧の読み込み
+async function loadCountriesMaster() {
+  countriesCache = [];
   const snap = await getDocs(query(collection(db, 'countries'), orderBy('order', 'asc')));
-  snap.forEach(d => countries.push({ id: d.id, ...d.data() }));
-  renderCountrySelect();
-  renderCountryList();
+  snap.forEach(doc => {
+    countriesCache.push({ id: doc.id, ...doc.data() });
+  });
 }
 
-async function loadPosts() {
-  allPosts = [];
-  const snap = await getDocs(query(collection(db, 'posts'), orderBy('date', 'desc')));
-  snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
-  renderPostList();
-}
+// ==========================================
+// Facebook インポート処理ロジック
+// ==========================================
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.onclick = () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    const target = btn.dataset.tab;
-    $(target).classList.add('active');
-    if (target === 'tab-post-list') renderPostList();
-    if (target === 'tab-country-mgmt') renderCountryList();
-  };
+// STEP 1: メディアフォルダのインデックス化
+document.getElementById('import-media-dir').addEventListener('change', (e) => {
+  localMediaMap.clear();
+  for (const file of e.target.files) {
+    localMediaMap.set(file.name, file);
+  }
+  document.getElementById('media-count-status').textContent = `（画像ファイル ${localMediaMap.size} 件を認識）`;
+  pushLog(`画像ファイルを ${localMediaMap.size} 件ロードしました。`);
 });
 
-function renderCountrySelect() {
-  const select = $('f-country');
-  select.innerHTML = countries.map(c => `<option value="${c.id}">${c.flag || ''} ${c.name}</option>`).join('');
-}
+// STEP 2: JSON読み込みおよび解析
+document.getElementById('import-json-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-function renderMediaList() {
-  const container = $('media-list');
-  container.innerHTML = '';
-  mediaRows.forEach((row, idx) => {
-    const div = document.createElement('div');
-    div.className = 'media-row';
-    let previewHtml = '<span style="font-size:11px;color:#999;">No media</span>';
-    if (row.url) {
-      previewHtml = row.type === 'video' ? `<video src="${row.url}"></video>` : `<img src="${row.url}">`;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    try {
+      const rawData = JSON.parse(event.target.result);
+      if (!Array.isArray(rawData)) {
+        alert("タイムライン投稿のJSON（配列形式）を選択してください。アルバムのJSONはスキップ対象です。");
+        return;
+      }
+      parseAndRenderPreview(rawData);
+    } catch (err) {
+      alert("JSONのパースに失敗しました: " + err.message);
     }
-    div.innerHTML = `
-      <button type="button" class="btn-remove-media" data-idx="${idx}">×</button>
-      <div class="media-row-header">
-        <div class="preview-wrap" id="prev-${idx}">${previewHtml}</div>
-        <div class="media-row-fields">
-          <input type="url" class="m-url" data-idx="${idx}" placeholder="URL" value="${row.url || ''}">
-          <select class="m-type" data-idx="${idx}">
-            <option value="image" ${row.type === 'image' ? 'selected' : ''}>📷 写真</option>
-            <option value="video" ${row.type === 'video' ? 'selected' : ''}>🎬 動画</option>
-          </select>
-          <textarea class="m-caption" data-idx="${idx}" rows="2" placeholder="キャプション">${row.caption || ''}</textarea>
+  };
+  reader.readAsText(file);
+});
+
+// プレビュー表示データの生成
+function parseAndRenderPreview(items) {
+  const container = document.getElementById('import-preview-area');
+  container.innerHTML = "";
+  parsedPosts = [];
+
+  pushLog(`JSONからデータの抽出を開始...`);
+
+  items.forEach((item, index) => {
+    if (!item.attachments && !item.data) return;
+
+    // 投稿日付（timestamp）の採用
+    const dateStr = new Date(item.timestamp * 1000).toISOString().split('T')[0];
+    
+    let caption = "";
+    const extractedMedia = [];
+
+    if (item.attachments) {
+      item.attachments.forEach(attach => {
+        if (!attach.data) continue;
+        attach.data.forEach(node => {
+          if (node.media) {
+            // 本文テキスト（caption）をdescriptionから抽出
+            if (node.media.description && !caption) {
+              caption = node.media.description; 
+            }
+            const fileName = node.media.uri.split('/').pop();
+            // パスまたは拡張子から画像か動画かを判定
+            const isVideo = node.media.uri.includes('videos/') || fileName.toLowerCase().endsWith('.mp4');
+
+            extractedMedia.push({
+              fileName: fileName,
+              caption: node.media.description || "",
+              type: isVideo ? 'video' : 'image'
+            });
+          }
+        });
+      });
+    }
+
+    const postObj = {
+      id: `fb-${index}-${item.timestamp}`,
+      date: dateStr,
+      title: item.title || `${dateStr} の投稿`,
+      caption: caption,
+      rawMedia: extractedMedia
+    };
+
+    parsedPosts.push(postObj);
+
+    // プレビューカード生成
+    const card = document.createElement('div');
+    card.className = 'preview-card';
+    card.id = `card-${postObj.id}`;
+
+    let countryOptions = `<option value="">-- 国を選択 --</option>`;
+    countriesCache.forEach(c => {
+      countryOptions += `<option value="${c.id}">${c.flag || ''} ${c.name}</option>`;
+    });
+
+    card.innerHTML = `
+      <div class="preview-header">
+        <strong>${postObj.date} - ${postObj.title}</strong>
+        <div>
+          <select id="select-country-${postObj.id}" style="padding:5px;">${countryOptions}</select>
+          <button class="btn-single-import" data-id="${postObj.id}" style="padding:5px 10px; background:#c4873a; color:#fff; border:none; cursor:pointer; margin-left:5px;">登録</button>
         </div>
       </div>
-      <div class="media-row-controls">
-        <label><input type="checkbox" class="m-cover" data-idx="${idx}" ${row.isCover ? 'checked' : ''}> 代表にする</label>
-        <button type="button" class="btn-upload" data-idx="${idx}">☁️ アップロード</button>
-        <button type="button" class="btn-move" data-dir="up" data-idx="${idx}">↑</button>
-        <button type="button" class="btn-move" data-dir="down" data-idx="${idx}">↓</button>
-        <span class="upload-progress" id="progress-${idx}" style="display:none;"></span>
-      </div>
+      <p style="font-size:13px; margin:5px 0; color:#333;">${postObj.caption || '<span style="color:#999;">(本文なし)</span>'}</p>
+      <div class="preview-media-list" id="media-list-${postObj.id}"></div>
     `;
-    container.appendChild(div);
-    const insWrap = document.createElement('div');
-    insWrap.className = 'insert-btn-wrap';
-    insWrap.innerHTML = `<button type="button" class="btn-insert" data-pos="${idx + 1}">＋ 挿入</button>`;
-    container.appendChild(insWrap);
+
+    container.appendChild(card);
+
+    // 各メディアのステータス表示
+    const mediaListDiv = document.getElementById(`media-list-${postObj.id}`);
+    postObj.rawMedia.forEach(m => {
+      const span = document.createElement('span');
+      span.style.fontSize = '11px';
+      span.style.padding = '2px 6px';
+      span.style.borderRadius = '3px';
+      
+      if (m.type === 'video') {
+        span.style.background = '#fff2cc';
+        span.style.color = '#d66011';
+        span.textContent = `📹 動画: ${m.fileName} (インポート時にダミー画像に置換されます)`;
+      } else {
+        const hasFile = localMediaMap.has(m.fileName);
+        span.style.background = hasFile ? '#e2f0d9' : '#fce4d6';
+        span.style.color = hasFile ? '#385723' : '#c65911';
+        span.textContent = `📷 画像: ${m.fileName} (${hasFile ? 'ローカル有' : 'ファイルが見つかりません'})`;
+      }
+      mediaListDiv.appendChild(span);
+    });
   });
-  bindMediaEvents();
-}
 
-function bindMediaEvents() {
-  document.querySelectorAll('.btn-remove-media').forEach(b => { b.onclick = () => { mediaRows.splice(parseInt(b.dataset.idx), 1); renderMediaList(); }; });
-  document.querySelectorAll('.m-url').forEach(input => { input.oninput = () => { mediaRows[parseInt(input.dataset.idx)].url = input.value.trim(); updatePreview(parseInt(input.dataset.idx)); }; });
-  document.querySelectorAll('.m-type').forEach(select => { select.onchange = () => { mediaRows[parseInt(select.dataset.idx)].type = select.value; updatePreview(parseInt(select.dataset.idx)); }; });
-  document.querySelectorAll('.m-caption').forEach(ta => { ta.oninput = () => { mediaRows[parseInt(ta.dataset.idx)].caption = ta.value; }; });
-  document.querySelectorAll('.m-cover').forEach(cb => { cb.onchange = () => { mediaRows.forEach((r, i) => r.isCover = (i === parseInt(cb.dataset.idx))); renderMediaList(); }; });
-  document.querySelectorAll('.btn-upload').forEach(b => { b.onclick = () => uploadMedia(parseInt(b.dataset.idx)); });
-  document.querySelectorAll('.btn-move').forEach(b => {
-    b.onclick = () => {
-      const idx = parseInt(b.dataset.idx);
-      if (b.dataset.dir === 'up' && idx > 0) [mediaRows[idx], mediaRows[idx - 1]] = [mediaRows[idx - 1], mediaRows[idx]];
-      else if (b.dataset.dir === 'down' && idx < mediaRows.length - 1) [mediaRows[idx], mediaRows[idx + 1]] = [mediaRows[idx + 1], mediaRows[idx]];
-      renderMediaList();
-    };
+  pushLog(`プレビューに ${parsedPosts.length} 件の投稿を展開しました。国を選択して登録を行ってください。`);
+
+  // インポートボタンのイベントハンドラ登録
+  document.querySelectorAll('.btn-single-import').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      await executeSingleImport(e.target.dataset.id);
+    });
   });
-  document.querySelectorAll('.btn-insert').forEach(b => { b.onclick = () => { mediaRows.splice(parseInt(b.dataset.pos), 0, { url: '', type: 'image', caption: '', isCover: false }); renderMediaList(); }; });
 }
 
-function updatePreview(idx) {
-  const row = mediaRows[idx]; const pWrap = $(`prev-${idx}`);
-  if (row.url) pWrap.innerHTML = row.type === 'video' ? `<video src="${row.url}"></video>` : `<img src="${row.url}">`;
-  else pWrap.innerHTML = '<span style="font-size:11px;color:#999;">No media</span>';
-}
+// 1件のインポート処理を実行
+async function executeSingleImport(id) {
+  const targetPost = parsedPosts.find(p => p.id === id);
+  if (!targetPost) return;
 
-function uploadMedia(idx) {
-  const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*,video/*';
-  fileInput.onchange = async () => {
-    const file = fileInput.files[0]; if (!file) return;
-    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
-    const prog = $(`progress-${idx}`); prog.textContent = '中…'; prog.style.display = 'inline';
-    const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-    try {
-      const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${resourceType}/upload`, { method: 'POST', body: formData });
-      const data = await res.json();
-      if (data.secure_url) { mediaRows[idx].url = data.secure_url; mediaRows[idx].type = resourceType; renderMediaList(); }
-    } catch (err) { console.error(err); }
-  };
-  fileInput.click();
-}
+  const countrySelect = document.getElementById(`select-country-${id}`);
+  const countryId = countrySelect.value;
 
-$('btn-add-media-bottom').onclick = () => { mediaRows.push({ url: '', type: 'image', caption: '', isCover: false }); renderMediaList(); };
+  if (!countryId) {
+    alert("この投稿を紐付ける国を選択してください。");
+    return;
+  }
 
-$('btn-submit-post').onclick = async () => {
-  const postData = {
-    countryId: $('f-country').value, date: $('f-date').value, title: $('f-title').value.trim(),
-    location: $('f-location').value.trim(), caption: $('f-caption').value.trim(),
-    media: mediaRows.map(r => ({ url: r.url, type: r.type, caption: r.caption, isCover: r.isCover })), updatedAt: serverTimestamp()
-  };
+  const card = document.getElementById(`card-${id}`);
+  const btn = card.querySelector('.btn-single-import');
+  
+  // UIの無効化
+  btn.disabled = true;
+  btn.textContent = "処理中...";
+  countrySelect.disabled = true;
+
+  pushLog(`[処理開始] ${targetPost.date} の投稿を処理中...`);
+
   try {
-    if (editPostId) await updateDoc(doc(db, 'posts', editPostId), postData);
-    else { postData.createdAt = serverTimestamp(); await addDoc(collection(db, 'posts'), postData); }
-    resetPostForm(); await loadPosts(); showToast('保存しました');
-  } catch (err) { console.error(err); }
-};
+    const finalMediaArray = [];
 
-function resetPostForm() { $('f-date').value = ''; $('f-title').value = ''; $('f-location').value = ''; $('f-caption').value = ''; mediaRows = []; editPostId = null; renderMediaList(); }
+    for (const m of targetPost.rawMedia) {
+      if (m.type === 'video') {
+        // 動画の場合はアップロードせずダミー画像を割り当て、キャプションを保持
+        pushLog(`  -> 動画要素をダミー画像に置換中: ${m.fileName}`);
+        finalMediaArray.push({
+          url: DUMMY_IMAGE_URL,
+          type: "image", // システム仕様上画像として扱う
+          caption: m.caption,
+          isCover: finalMediaArray.length === 0
+        });
+      } else {
+        // 画像の場合はローカルファイルを照合してCloudinaryへ
+        const fileObj = localMediaMap.get(m.fileName);
+        if (fileObj) {
+          pushLog(`  -> 画像をCloudinaryへアップロード中: ${m.fileName}`);
+          const uploadedUrl = await uploadToCloudinary(fileObj);
+          
+          finalMediaArray.push({
+            url: uploadedUrl,
+            type: "image",
+            caption: m.caption,
+            isCover: finalMediaArray.length === 0
+          });
+        } else {
+          pushLog(`  -> [警告] 物理画像ファイルが見つからないためスキップ: ${m.fileName}`, true);
+        }
+      }
+    }
 
-function renderPostList() {
-  const wrap = $('list-posts'); wrap.innerHTML = '';
-  allPosts.forEach(p => {
-    const c = countries.find(item => item.id === p.countryId);
-    const item = document.createElement('div'); item.className = 'post-list-item';
-    item.innerHTML = `
-      <div class="post-info"><div class="post-title-text">${p.title}</div><div class="post-meta-text">${c ? c.name : ''} / ${p.date}</div></div>
-      <div class="post-actions"><button type="button" class="btn-edit-post" data-id="${p.id}">編集</button></div>
-    `;
-    wrap.appendChild(item);
-  });
-  document.querySelectorAll('.btn-edit-post').forEach(b => {
-    b.onclick = () => {
-      const post = allPosts.find(p => p.id === b.dataset.id); if (!post) return;
-      editPostId = post.id; $('f-country').value = post.countryId; $('f-date').value = post.date; $('f-title').value = post.title;
-      $('f-location').value = post.location || ''; $('f-caption').value = post.caption || '';
-      mediaRows = post.media ? JSON.parse(JSON.stringify(post.media)) : []; renderMediaList();
-      document.querySelectorAll('.tab-btn')[0].click();
+    // Firestoreへのドキュメント作成
+    const newFirestorePost = {
+      countryId: countryId,
+      title: targetPost.title,
+      date: targetPost.date, 
+      location: "", 
+      caption: targetPost.caption,
+      media: finalMediaArray,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     };
-  });
+
+    await addDoc(collection(db, 'posts'), newFirestorePost);
+    
+    // 登録成功時のUI表示変更
+    pushLog(`[完了] Firestoreへ登録しました: ${targetPost.date}`);
+    card.style.background = "#f0f7f0";
+    card.style.opacity = "0.7";
+    btn.textContent = "登録済み";
+    btn.style.background = "#7f7f7f";
+
+  } catch (err) {
+    pushLog(`[エラー] インポート失敗: ${err.message}`, true);
+    btn.disabled = false;
+    btn.textContent = "再試行";
+    countrySelect.disabled = false;
+  }
 }
 
-$('btn-save-country').onclick = async () => {
-  const cData = { name: $('c-name').value.trim(), flag: $('c-flag').value.trim(), order: parseInt($('c-order').value) || 100, subtitle: $('c-subtitle').value.trim(), description: $('c-description').value.trim() };
-  try {
-    if (editCountryId) await updateDoc(doc(db, 'countries', editCountryId), cData);
-    else await addDoc(collection(db, 'countries'), cData);
-    resetCountryForm(); await loadCountries(); showToast('保存しました');
-  } catch (err) { console.error(err); }
-};
+// Cloudinary 署名なしアップロード
+async function uploadToCloudinary(file) {
+  const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
 
-function resetCountryForm() { editCountryId = null; $('c-name').value = ''; $('c-flag').value = ''; $('c-order').value = '100'; $('c-subtitle').value = ''; $('c-description').value = ''; }
-
-function renderCountryList() {
-  const wrap = $('list-countries'); wrap.innerHTML = '';
-  countries.forEach(c => {
-    const item = document.createElement('div'); item.className = 'country-list-item';
-    item.innerHTML = `<div class="country-list-info"><strong>${c.name}</strong> (順: ${c.order})</div><div><button type="button" class="btn-edit-country" data-id="${c.id}">編集</button></div>`;
-    wrap.appendChild(item);
-  });
-  document.querySelectorAll('.btn-edit-country').forEach(b => {
-    b.onclick = () => {
-      const c = countries.find(item => item.id === b.dataset.id); if (!c) return;
-      editCountryId = c.id; $('c-name').value = c.name; $('c-flag').value = c.flag || ''; $('c-order').value = c.order; $('c-subtitle').value = c.subtitle || ''; $('c-description').value = c.description || '';
-    };
-  });
+  const res = await fetch(url, { method: 'POST', body: formData });
+  if (!res.ok) throw new Error(`Cloudinary API エラー: ${res.statusText}`);
+  const data = await res.json();
+  return data.secure_url;
 }
 
-function showToast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => { t.classList.remove('show'); }, 3000); }
+// ログ出力用ユーティリティ
+function pushLog(msg, isError = false) {
+  const logDiv = document.getElementById('import-log');
+  const line = document.createElement('div');
+  line.style.color = isError ? '#ff4d4d' : '#00ff00';
+  line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logDiv.appendChild(line);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}

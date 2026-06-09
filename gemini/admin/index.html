@@ -2,110 +2,60 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AKIRA travels — 管理画面</title>
-  <link rel="stylesheet" href="css/admin.css">
+  <title>AKIRA travels - 管理画面</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0d8cf; padding-bottom: 10px; }
+    .tab-btn { padding: 10px 20px; background: #f7f3ee; border: 1px solid #e0d8cf; cursor: pointer; font-family: inherit; }
+    .tab-btn.active { background: #c4873a; color: #fff; border-color: #c4873a; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .preview-card { background: #fff; border: 1px solid #e0d8cf; padding: 15px; margin-bottom: 15px; border-radius: 4px; }
+    .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed #e0d8cf; }
+    .preview-media-list { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+    #import-log { background: #1a1410; color: #00ff00; padding: 10px; font-family: monospace; max-height: 150px; overflow-y: auto; margin-top: 15px; font-size: 12px; }
+  </style>
 </head>
 <body>
-
-  <header class="admin-header">
-    <h1>AKIRA travels <span>ADMIN</span></h1>
-    <div id="header-user" style="display:none;">
-      <span id="user-email"></span>
-      <button id="btn-logout">ログアウト</button>
-    </div>
+  <header>
+    <h1>AKIRA travels 管理システム</h1>
+    <button id="btn-logout" style="float: right;">ログアウト</button>
   </header>
 
-  <div id="login-screen" class="login-screen">
-    <h2>管理者ログイン</h2>
-    <input type="email" id="login-email" placeholder="メールアドレス">
-    <input type="password" id="login-password" placeholder="パスワード">
-    <button id="btn-login">ログイン</button>
-    <p id="login-error" style="color:red; font-size:13px; text-align:center;"></p>
-  </div>
-
-  <div id="admin-main" style="display:none;">
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="tab-new-post">✏️ 新規投稿</button>
-      <button class="tab-btn" data-tab="tab-post-list">📋 投稿一覧</button>
-      <button class="tab-btn" data-tab="tab-country-mgmt">🌍 国管理</button>
+  <main style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+    <!-- タブナビゲーション -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="tab-posts">既存投稿管理</button>
+      <button class="tab-btn" data-tab="tab-import">Facebookタイムラインインポート</button>
     </div>
 
-    <div id="tab-new-post" class="tab-panel active">
-      <h3 id="form-title">新規投稿</h3>
-      <div class="form-group">
-        <label>国・地域</label>
-        <select id="f-country"></select>
-      </div>
-      <div class="form-group">
-        <label>日付</label>
-        <input type="date" id="f-date">
-      </div>
-      <div class="form-group">
-        <label>タイトル</label>
-        <input type="text" id="f-title" placeholder="モロッコに到着">
-      </div>
-      <div class="form-group">
-        <label>場所・地名（任意）</label>
-        <input type="text" id="f-location" placeholder="カサブランカ">
-      </div>
-      <div class="form-group">
-        <label>投稿の説明</label>
-        <textarea id="f-caption" rows="4" placeholder="旅行記の文章を入力…"></textarea>
-      </div>
-
-      <h4 class="media-section-title">MEDIA</h4>
-      <div id="media-list"></div>
-
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" id="btn-add-media-bottom" style="border:1px dashed var(--accent); color:var(--accent);">☁️ メディアを追加</button>
-        <div style="flex:1;"></div>
-        <button type="button" class="btn-cancel" id="btn-cancel-edit" style="display:none;">キャンセル</button>
-        <button type="button" class="btn-submit" id="btn-submit-post">投稿する →</button>
-      </div>
+    <!-- タブ1: 既存投稿管理 -->
+    <div id="tab-posts" class="tab-content active">
+      <h2>投稿一覧・新規登録</h2>
+      <div id="existing-posts-list"></div>
     </div>
 
-    <div id="tab-post-list" class="tab-panel">
-      <h3>投稿一覧</h3>
-      <div id="list-posts"></div>
-    </div>
-
-    <div id="tab-country-mgmt" class="tab-panel">
-      <h3>国管理</h3>
-      <div class="country-form-card" style="border:1px solid var(--border); padding:15px; margin-bottom:20px; background:#fdfdfd;">
-        <h4 id="country-form-title" style="margin-top:0;">国の追加</h4>
-        <input type="hidden" id="edit-country-id">
-        <div class="form-group">
-          <label>国名</label>
-          <input type="text" id="c-name" placeholder="モロッコ">
-        </div>
-        <div class="form-group">
-          <label>国旗絵文字</label>
-          <input type="text" id="c-flag" maxlength="8" placeholder="🇲🇦">
-        </div>
-        <div class="form-group">
-          <label>表示順</label>
-          <input type="number" id="c-order" value="100">
-        </div>
-        <div class="form-group">
-          <label>サブタイトル（任意）</label>
-          <input type="text" id="c-subtitle" placeholder="サハラ砂漠の国">
-        </div>
-        <div class="form-group">
-          <label>紹介文</label>
-          <textarea id="c-description" rows="3" placeholder="国別ページのトップに表示される説明文…"></textarea>
-        </div>
-        <button type="button" class="btn-submit" id="btn-save-country">保存</button>
-        <button type="button" class="btn-cancel" id="btn-cancel-country" style="display:none;">キャンセル</button>
-      </div>
+    <!-- タブ2: Facebookインポート -->
+    <div id="tab-import" class="tab-content">
+      <h2>🌍 Facebook タイムライン投稿インポート</h2>
+      <p style="font-size:14px; color:#666;">FacebookからエクスポートしたJSONからタイムライン投稿を抽出します。画像はCloudinaryへ自動アップロードし、動画はダミー画像に置き換えてキャプションを登録します（アルバムは除外されます）。</p>
       
-      <h4>登録済みの国一覧</h4>
-      <div id="list-countries"></div>
+      <div style="background: #f7f3ee; padding: 20px; border: 1px solid #e0d8cf; margin-bottom: 20px;">
+        <label style="display:block; margin-bottom:10px;"><strong>STEP 1: メディアフォルダを選択</strong> (画像ファイルの照合用)</label>
+        <input type="file" id="import-media-dir" webkitdirectory directory multiple>
+        <span id="media-count-status" style="margin-left:10px; font-weight:bold;"></span>
+
+        <label style="display:block; margin-top:20px; margin-bottom:10px;"><strong>STEP 2: 投稿JSONファイルを選択</strong> (`your_posts__check_ins__photos_and_videos_1.json`など)</label>
+        <input type="file" id="import-json-file" accept=".json">
+      </div>
+
+      <div id="import-log">システムスタンバイ</div>
+
+      <h3 style="margin-top:20px;">インポート対象候補プレビュー</h3>
+      <div id="import-preview-area"></div>
     </div>
-  </div>
+  </main>
 
-  <div id="toast" class="toast"></div>
-
-  <script type="module" src="./index.js"></script>
+  <script type="module" src="index.js"></script>
 </body>
 </html>
