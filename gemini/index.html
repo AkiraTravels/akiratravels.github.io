@@ -21,10 +21,10 @@
       <p class="loading">読み込み中…</p>
     </div>
     
-    <footer class="top-footer">
+    <footer class="shared-footer">
       <div class="footer-icons">
         <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
-        <a href="#" id="f-link-mail"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')"></a>
+        <!-- 要件：メールアイコンを削除 -->
         <a href="#" id="f-link-fb"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')"></a>
         <a href="#" id="f-link-msg"><img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')"></a>
       </div>
@@ -100,7 +100,6 @@
       const subtitleHtml = c.subtitle ? `<span class="country-subtitle">${c.subtitle}</span>` : '';
       
       if (count > 0) {
-        // 登録あり：クラス has-posts (CSSでオレンジ適用)
         return `
           <div class="country-link-cell">
             <a href="country.html?id=${c.id}" class="has-posts">${c.name}</a>
@@ -108,7 +107,6 @@
           </div>
         `;
       } else {
-        // 登録なし：クラス no-posts (CSSでグレー適用)
         return `
           <div class="country-link-cell">
             <span class="no-posts">${c.name}</span>

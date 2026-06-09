@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
+  <!-- 要件：管理画面へのリンクは削除 -->
 
   <div id="country-wrap" class="country-wrap" style="display:none;">
     <div class="country-header">
@@ -21,14 +21,12 @@
     
     <div class="post-chain" id="post-chain"></div>
 
-    <!-- 要件：最下部の左端に既存サイトのimages/i_home.gifを配置してトップにリンク -->
-    <footer class="country-footer">
-      <div class="country-footer-left-home">
-        <a href="index.html"><img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME"></a>
-      </div>
+    <footer class="shared-footer">
       <div class="footer-icons">
+        <!-- 要件：最下段のホームアイコンは他のアイコンと合わせて全体でセンタリング -->
+        <a href="index.html"><img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME"></a>
         <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
-        <a href="#" id="f-link-mail"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')"></a>
+        <!-- 要件：メールアイコンは削除 -->
         <a href="#" id="f-link-fb"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')"></a>
         <a href="#" id="f-link-msg"><img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')"></a>
       </div>
@@ -39,7 +37,7 @@
   <div id="loading-msg" class="loading">読み込み中…</div>
   <div id="error-msg" class="error-msg" style="display:none;"></div>
 
-  <!-- 詳細モーダルページ構造 -->
+  <!-- 詳細モーダル構造 -->
   <div id="modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-sticky-bar">
       <div class="modal-sticky-title" id="modal-title"></div>
@@ -54,21 +52,14 @@
   </div>
 
   <script type="module">
-    import { db, auth } from './js/firebase-config.js';
+    import { db } from './js/firebase-config.js';
     import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     let countryId = '';
     let countryData = null;
     let allPosts = [];
     let currentIdx = 0;
     let videoObserver = null;
-
-    onAuthStateChanged(auth, user => {
-      const linkText = document.getElementById('admin-link-text');
-      if (user) linkText.textContent = '管理画面';
-      else linkText.textContent = '管理者';
-    });
 
     const yr = new Date().getFullYear();
     document.getElementById('country-copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
@@ -275,10 +266,10 @@
       videoObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           const vid = entry.target;
-          if (entry.intersecting && vid.paused) {
+          if (entry.isIntersecting && vid.paused) {
             stopAllVideos();
             vid.play().catch(() => {});
-          } else if (!entry.intersecting && !vid.paused) {
+          } else if (!entry.isIntersecting && !vid.paused) {
             vid.pause();
           }
         });
@@ -288,14 +279,13 @@
       videos.forEach(v => videoObserver.observe(v));
     }
 
-    // 要件：最下部のリンクアイコンは、next、home、lastの順番で配置
     function renderModalFooter(idx) {
       const footer = document.getElementById('modal-footer');
       footer.innerHTML = '';
 
       const hasNext = idx < allPosts.length - 1;
 
-      // 1. [next] アイコン (次の記事がある場合のみ表示、または非活性プレースホルダ)
+      // 1. [next]
       if (hasNext) {
         const btnNext = document.createElement('img');
         btnNext.src = "https://akiratravels.github.io/images/i_next.gif";
@@ -303,20 +293,22 @@
         btnNext.onclick = () => navigateModal(idx + 1);
         footer.appendChild(btnNext);
       } else {
-        // 次がない場合はレイアウト維持のため空要素を置くか、表示しない
         const spacer = document.createElement('div');
         spacer.style.width = '36px';
         footer.appendChild(spacer);
       }
 
-      // 2. [home] アイコン (国別インデックスに常時戻る、またはトップへ)
+      // 2. [home] 要件：タップした場合には国別ページではなくトップページ（index.html）へリンク
       const btnHome = document.createElement('img');
       btnHome.src = "https://akiratravels.github.io/images/i_home.gif";
       btnHome.alt = "HOME";
-      btnHome.onclick = () => closeModal(); // モーダルを閉じて国別一覧に戻る
+      btnHome.onclick = () => {
+        stopAllVideos();
+        location.href = 'index.html';
+      };
       footer.appendChild(btnHome);
 
-      // 3. [last] アイコン (モーダルを閉じる、あるいは前の画面の代わり)
+      // 3. [last]
       const btnLast = document.createElement('img');
       btnLast.src = "https://akiratravels.github.io/images/i_last.gif";
       btnLast.alt = "LAST";

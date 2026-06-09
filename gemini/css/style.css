@@ -3,7 +3,7 @@
   --orange:     #cc6600;
   --gray:       #aaaaaa;
   --bg-fallback:#f0e0c8;
-  --font-main:  "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
 body {
@@ -17,7 +17,7 @@ body {
   padding: 0;
 }
 
-/* 管理者リンク */
+/* 管理者リンク (トップページのみで使用、国別からは削除) */
 #admin-link {
   position: fixed;
   top: 10px;
@@ -35,8 +35,8 @@ body {
   text-decoration: none;
 }
 
-/* 共通フッター（トップ用） */
-.top-footer {
+/* 共通フッターレイアウト：すべてのアイコンを含めて中央揃え（メールは削除） */
+.shared-footer {
   margin-top: 40px;
   padding-bottom: 30px;
   text-align: center;
@@ -44,42 +44,16 @@ body {
 .footer-icons {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 20px;
   margin-bottom: 15px;
 }
-.footer-icons a img {
+.footer-icons a img, .footer-icons img {
   height: 32px;
   border: none;
   vertical-align: middle;
 }
 .copyright {
-  font-size: 12px;
-  color: var(--brown);
-}
-
-/* 国別ページ専用フッター（左端にHOMEアイコンを配置するための専用レイアウト） */
-.country-footer {
-  margin-top: 40px;
-  padding-bottom: 30px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  width: 100%;
-}
-.country-footer-left-home {
-  position: absolute;
-  left: 0;
-  top: 0;
-}
-.country-footer-left-home img {
-  height: 32px;
-  cursor: pointer;
-}
-.country-footer .footer-icons {
-  margin-bottom: 15px;
-}
-.country-footer .copyright {
   font-size: 12px;
   color: var(--brown);
 }
@@ -108,7 +82,7 @@ body {
   padding: 20px;
 }
 
-/* 国名リスト（テーブル）要件：太字プロポーショナル・ワンサイズ拡大・件数で色分け */
+/* 国名リスト（テーブル）要件：列ごとにセンタリング、左右余白を最小限に、太字プロポーショナル・拡大 */
 .country-table {
   width: 100%;
   border-collapse: collapse;
@@ -116,28 +90,29 @@ body {
 }
 .country-table td {
   width: 50%;
-  padding: 6px 8px;
-  text-align: left;
+  padding: 6px 2px;       /* 左右の余白を最小限に設定 */
+  text-align: center;     /* 列ごとにセンタリング */
   vertical-align: top;
 }
 .country-link-cell {
-  font-family: var(--font-main); /* プロポーショナルフォント */
-  font-size: 24px;               /* ワンサイズ大きく（旧22pxから拡大） */
-  font-weight: bold;             /* 太字化 */
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: bold;
   line-height: 1.2;
-  display: block;
+  display: inline-block;
+  text-align: center;
 }
 @media (min-width: 600px) {
   .country-link-cell {
-    font-size: 28px;             /* レスポンシブでもワンサイズ大きく */
+    font-size: 26px;
   }
 }
 .has-posts {
-  color: var(--orange);         /* 登録あり：オレンジ */
+  color: var(--orange);
   text-decoration: none;
 }
 .no-posts {
-  color: var(--gray);           /* 登録なし：グレー */
+  color: var(--gray);
 }
 .country-subtitle {
   display: block;
@@ -145,6 +120,7 @@ body {
   color: #7a5a20;
   font-weight: normal;
   margin-top: 2px;
+  text-align: center;
 }
 
 /* --- 国別ページ専用スタイル --- */
@@ -208,13 +184,13 @@ body {
   font-size: 14px;
 }
 
-/* --- 詳細モーダル（要件：背景色を国別ページと統一、フォント色は黒、キャプションサイズ変更） --- */
+/* --- 詳細モーダル（要件：背景色を国別と統一、フォント色黒、個別キャプションサイズ変更＋改行再現） --- */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background-color: var(--bg-fallback);                 /* 黒から国別ページと同様の明色背景に変更 */
-  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 背景画像も国別ページと統一 */
+  background-color: var(--bg-fallback);                 /* 背景色を国別ページと揃える */
+  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 背景画像も揃える */
   background-repeat: repeat;
   z-index: 500;
   overflow-y: auto;
@@ -233,13 +209,13 @@ body {
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 .modal-sticky-title {
-  font-size: 18px;
+  font-size: 16px; /* 仕様書定義を維持 */
   font-weight: bold;
-  color: #000000; /* フォント色を黒に変更 */
+  color: #000000;  /* フォント色は黒 */
 }
 .modal-sticky-meta {
   font-size: 12px;
-  color: #444444; /* 見やすさのため暗い色に変更 */
+  color: #444444;
   margin-top: 2px;
 }
 .modal-body {
@@ -248,8 +224,8 @@ body {
   padding-top: 20px;
 }
 .modal-caption {
-  font-size: 18px; /* 本文キャプションもワンサイズ拡大 */
-  color: #000000; /* フォント色を黒に変更 */
+  font-size: 15px; /* 全体の説明に関するフォントサイズは変えない */
+  color: #000000;  /* フォント色は黒 */
   font-weight: normal;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -266,10 +242,11 @@ body {
   background: #000;
   cursor: pointer;
 }
-/* 要件：各メディアのキャプションのフォントをワンサイズ大きく、色は黒に */
+/* 要件：各メディアごとのキャプションのフォントをワンサイズ大きく(旧14px->16px)、かつ改行再現 */
 .media-caption {
-  font-size: 16px; /* 旧14pxからワンサイズ大きく変更 */
-  color: #000000; /* フォント色を黒に変更 */
+  font-size: 16px;        /* ワンサイズ大きく設定 */
+  color: #000000;         /* フォント色は黒 */
+  white-space: pre-wrap;  /* 元データに改行が含まれる場合はそれを再現 */
   padding: 8px 16px 16px;
   line-height: 1.6;
 }

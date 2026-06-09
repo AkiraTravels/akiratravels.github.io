@@ -180,7 +180,7 @@ function renderPostList() {
     const item = document.createElement('div'); item.className = 'post-list-item';
     item.innerHTML = `
       <div class="post-info"><div class="post-title-text">${p.title}</div><div class="post-meta-text">${c ? c.name : ''} / ${p.date}</div></div>
-      <div><button type="button" class="btn-edit-post" data-id="${p.id}">編集</button></div>
+      <div class="post-actions"><button type="button" class="btn-edit-post" data-id="${p.id}">編集</button></div>
     `;
     wrap.appendChild(item);
   });
