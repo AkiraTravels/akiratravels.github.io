@@ -1,244 +1,665 @@
-.admin-body { background: #f0ece7; }
+/* ========================================
+   AKIRA travels — 管理画面スタイル
+   ======================================== */
 
-/* LOGIN */
-.admin-login-screen {
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400;600&family=Montserrat:wght@400;500;600&display=swap");
+
+:root {
+  --ink:     #1a1410;
+  --paper:   #f7f3ee;
+  --accent:  #c4873a;
+  --muted:   #8a7e74;
+  --card-bg: #ffffff;
+  --border:  #e0d8cf;
+  --shadow:  0 2px 20px rgba(0,0,0,0.08);
+  --radius:  2px;
+  --font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
+  --font-sans:  "Montserrat", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  min-height: 100vh;
+}
+
+/* ─── ヘッダー ─── */
+.admin-header {
+  background: var(--ink);
+  color: #f0e0c8;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 52px);
-  padding: 20px;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
 }
-.login-box {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 36px 28px;
-  width: 100%;
-  max-width: 380px;
-  box-shadow: var(--shadow);
-}
-.login-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 26px;
-  font-weight: 300;
-  color: var(--ink);
-  margin-bottom: 24px;
-  text-align: center;
-}
-.login-error {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  color: #c0392b;
-  margin-top: 12px;
-  text-align: center;
-}
-.login-box .submit-btn { width: 100%; margin-top: 8px; }
 
-/* ADMIN MAIN */
-.admin-main { max-width: 800px; margin: 0 auto; padding: 24px 16px 60px; }
-.admin-user-label {
-  font-family: 'Montserrat', sans-serif;
+.admin-header-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 2px;
+}
+
+.admin-header-sub {
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.admin-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.admin-header-right span {
+  color: #b09070;
+}
+
+.btn-logout {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 4px 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: #f0e0c8;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+}
+
+.btn-logout:hover { background: rgba(255,255,255,0.1); }
+
+/* ─── ログイン画面 ─── */
+.login-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 16px;
+  background: var(--ink);
+}
+
+.login-title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: #f0e0c8;
+  margin-bottom: 8px;
+  letter-spacing: 3px;
+}
+
+.login-subtitle {
   font-size: 11px;
   color: var(--muted);
+  letter-spacing: 2px;
+  margin-bottom: 36px;
 }
 
-/* TABS */
-.admin-tabs {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 24px;
-  border-bottom: 2px solid var(--border);
-  padding-bottom: 0;
+.login-card {
+  background: var(--card-bg);
+  padding: 32px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: var(--shadow);
 }
-.admin-tab {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  padding: 10px 16px;
+
+.login-card input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.login-card input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 11px;
+  background: var(--accent);
+  color: #fff;
   border: none;
-  background: transparent;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  margin-top: 4px;
+  transition: background 0.2s;
+}
+
+.btn-login:hover { background: #b07030; }
+
+.login-error {
+  color: #c04040;
+  font-size: 13px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* ─── タブ ─── */
+.admin-main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 28px;
+}
+
+.tab-btn {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 20px;
+  background: none;
+  border: none;
   color: var(--muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: all 0.2s;
+  transition: color 0.2s;
+  letter-spacing: 0.5px;
 }
-.admin-tab.active {
-  color: var(--ink);
+
+.tab-btn:hover { color: var(--ink); }
+
+.tab-btn.active {
+  color: var(--accent);
   border-bottom-color: var(--accent);
 }
-.admin-tab:hover { color: var(--ink); }
 
-.admin-section-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
-  font-weight: 400;
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── カード / セクション ─── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  border-radius: var(--radius);
+  padding: 24px;
   margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 1px;
+}
+
+/* ─── フォーム ─── */
+.form-row {
+  margin-bottom: 16px;
+}
+
+.form-row label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  transition: border-color 0.2s;
+}
+
+.form-row input:focus,
+.form-row select:focus,
+.form-row textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-row textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+/* ─── メディアセクション ─── */
+.media-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.media-row {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  position: relative;
+}
+
+.media-row-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.media-preview {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.media-preview-placeholder {
+  width: 80px;
+  height: 60px;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--muted);
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.media-row-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.media-row-fields input,
+.media-row-fields select,
+.media-row-fields textarea {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+}
+
+.media-row-fields input:focus,
+.media-row-fields select:focus,
+.media-row-fields textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.media-row-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.cover-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cover-checkbox-label input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+}
+
+.btn-upload {
+  font-size: 12px;
+  padding: 5px 12px;
+  background: var(--ink);
+  color: #f0e0c8;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-upload:hover { background: #3a2a1a; }
+
+.btn-move {
+  font-size: 12px;
+  padding: 4px 8px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.2s;
+}
+
+.btn-move:hover { background: var(--border); }
+
+.btn-remove-media {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+  line-height: 1;
+  padding: 0;
+}
+
+.btn-remove-media:hover {
+  background: #ffeaea;
+  border-color: #cc4444;
+  color: #cc4444;
+}
+
+.upload-progress {
+  font-size: 11px;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+/* ─── フォーム下部ボタン行 ─── */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn-add-media {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 9px 18px;
+  background: transparent;
+  border: 1px dashed var(--accent);
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.btn-add-media:hover {
+  background: rgba(196,135,58,0.08);
+}
+
+.btn-submit {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 9px 24px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+.btn-submit:hover { background: #b07030; }
+
+.btn-cancel {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 9px 18px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  border-color: var(--ink);
   color: var(--ink);
 }
 
-.admin-form {
-  background: white;
+/* ─── 投稿一覧 ─── */
+.post-list-item {
+  background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 24px;
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
   box-shadow: var(--shadow);
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+.post-thumb {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  background: var(--border);
+  flex-shrink: 0;
 }
-@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
-.form-actions { display: flex; gap: 10px; margin-top: 8px; }
-
-/* MEDIA ROWS */
-.media-section { margin-top: 8px; }
-.media-section-header {
+.post-thumb-placeholder {
+  width: 80px;
+  height: 60px;
+  background: var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.add-media-btn {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  color: var(--accent);
-  background: none;
-  border: 1px solid var(--accent);
+  justify-content: center;
+  font-size: 20px;
   border-radius: var(--radius);
-  padding: 5px 12px;
-  cursor: pointer;
-  letter-spacing: 0.05em;
-  transition: all 0.2s;
+  flex-shrink: 0;
 }
-.add-media-btn:hover { background: var(--accent); color: white; }
 
-.media-row {
-  background: #faf8f5;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px;
-  margin-bottom: 10px;
-  position: relative;
+.post-info {
+  flex: 1;
+  min-width: 0;
 }
-.media-row-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-.media-row-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.remove-media-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #c0392b;
-  font-size: 18px;
-  line-height: 1;
-  padding: 0 4px;
-}
-.media-row-inner { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: start; }
-@media (max-width: 480px) { .media-row-inner { grid-template-columns: 1fr; } }
 
-.media-type-select { width: 100px; }
-
-.media-preview-thumb {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  background: #000;
-  border-radius: var(--radius);
-  display: block;
-  margin-top: 8px;
-}
-.media-preview-thumb.hidden { display: none; }
-
-/* Cloudinary info box */
-.cloudinary-info {
-  background: rgba(196,135,58,0.07);
-  border: 1px solid rgba(196,135,58,0.2);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin-bottom: 14px;
-}
-.cloudinary-info-title {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 6px;
-}
-.cloudinary-info-text {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  color: var(--muted);
-  line-height: 1.9;
-}
-.cloudinary-info-text a { color: var(--accent); }
-
-/* POSTS LIST */
-.admin-post-item {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: var(--shadow);
-}
-.admin-post-info { flex: 1; min-width: 0; }
-.admin-post-title {
-  font-family: 'Noto Serif JP', serif;
+.post-title-text {
+  font-weight: 600;
   font-size: 14px;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.admin-post-meta {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
+
+.post-meta-text {
+  font-size: 12px;
   color: var(--muted);
-  margin-top: 3px;
 }
-.admin-post-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.edit-btn, .delete-btn {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: var(--radius);
-  cursor: pointer;
+
+.post-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-edit, .btn-delete {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  padding: 5px 12px;
   border: 1px solid var(--border);
-  background: white;
-  color: var(--muted);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: var(--radius);
   transition: all 0.2s;
 }
-.edit-btn:hover { border-color: var(--accent); color: var(--accent); }
-.delete-btn:hover { border-color: #c0392b; color: #c0392b; }
 
-/* COUNTRIES LIST */
-.country-admin-item {
-  background: white;
+.btn-edit:hover { border-color: var(--accent); color: var(--accent); }
+.btn-delete:hover { border-color: #cc4444; color: #cc4444; }
+
+/* ─── 国管理 ─── */
+.country-form-card {
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.country-list-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
   margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 12px;
+  box-shadow: var(--shadow);
 }
-.country-admin-flag { font-size: 24px; }
-.country-admin-name { font-family: 'Noto Serif JP', serif; font-size: 14px; flex: 1; }
-.country-admin-count { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--muted); }
+
+.country-list-flag { font-size: 24px; }
+
+.country-list-info {
+  flex: 1;
+}
+
+.country-list-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.country-list-order {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.country-list-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ─── 通知トースト ─── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink);
+  color: #f0e0c8;
+  padding: 10px 24px;
+  border-radius: 24px;
+  font-size: 13px;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+  background: #8b2020;
+}
+
+/* ─── 空メッセージ ─── */
+.empty-msg {
+  text-align: center;
+  padding: 40px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* ─── インサートボタン ─── */
+.insert-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.btn-insert {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  padding: 3px 12px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.btn-insert:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (max-width: 500px) {
+  .admin-main { padding: 16px 10px 80px; }
+  .card { padding: 16px; }
+  .post-list-item { flex-wrap: wrap; }
+}

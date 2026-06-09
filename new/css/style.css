@@ -1,409 +1,381 @@
-:root {
-  --ink: #1a1410;
-  --paper: #f7f3ee;
-  --accent: #c4873a;
-  --muted: #8a7e74;
-  --card-bg: #ffffff;
-  --border: #e0d8cf;
-  --shadow: 0 2px 20px rgba(0,0,0,0.08);
-  --radius: 2px;
-}
+/* ========================================
+   AKIRA travels — 共通スタイル
+   ======================================== */
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: 'Noto Serif JP', serif;
-  background: var(--paper);
-  color: var(--ink);
-  min-height: 100vh;
-}
-
-/* NAV */
-.nav {
-  background: var(--ink);
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 52px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-.nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 22px;
-  font-weight: 300;
-  color: var(--paper);
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.nav-logo span { color: var(--accent); font-style: italic; }
-.nav-logo small { font-family: 'Montserrat', sans-serif; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
-.nav-actions { display: flex; gap: 10px; align-items: center; }
-.nav-btn {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 7px 14px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: opacity 0.2s;
-  text-decoration: none;
-}
-.nav-btn:hover { opacity: 0.85; }
-.nav-btn.secondary {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.3);
-  color: var(--paper);
-}
-
-/* PAGES */
-.page { display: none; }
-.page.active { display: block; }
-
-/* HOME */
-.hero {
-  background: var(--ink);
-  padding: 48px 20px 40px;
-  text-align: center;
-}
-.hero-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(36px, 8vw, 64px);
-  font-weight: 300;
-  color: var(--paper);
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-}
-.hero-sub {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-top: 12px;
-}
-.hero-divider {
-  width: 40px; height: 1px;
-  background: var(--accent);
-  margin: 20px auto;
-}
-
-.countries-section {
-  padding: 32px 16px 48px;
-  max-width: 680px;
-  margin: 0 auto;
-}
-.section-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 20px;
-}
-.country-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-@media (min-width: 480px) { .country-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (min-width: 768px) { .country-grid { grid-template-columns: repeat(4, 1fr); } }
-
-.country-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 16px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: var(--shadow);
-}
-.country-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
-}
-.country-flag { font-size: 32px; margin-bottom: 8px; }
-.country-name { font-family: 'Noto Serif JP', serif; font-size: 14px; color: var(--ink); margin-bottom: 4px; }
-.country-count { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--muted); }
-
-/* COUNTRY PAGE */
-.country-header {
-  background: var(--ink);
-  padding: 32px 16px 28px;
-}
-.back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-  cursor: pointer;
-  margin-bottom: 16px;
-  background: none;
-  border: none;
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
 }
-.back-btn:hover { color: var(--paper); }
-.country-page-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(28px, 6vw, 48px);
-  font-weight: 300;
-  color: var(--paper);
-  letter-spacing: 0.04em;
-}
-.posts-list {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 24px 16px 48px;
-}
-.date-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 16px 0 8px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 8px;
-}
-.post-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  cursor: pointer;
-  margin-bottom: 8px;
-  transition: all 0.2s;
-  box-shadow: var(--shadow);
-}
-.post-item:hover { border-color: var(--accent); transform: translateX(4px); }
-.post-thumb {
-  width: 56px; height: 56px;
-  border-radius: var(--radius);
-  object-fit: cover;
-  flex-shrink: 0;
-  background: var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-.post-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius); }
-.post-info { flex: 1; min-width: 0; }
-.post-title {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 14px;
-  color: var(--ink);
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.post-meta { font-family: 'Montserrat', sans-serif; font-size: 10px; color: var(--muted); }
-.post-arrow { color: var(--muted); font-size: 16px; flex-shrink: 0; }
 
-/* POST DETAIL */
-.post-header {
-  background: var(--ink);
-  padding: 28px 16px 24px;
-}
-.post-page-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(24px, 5vw, 40px);
-  font-weight: 300;
-  color: var(--paper);
-  letter-spacing: 0.02em;
-  line-height: 1.2;
-}
-.post-page-date {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.15em;
-  margin-top: 8px;
+:root {
+  --brown:      #4a3000;
+  --orange:     #cc6600;
+  --gray:       #aaaaaa;
+  --bg-fallback:#f0e0c8;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
-/* MEDIA FEED */
-.media-feed { max-width: 680px; margin: 0 auto; }
-.media-item {
-  background: var(--card-bg);
-  margin-bottom: 2px;
-  overflow: hidden;
+html, body {
+  min-height: 100%;
 }
-.media-wrapper {
-  width: 100%;
-  position: relative;
-  background: #000;
-  overflow: hidden;
+
+body {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: var(--brown);
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/bg.gif");
+  background-repeat: repeat;
 }
-.media-wrapper img,
-.media-wrapper video {
-  width: 100%;
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
   display: block;
-  max-height: 80vh;
-  object-fit: contain;
-  background: #000;
 }
-.video-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.25);
-  cursor: pointer;
-  transition: opacity 0.3s;
-}
-.video-overlay.hidden { opacity: 0; pointer-events: none; }
-.play-btn {
-  width: 56px; height: 56px;
-  background: rgba(255,255,255,0.92);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s;
-}
-.play-btn svg { width: 22px; height: 22px; fill: var(--ink); margin-left: 3px; }
-.video-overlay:hover .play-btn { transform: scale(1.1); }
-.media-caption {
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid var(--border);
-}
-.caption-text {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 14px;
-  line-height: 1.8;
-  color: var(--ink);
-  white-space: pre-line;
-}
-.caption-location {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  color: var(--muted);
-  letter-spacing: 0.1em;
-  margin-top: 8px;
-}
-.media-actions {
-  padding: 10px 16px;
-  display: flex;
-  gap: 20px;
-}
-.action-btn {
-  background: none; border: none; cursor: pointer;
-  display: flex; align-items: center; gap: 5px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px; color: var(--muted);
-  padding: 4px 0; transition: color 0.2s;
-}
-.action-btn:hover { color: var(--accent); }
-.action-btn.liked { color: #e74c3c; }
 
-@media (min-width: 768px) {
-  .countries-section, .posts-list, .media-feed { max-width: 760px; }
-  .media-item {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
+/* ========================================
+   管理者リンク（右上固定）
+   ======================================== */
+#admin-link {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 100;
+  font-size: 11px;
+  color: var(--gray);
+  background: rgba(255,255,255,0.6);
+  padding: 3px 8px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+
+#admin-link a {
+  color: var(--gray);
+  text-decoration: none;
+}
+
+#admin-link a:hover {
+  color: var(--orange);
+}
+
+/* ========================================
+   トップページ
+   ======================================== */
+.top-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+  text-align: center;
+}
+
+.top-logo {
+  margin: 24px auto 32px;
+}
+
+.top-logo img {
+  margin: 0 auto;
+  max-height: 80px;
+}
+
+.top-logo-fallback {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--orange);
+  letter-spacing: 2px;
+}
+
+/* 国一覧テーブル */
+.country-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto 32px;
+}
+
+.country-table td {
+  text-align: center;
+  padding: 10px 6px;
+  vertical-align: top;
+}
+
+.country-name {
+  font-size: 22px;
+  font-weight: bold;
+  display: block;
+  line-height: 1.3;
+}
+
+.country-name.has-posts {
+  color: var(--orange);
+}
+
+.country-name.no-posts {
+  color: var(--gray);
+}
+
+.country-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #7a5a20;
+  margin-top: 2px;
+  font-weight: normal;
+}
+
+@media (min-width: 600px) {
+  .country-name {
+    font-size: 26px;
   }
 }
 
-/* FORMS (shared) */
-.form-group { margin-bottom: 16px; }
-.form-label {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--muted);
-  display: block;
-  margin-bottom: 6px;
+/* フッター */
+.top-footer {
+  margin-top: 40px;
+  text-align: center;
 }
-.required { color: var(--accent); }
-.form-input, .form-select, .form-textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  font-family: 'Noto Serif JP', serif;
+
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.footer-icons a img {
+  height: 28px;
+  width: auto;
+}
+
+.copyright {
+  font-size: 12px;
+  color: #8a7060;
+}
+
+/* ========================================
+   国別ページ
+   ======================================== */
+.country-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 0 60px;
+}
+
+.country-header {
+  text-align: center;
+  padding: 20px 16px 16px;
+}
+
+.country-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--brown);
+  margin-bottom: 10px;
+}
+
+.country-description {
   font-size: 14px;
-  background: white;
-  color: var(--ink);
-  outline: none;
-  transition: border-color 0.2s;
-}
-.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent); }
-.form-textarea { min-height: 90px; resize: vertical; line-height: 1.7; }
-.submit-btn {
-  padding: 12px 28px;
-  background: var(--ink);
-  color: var(--paper);
-  border: none;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: background 0.2s;
-}
-.submit-btn:hover { background: var(--accent); }
-.cancel-btn {
-  padding: 12px 20px;
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  cursor: pointer;
-  border-radius: var(--radius);
+  color: var(--brown);
+  line-height: 1.7;
+  white-space: pre-wrap;
+  text-align: left;
+  margin: 0 auto;
+  max-width: 560px;
+  padding: 0 16px;
 }
 
-/* EMPTY / LOADING */
-.empty-state {
-  text-align: center; padding: 60px 20px; color: var(--muted);
-}
-.empty-state-icon { font-size: 48px; margin-bottom: 16px; }
-.empty-state-text { font-family: 'Montserrat', sans-serif; font-size: 12px; }
-.loading-state {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  color: var(--muted);
-  letter-spacing: 0.1em;
-  padding: 20px 0;
-  grid-column: 1/-1;
+/* 代表写真 */
+.cover-photo-wrap {
+  margin: 16px 0;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
-/* TOAST */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(80px);
-  background: var(--ink);
-  color: var(--paper);
-  padding: 10px 20px;
-  border-radius: 20px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
-  z-index: 300;
+.cover-photo-wrap img {
+  width: 100%;
+  display: block;
   transition: transform 0.3s ease;
-  white-space: nowrap;
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.error { background: #c0392b; }
+
+.cover-photo-wrap:hover img {
+  transform: scale(1.01);
+}
+
+/* 投稿チェーン */
+.post-chain {
+  padding: 20px 16px;
+}
+
+.chain-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.chain-link {
+  font-size: 18px;
+  color: var(--orange);
+  font-weight: bold;
+  text-align: center;
+  padding: 4px 0;
+  cursor: pointer;
+  display: block;
+  transition: opacity 0.2s;
+}
+
+.chain-link:hover {
+  opacity: 0.75;
+}
+
+.chain-meta {
+  font-size: 12px;
+  color: #9a7a50;
+  margin-top: 1px;
+  margin-bottom: 4px;
+}
+
+.chain-arrow {
+  font-size: 16px;
+  color: var(--gray);
+  margin: 2px 0;
+}
+
+/* ========================================
+   詳細モーダル
+   ======================================== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #111;
+  z-index: 500;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-overlay.open {
+  display: block;
+}
+
+/* 上部固定バー */
+.modal-sticky-bar {
+  position: sticky;
+  top: 0;
+  z-index: 510;
+  background: rgba(20, 12, 0, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.modal-sticky-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #f0e0c8;
+  margin-bottom: 2px;
+}
+
+.modal-sticky-meta {
+  font-size: 12px;
+  color: #b09070;
+}
+
+/* モーダル本体 */
+.modal-body {
+  padding: 16px 0 0;
+}
+
+.modal-caption {
+  font-size: 15px;
+  color: #e0cdb0;
+  font-weight: normal;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  padding: 4px 16px 20px;
+}
+
+/* メディアアイテム */
+.media-item {
+  margin-bottom: 0;
+  position: relative;
+}
+
+.media-item img,
+.media-item video {
+  width: 100%;
+  display: block;
+}
+
+.media-item video {
+  background: #000;
+  cursor: pointer;
+}
+
+.media-caption {
+  font-size: 14px;
+  color: #b09070;
+  padding: 8px 16px 16px;
+  line-height: 1.6;
+}
+
+/* 下部ナビゲーション */
+.modal-footer {
+  padding: 24px 16px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  background: rgba(10,6,0,0.5);
+}
+
+.modal-footer img {
+  height: 36px;
+  width: auto;
+  cursor: pointer;
+  display: block;
+}
+
+.modal-footer-btn {
+  cursor: pointer;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: #f0e0c8;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 4px;
+  transition: background 0.2s;
+  font-family: var(--font-main);
+}
+
+.modal-footer-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.modal-copyright {
+  text-align: center;
+  font-size: 11px;
+  color: #6a5040;
+  padding: 0 16px 20px;
+}
+
+/* ローディング */
+.loading {
+  text-align: center;
+  padding: 60px 16px;
+  color: #9a7a50;
+  font-size: 14px;
+}
+
+.error-msg {
+  text-align: center;
+  padding: 40px 16px;
+  color: #cc4444;
+  font-size: 14px;
+}

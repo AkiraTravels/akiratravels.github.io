@@ -1,218 +1,138 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, user-scalable=yes">
-<meta name="description" content="だから一人旅はやめられない。人にフォーカスを当てて書き下ろした旅行記です。">
-<title>AKIRA travels ～ だから一人旅はやめられない</title>
-<style>
-/* ===== Jekyll Cayman テーマ準拠 ===== */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #606c71;               /* Cayman body text */
-  background-color: #fff;
-}
-
-/* ===== ヘッダー（Caymanの緑グラデ帯を踏襲） ===== */
-.page-header {
-  background-color: #159957;
-  background-image: linear-gradient(120deg, #155799, #159957);
-  padding: 2rem 1rem 1.5rem;
-  text-align: center;
-}
-
-/* ロゴ GIF */
-.header-logo {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0 auto 0.8rem;
-}
-
-/* ===== メインコンテンツ ===== */
-.main-content {
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 2rem;
-  font-size: 1.1rem;
-}
-
-/* キャッチコピー */
-.catchcopy {
-  font-size: 1rem;
-  font-weight: bold;
-  line-height: 1.9;
-  color: #333;
-  margin-bottom: 1.4rem;
-}
-
-/* 国リンクテーブル */
-.country-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1.2rem;
-}
-.country-table td {
-  padding: 4px 6px;
-  width: 50%;
-  vertical-align: top;
-}
-.country-table a {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #1e6bb8;      /* Cayman link blue */
-  text-decoration: none;
-}
-.country-table a:hover  { text-decoration: underline; }
-.country-table a:visited { color: #6a737d; }
-.count-note {
-  font-size: 0.8rem;
-  font-weight: normal;
-  color: #6a737d;
-  margin-left: 3px;
-}
-
-/* ===== フッター ===== */
-.site-footer {
-  padding: 1rem 1rem 1.5rem;
-  border-top: 1px solid #e7e7e7;
-  text-align: center;
-}
-.site-footer img {
-  height: 28px;
-  margin: 0 3px 4px;
-  vertical-align: middle;
-}
-.copyright {
-  font-size: 0.78rem;
-  color: #819198;
-  margin-top: 0.6rem;
-}
-
-/* 管理リンク */
-#admin-link {
-  position: fixed; top: 6px; right: 8px; z-index: 100; font-size: 11px;
-}
-#admin-link a {
-  color: rgba(255,255,255,0.7);
-  text-decoration: none;
-  background: rgba(0,0,0,0.2);
-  padding: 2px 8px;
-  border-radius: 3px;
-}
-#admin-link a:hover { color: #fff; }
-
-.status-msg {
-  font-size: 0.9rem; color: #999; padding: 1rem 0;
-}
-
-/* PC: 最大幅を活かした2カラム維持 */
-@media (min-width: 64rem) {
-  .main-content { padding: 2rem 6rem 3rem; }
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKIRA travels</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="admin-link"></div>
+<!-- 管理者リンク（右上固定） -->
+<div id="admin-link">
+  <a href="admin/" id="admin-link-text">管理者</a>
+</div>
 
-<!-- HEADER: home.gif ロゴをそのまま使用 -->
-<div class="page-header">
-  <img
-    src="https://akiratravels.github.io/images/home.gif"
-    alt="AKIRA travels ～ だから一人旅はやめられない"
-    class="header-logo"
-    onerror="this.style.display='none';document.getElementById('header-fallback').style.display='block'">
-  <div id="header-fallback" style="display:none;color:#fff;font-size:1.4rem;font-weight:bold;letter-spacing:0.04em">
-    AKIRA travels ～ だから一人旅はやめられない
+<div class="top-wrap">
+  <!-- ロゴ -->
+  <div class="top-logo">
+    <img
+      src="https://akiratravels.github.io/images/home.gif"
+      alt="AKIRA travels"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+    >
+    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
   </div>
-</div>
 
-<div class="main-content">
-  <p class="catchcopy">
-    湖も、絶壁も、遺跡もいいけどやっぱり人が面白い<br>
-    人にフォーカスを当てて書き下ろした旅行記です
-  </p>
-  <div id="country-list-area"><div class="status-msg">読み込み中...</div></div>
-</div>
+  <!-- 国一覧 -->
+  <div id="country-list-wrap">
+    <p class="loading">読み込み中…</p>
+  </div>
 
-<div class="site-footer">
-  <a href="https://akiratravels.github.io/profile/index.html"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"></a>
-  <a href="mailto:akira.mizui@gmail.com"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"></a>
-  <a href="https://www.facebook.com/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"></a>
-  <a href="https://m.me/akiratravels" target="_blank" rel="noopener"><img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"></a>
-  <div class="copyright" id="copyright-text"></div>
+  <!-- フッター -->
+  <footer class="top-footer">
+    <div class="footer-icons">
+      <a href="https://akiratravels.github.io/profile/" target="_blank" rel="noopener">
+        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
+          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>PROFILE</span>'">
+      </a>
+      <a href="mailto:">
+        <img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"
+          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>MAIL</span>'">
+      </a>
+      <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>Facebook</span>'">
+      </a>
+      <a href="https://m.me/" target="_blank" rel="noopener">
+        <img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"
+          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>Messenger</span>'">
+      </a>
+    </div>
+    <p class="copyright" id="copyright-text"></p>
+  </footer>
 </div>
 
 <script type="module">
-import { db, auth } from "./js/firebase-config.js";
-import { collection, getDocs, query, orderBy }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { db, auth } from './js/firebase-config.js';
+import {
+  collection, getDocs, query, orderBy, where
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
-// 著作権年（動的）
-const y = new Date().getFullYear();
+// 著作権年
+const yr = new Date().getFullYear();
 document.getElementById('copyright-text').textContent =
-  `© 1998–${y} AKIRA travels. All rights reserved.`;
+  `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-// 管理リンク
+// 管理者リンク
 onAuthStateChanged(auth, user => {
-  document.getElementById('admin-link').innerHTML =
-    `<a href="admin/">${user ? '管理画面' : '管理者'}</a>`;
+  document.getElementById('admin-link-text').textContent =
+    user ? '管理画面' : '管理者';
 });
 
-// 国一覧読み込み
+// 国一覧を表示
 async function loadCountries() {
-  const area = document.getElementById('country-list-area');
+  const wrap = document.getElementById('country-list-wrap');
   try {
     const [countriesSnap, postsSnap] = await Promise.all([
       getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
       getDocs(collection(db, 'posts'))
     ]);
 
+    // 国ごとの投稿数
     const postCount = {};
     postsSnap.forEach(d => {
       const cid = d.data().countryId;
       postCount[cid] = (postCount[cid] || 0) + 1;
     });
 
-    if (countriesSnap.empty) {
-      area.innerHTML = '<div class="status-msg">まだ国が登録されていません</div>';
-      return;
-    }
-
     const countries = [];
     countriesSnap.forEach(d => countries.push({ id: d.id, ...d.data() }));
 
-    let html = '<table class="country-table">';
-    for (let i = 0; i < countries.length; i += 2) {
-      html += '<tr>';
-      for (const c of [countries[i], countries[i+1]]) {
-        if (!c) { html += '<td></td>'; continue; }
-        const n = postCount[c.id] || 0;
-        const note = n ? `<span class="count-note">(${n}件)</span>` : '';
-        // 絵文字なし（PC・モバイル共通）
-        html += `<td><a href="country.html?id=${c.id}">${escHtml(c.name)}</a>${note}</td>`;
-      }
-      html += '</tr>';
+    if (countries.length === 0) {
+      wrap.innerHTML = '<p class="loading">国データがありません</p>';
+      return;
     }
-    html += '</table>';
-    area.innerHTML = html;
-  } catch(e) {
-    area.innerHTML = `<div class="status-msg">読み込みに失敗しました<br><small>${e.message}</small></div>`;
+
+    // 2カラムテーブル
+    let rows = '';
+    for (let i = 0; i < countries.length; i += 2) {
+      rows += '<tr>';
+      for (let j = i; j < i + 2; j++) {
+        const c = countries[j];
+        if (!c) { rows += '<td></td>'; continue; }
+        const cnt = postCount[c.id] || 0;
+        const subtitleHtml = c.subtitle
+          ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>` : '';
+        if (cnt > 0) {
+          rows += `<td>
+            <a href="country.html?id=${c.id}" style="text-decoration:none;">
+              <span class="country-name has-posts">${escHtml(c.name)}</span>
+              ${subtitleHtml}
+            </a>
+          </td>`;
+        } else {
+          rows += `<td>
+            <span class="country-name no-posts">${escHtml(c.name)}</span>
+            ${subtitleHtml}
+          </td>`;
+        }
+      }
+      rows += '</tr>';
+    }
+
+    wrap.innerHTML = `<table class="country-table"><tbody>${rows}</tbody></table>`;
+  } catch (e) {
     console.error(e);
+    wrap.innerHTML = '<p class="error-msg">読み込みに失敗しました。</p>';
   }
 }
 
 function escHtml(s) {
-  return String(s||'')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 loadCountries();

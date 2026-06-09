@@ -1,166 +1,145 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>管理画面 — 旅の記録</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
-<link rel="stylesheet" href="../css/admin.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理画面 — AKIRA travels</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="admin-body">
+<body>
 
-<nav class="nav">
-  <div class="nav-logo" onclick="location.href='../index.html'">旅<span>の</span>記録 <small>— 管理画面</small></div>
-  <div class="nav-actions">
-    <span id="admin-user" class="admin-user-label"></span>
-    <button class="nav-btn secondary" id="logout-btn" onclick="adminLogout()">ログアウト</button>
+<!-- ヘッダー -->
+<header class="admin-header">
+  <div>
+    <div class="admin-header-title">AKIRA travels</div>
+    <div class="admin-header-sub">ADMIN</div>
   </div>
-</nav>
+  <div class="admin-header-right" id="header-user" style="display:none;">
+    <span id="user-email"></span>
+    <button class="btn-logout" id="btn-logout">ログアウト</button>
+  </div>
+</header>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="admin-login-screen">
-  <div class="login-box">
-    <div class="login-title">管理者ログイン</div>
-    <div class="form-group">
-      <label class="form-label">メールアドレス</label>
-      <input type="email" class="form-input" id="login-email" placeholder="admin@example.com">
-    </div>
-    <div class="form-group">
-      <label class="form-label">パスワード</label>
-      <input type="password" class="form-input" id="login-password">
-    </div>
-    <button class="submit-btn" onclick="doLogin()">ログイン</button>
-    <div id="login-error" class="login-error"></div>
+<!-- ログイン画面 -->
+<div id="login-screen" class="login-screen">
+  <div class="login-title">AKIRA travels</div>
+  <div class="login-subtitle">ADMIN LOGIN</div>
+  <div class="login-card">
+    <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
+    <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+    <button class="btn-login" id="btn-login">ログイン</button>
+    <p class="login-error" id="login-error" style="display:none;"></p>
   </div>
 </div>
 
-<!-- ADMIN MAIN -->
-<div id="admin-main" class="admin-main" style="display:none">
-
-  <!-- TABS -->
-  <div class="admin-tabs">
-    <button class="admin-tab active" onclick="switchAdminTab('post')">✏️ 新規投稿</button>
-    <button class="admin-tab" onclick="switchAdminTab('posts')">📋 投稿一覧</button>
-    <button class="admin-tab" onclick="switchAdminTab('countries')">🌍 国管理</button>
+<!-- 管理メイン -->
+<div id="admin-main" class="admin-main" style="display:none;">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="new-post">✏️ 新規投稿</button>
+    <button class="tab-btn" data-tab="post-list">📋 投稿一覧</button>
+    <button class="tab-btn" data-tab="country-mgmt">🌍 国管理</button>
   </div>
 
-  <!-- NEW POST TAB -->
-  <div id="tab-post" class="admin-tab-content">
-    <div class="admin-section-title">新規投稿 / 編集</div>
-
-    <div class="admin-form">
+  <!-- ━━━ 新規投稿タブ ━━━ -->
+  <div class="tab-panel active" id="tab-new-post">
+    <div class="card">
+      <div class="section-title" id="post-form-title">新規投稿</div>
       <input type="hidden" id="edit-post-id">
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">国・地域 <span class="required">*</span></label>
-          <select class="form-select" id="post-country"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">日付 <span class="required">*</span></label>
-          <input type="date" class="form-input" id="post-date">
-        </div>
+        <label>国・地域 *</label>
+        <select id="f-country"></select>
+      </div>
+      <div class="form-row">
+        <label>日付 *</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-row">
+        <label>タイトル *</label>
+        <input type="text" id="f-title" placeholder="例: サハラ砂漠に沈む夕日">
+      </div>
+      <div class="form-row">
+        <label>場所・地名</label>
+        <input type="text" id="f-location" placeholder="例: マラケシュ">
+      </div>
+      <div class="form-row">
+        <label>投稿の説明</label>
+        <textarea id="f-caption" rows="4" placeholder="この投稿の説明文（モーダル上部に表示）"></textarea>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">タイトル <span class="required">*</span></label>
-        <input type="text" class="form-input" id="post-title" placeholder="例: リスボン旧市街を歩く">
+      <!-- メディアリスト -->
+      <div class="media-section-title">メディア</div>
+      <div id="media-list" class="media-list"></div>
+
+      <!-- 最初のインサートボタン -->
+      <div class="insert-btn-wrap" id="insert-top">
+        <button class="btn-insert" data-pos="0">＋ ここに追加</button>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">場所・地名</label>
-        <input type="text" class="form-input" id="post-location" placeholder="例: アルファマ地区, リスボン">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">投稿の説明（全体キャプション）</label>
-        <textarea class="form-textarea" id="post-caption" placeholder="この投稿についての説明..."></textarea>
-      </div>
-
-      <!-- MEDIA SECTION -->
-      <div class="media-section">
-        <div class="media-section-header">
-          <div class="form-label">メディア（写真・動画）</div>
-          <button class="add-media-btn" onclick="addMediaRow()">＋ メディアを追加</button>
-        </div>
-
-        <div class="cloudinary-info">
-          <div class="cloudinary-info-title">☁️ Cloudinary へのアップロード手順</div>
-          <div class="cloudinary-info-text">
-            1. <a href="https://cloudinary.com/console/media_library" target="_blank">Cloudinary Media Library</a> を開く<br>
-            2. 写真・動画をアップロード<br>
-            3. ファイルを右クリック →「Copy URL」でURLをコピー<br>
-            4. 下のフォームにURLを貼り付け
-          </div>
-        </div>
-
-        <div id="media-rows"></div>
-      </div>
-
+      <!-- フォーム下部ボタン -->
       <div class="form-actions">
-        <button class="submit-btn" onclick="submitPost()">投稿する</button>
-        <button class="cancel-btn" onclick="resetPostForm()" id="cancel-edit-btn" style="display:none">キャンセル</button>
+        <button class="btn-add-media" id="btn-add-media-bottom">☁️ メディアを追加</button>
+        <button class="btn-submit" id="btn-submit-post">投稿する</button>
+        <button class="btn-cancel" id="btn-cancel-edit" style="display:none;">キャンセル</button>
       </div>
     </div>
   </div>
 
-  <!-- POSTS LIST TAB -->
-  <div id="tab-posts" class="admin-tab-content" style="display:none">
-    <div class="admin-section-title">投稿一覧</div>
-    <div id="admin-posts-list"></div>
-  </div>
-
-  <!-- COUNTRIES TAB -->
-  <div id="tab-countries" class="admin-tab-content" style="display:none">
-    <div class="admin-section-title">国・地域の管理</div>
-
-    <div class="admin-form" style="max-width:400px">
-      <input type="hidden" id="edit-country-id">
-      <div class="form-group">
-        <label class="form-label">国名 <span class="required">*</span></label>
-        <input type="text" class="form-input" id="country-name" placeholder="例: ポルトガル">
-      </div>
-      <div class="form-group">
-        <label class="form-label">国旗絵文字 <span class="required">*</span></label>
-        <input type="text" class="form-input" id="country-flag" placeholder="例: 🇵🇹">
-      </div>
-      <div class="form-group">
-        <label class="form-label">表示順（数字が小さいほど先頭）</label>
-        <input type="number" class="form-input" id="country-order" value="0">
-      </div>
-      <div class="form-group">
-        <label class="form-label">国別ページの紹介文</label>
-        <textarea class="form-textarea" id="country-desc"
-          placeholder="例: 迷路のようなメディナを行けば息もつかせぬ事件の連続。&#10;メクネス、フェズ、マラケシュ。三大古都を巡ります。"></textarea>
-        <div style="font-family:'Montserrat',sans-serif;font-size:10px;color:var(--muted);margin-top:4px">
-          改行はそのまま反映されます。国別ページの投稿リスト上部に表示されます。
-        </div>
-      </div>
-      <div class="form-actions">
-        <button class="submit-btn" onclick="submitCountry()">保存</button>
-        <button class="cancel-btn" onclick="resetCountryForm()" id="cancel-country-btn" style="display:none">キャンセル</button>
+  <!-- ━━━ 投稿一覧タブ ━━━ -->
+  <div class="tab-panel" id="tab-post-list">
+    <div class="card">
+      <div class="section-title">投稿一覧</div>
+      <div id="post-list-container">
+        <p class="loading">読み込み中…</p>
       </div>
     </div>
-
-    <div id="countries-list" style="margin-top:24px"></div>
   </div>
 
+  <!-- ━━━ 国管理タブ ━━━ -->
+  <div class="tab-panel" id="tab-country-mgmt">
+    <div class="card">
+      <div class="section-title">国を追加</div>
+      <div class="country-form-card">
+        <input type="hidden" id="edit-country-id">
+        <div class="form-row">
+          <label>国名 *</label>
+          <input type="text" id="c-name" placeholder="例: モロッコ">
+        </div>
+        <div class="form-row">
+          <label>国旗絵文字 *</label>
+          <input type="text" id="c-flag" placeholder="例: 🇲🇦" maxlength="8">
+        </div>
+        <div class="form-row">
+          <label>表示順（数値、小さいほど先頭）</label>
+          <input type="number" id="c-order" placeholder="例: 10" value="100">
+        </div>
+        <div class="form-row">
+          <label>サブタイトル（トップページの国名下）</label>
+          <input type="text" id="c-subtitle" placeholder="例: 砂漠と迷宮の国">
+        </div>
+        <div class="form-row">
+          <label>紹介文</label>
+          <textarea id="c-description" rows="4" placeholder="国別ページの投稿リスト上部に表示される説明文"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button class="btn-submit" id="btn-save-country">保存</button>
+          <button class="btn-cancel" id="btn-cancel-country" style="display:none;">キャンセル</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="section-title">国一覧</div>
+      <div id="country-list-mgmt">
+        <p class="loading">読み込み中…</p>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- トースト通知 -->
+<div id="toast" class="toast"></div>
 
-<div style="text-align:center;padding:16px 0 24px;border-top:1px solid var(--border);margin-top:8px">
-  <div style="font-family:'Montserrat',sans-serif;font-size:11px;color:var(--muted)" id="admin-copyright"></div>
-</div>
-
-<script>
-  const y = new Date().getFullYear();
-  document.getElementById('admin-copyright').textContent =
-    `© 1998–${y} AKIRA travels. All rights reserved.`;
-</script>
-<script type="module" src="../js/firebase-config.js"></script>
-<script type="module" src="../js/admin.js"></script>
+<script type="module" src="./index.js"></script>
 </body>
 </html>
