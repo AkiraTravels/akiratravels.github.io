@@ -1,0 +1,267 @@
+:root {
+  --brown:      #4a3000;
+  --orange:     #cc6600;
+  --gray:       #aaaaaa;
+  --bg-fallback:#f0e0c8;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+}
+
+body {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: var(--brown);
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/bg.gif");
+  background-repeat: repeat;
+  margin: 0;
+  padding: 0;
+}
+
+/* 管理者リンク */
+#admin-link {
+  position: fixed;
+  top: 10px;
+  right: 12px;
+  z-index: 100;
+  font-size: 11px;
+  color: var(--gray);
+  background: rgba(255,255,255,0.6);
+  padding: 3px 8px;
+  border-radius: 10px;
+  backdrop-filter: blur(4px);
+}
+#admin-link a {
+  color: var(--gray);
+  text-decoration: none;
+}
+
+/* トップページスタイル */
+.top-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+}
+.top-logo {
+  margin-bottom: 40px;
+}
+.top-logo img {
+  max-width: 100%;
+  height: auto;
+}
+.loading, .error-msg {
+  padding: 20px;
+  font-size: 14px;
+}
+
+#country-list-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 40px;
+}
+#country-list-wrap td {
+  width: 50%;
+  padding: 15px 10px;
+  vertical-align: top;
+  border: none;
+}
+.country-cell {
+  display: block;
+}
+.country-cell.has-posts a {
+  color: var(--orange);
+  text-decoration: none;
+  font-weight: bold;
+}
+.country-cell.no-posts {
+  color: var(--gray);
+  cursor: default;
+}
+.country-name {
+  font-size: 22px;
+  display: block;
+}
+@media (min-width: 600px) {
+  .country-name {
+    font-size: 26px;
+  }
+}
+.country-subtitle {
+  font-size: 13px;
+  color: #7a5a20;
+  display: block;
+  margin-top: 4px;
+  font-weight: normal;
+}
+
+.top-footer {
+  margin-top: 60px;
+}
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.footer-icons img {
+  height: 24px;
+  cursor: pointer;
+}
+.copyright {
+  font-size: 11px;
+  color: var(--gray);
+}
+
+/* 国別ページスタイル */
+.country-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+.country-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.country-title {
+  font-size: 28px;
+  color: var(--brown);
+  margin-bottom: 10px;
+}
+.country-description {
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  text-align: left;
+}
+.cover-photo-wrap {
+  width: 100%;
+  margin-bottom: 40px;
+  cursor: pointer;
+  overflow: hidden;
+}
+.cover-photo-wrap img {
+  width: 100%;
+  display: block;
+  transition: transform 0.2s ease;
+}
+.cover-photo-wrap:hover img {
+  transform: scale(1.01);
+}
+.post-chain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.chain-item {
+  text-align: center;
+  margin-bottom: 5px;
+}
+.chain-link {
+  font-size: 18px;
+  color: var(--orange);
+  cursor: pointer;
+  text-decoration: underline;
+  display: block;
+  font-weight: bold;
+}
+.chain-meta {
+  font-size: 12px;
+  color: var(--brown);
+  opacity: 0.8;
+  display: block;
+  margin-top: 2px;
+}
+.chain-arrow {
+  font-size: 14px;
+  color: var(--gray);
+  margin: 10px 0;
+  display: block;
+}
+
+/* モーダルスタイル */
+.modal-overlay {
+  display: none; 
+  position: fixed; 
+  inset: 0;
+  background: #111; 
+  z-index: 500;
+  overflow-y: auto; 
+  -webkit-overflow-scrolling: touch;
+}
+.modal-overlay.open { 
+  display: block; 
+}
+.modal-sticky-bar {
+  position: sticky; 
+  top: 0; 
+  z-index: 510;
+  background: rgba(20, 12, 0, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.modal-sticky-title { 
+  font-size: 16px; 
+  font-weight: bold; 
+  color: #f0e0c8; 
+}
+.modal-sticky-meta  { 
+  font-size: 12px; 
+  color: #b09070; 
+}
+.modal-body {
+  padding-top: 15px;
+}
+.modal-caption {
+  font-size: 15px; 
+  color: #e0cdb0; 
+  font-weight: normal;
+  line-height: 1.75; 
+  white-space: pre-wrap;
+  padding: 4px 16px 20px;
+}
+.media-item {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.media-item img, .media-item video { 
+  width: 100%; 
+  display: block; 
+}
+.media-item video { 
+  background: #000; 
+  cursor: pointer; 
+}
+.media-caption { 
+  font-size: 14px; 
+  color: #b09070; 
+  padding: 8px 16px 16px; 
+  line-height: 1.6; 
+}
+.modal-footer {
+  padding: 24px 16px 40px;
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  gap: 16px;
+  background: rgba(10,6,0,0.5);
+}
+.modal-footer img { 
+  height: 36px; 
+  cursor: pointer; 
+}
+.modal-footer-btn {
+  cursor: pointer; 
+  padding: 8px 20px; 
+  font-size: 13px;
+  color: #f0e0c8; 
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2); 
+  border-radius: 4px;
+}
+.modal-copyright { 
+  text-align: center; 
+  font-size: 11px; 
+  color: #6a5040; 
+  padding: 0 16px 20px; 
+}

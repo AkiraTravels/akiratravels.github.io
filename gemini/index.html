@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AKIRA travels</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
+
+  <div class="top-wrap">
+    <div class="top-logo">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="top-logo-fallback" style="display:none; font-size:24px; font-weight:bold; color:var(--brown);">AKIRA travels</span>
+    </div>
+    
+    <div id="country-list-wrap">
+      <p class="loading">読み込み中…</p>
+    </div>
+    
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')">
+        <img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')">
+        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')">
+        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')">
+      </div>
+      <p class="copyright" id="copyright-text"></p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { db, auth } from "./js/firebase-config.js";
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // 認証監視
+    onAuthStateChanged(auth, user => {
+      const linkText = document.getElementById('admin-link-text');
+      if (user) {
+        linkText.textContent = '管理画面';
+      } else {
+        linkText.textContent = '管理者';
+      }
+    });
+
+    // 著作権年動的設定
+    const yr = new Date().getFullYear();
+    document.getElementById('copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
+
+    async function init() {
+      try {
+        const [countriesSnap, postsSnap] = await Promise.all([
+          getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
+          getDocs(collection(db, 'posts'))
+        ]);
+
+        const postCount = {};
+        postsSnap.forEach(doc => {
+          const post = doc.data();
+          if (post.countryId) {
+            postCount[post.countryId] = (postCount[post.countryId] || 0) + 1;
+          }
+        });
+
+        const countries = [];
+        countriesSnap.forEach(doc => {
+          countries.push({ id: doc.id, ...doc.data() });
+        });
+
+        const wrap = document.getElementById('country-list-wrap');
+        if (countries.length === 0) {
+          wrap.innerHTML = '<p class="loading">国情報がありません。</p>';
+          return;
+        }
+
+        let tableHtml = '<table><tbody>';
+        for (let i = 0; i < countries.length; i += 2) {
+          tableHtml += '<tr>';
+          
+          // 左セル
+          tableHtml += `<td>${renderCell(countries[i], postCount)}</td>`;
+          
+          // 右セル
+          if (i + 1 < countries.length) {
+            tableHtml += `<td>${renderCell(countries[i+1], postCount)}</td>`;
+          } else {
+            tableHtml += '<td></td>';
+          }
+          
+          tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table>';
+        wrap.innerHTML = tableHtml;
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('country-list-wrap').innerHTML = '<p class="loading">データの取得に失敗しました。</p>';
+      }
+    }
+
+    function renderCell(c, postCount) {
+      const count = postCount[c.id] || 0;
+      const subtitleHtml = c.subtitle ? `<span class="country-subtitle">${c.subtitle}</span>` : '';
+      
+      if (count > 0) {
+        return `
+          <div class="country-cell has-posts">
+            <a href="country.html?id=${c.id}">
+              <span class="country-name">${c.name}</span>
+              ${subtitleHtml}
+            </a>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="country-cell no-posts">
+            <span class="country-name">${c.name}</span>
+            ${subtitleHtml}
+          </div>
+        `;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

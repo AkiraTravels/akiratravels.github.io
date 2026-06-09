@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>AKIRA travels</title>
+  <script>
+    const path = location.pathname;
+    const search = location.search;
+    const hash = location.hash;
+    const repo = '/';
+    const redirect = repo + '?' + encodeURIComponent(path.slice(repo.length))
+      + '&' + (search ? search.slice(1) + '&' : '') + hash.slice(1);
+    history.replaceState(null, null, redirect);
+  </script>
+</head>
+<body><p>リダイレクト中…</p></body>
+</html>
