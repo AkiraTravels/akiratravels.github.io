@@ -231,7 +231,9 @@ a {
   display: none;
   position: fixed;
   inset: 0;
-  background: #111;
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/bg.gif");
+  background-repeat: repeat;
   z-index: 500;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -244,19 +246,19 @@ a {
   position: sticky;
   top: 0;
   z-index: 510;
-  background: rgba(20, 12, 0, 0.92);
+  background: rgba(240, 224, 200, 0.92);
   backdrop-filter: blur(8px);
   padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 .modal-sticky-title {
-  font-size: 16px;
+  font-size: 19px;
   font-weight: bold;
-  color: #f0e0c8;
+  color: var(--brown);
 }
 .modal-sticky-meta {
-  font-size: 12px;
-  color: #b09070;
+  font-size: 14px;
+  color: #7a5a20;
   margin-top: 2px;
 }
 
@@ -266,8 +268,8 @@ a {
 }
 
 .modal-caption {
-  font-size: 15px;
-  color: #e0cdb0;
+  font-size: 17px;
+  color: var(--brown);
   font-weight: normal;
   line-height: 1.75;
   white-space: pre-wrap;
@@ -287,8 +289,8 @@ a {
   cursor: pointer;
 }
 .media-caption {
-  font-size: 14px;
-  color: #b09070;
+  font-size: 16px;
+  color: #5a3a10;
   padding: 8px 16px 16px;
   line-height: 1.6;
 }
@@ -299,7 +301,6 @@ a {
   justify-content: center;
   align-items: center;
   gap: 16px;
-  background: rgba(10,6,0,0.5);
   max-width: 640px;
   margin: 0 auto;
 }
@@ -310,19 +311,19 @@ a {
 .modal-footer-btn {
   cursor: pointer;
   padding: 8px 20px;
-  font-size: 13px;
-  color: #f0e0c8;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  font-size: 14px;
+  color: var(--brown);
+  background: rgba(74, 48, 0, 0.08);
+  border: 1px solid rgba(74, 48, 0, 0.2);
   border-radius: 4px;
 }
 .modal-footer-btn:hover {
-  background: rgba(255,255,255,0.18);
+  background: rgba(74, 48, 0, 0.15);
 }
 
 .modal-copyright {
   text-align: center;
-  font-size: 11px;
-  color: #6a5040;
+  font-size: 12px;
+  color: var(--gray);
   padding: 0 16px 20px;
 }

@@ -105,15 +105,19 @@ async function loadPosts() {
 // ========== 国セレクト ==========
 function renderCountrySelect() {
   const sel = $('f-country');
+  const filterSel = $('filter-country');
   const current = sel.value;
-  sel.innerHTML = '<option value="">国を選択…</option>';
-  countries.forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = `${c.flag || ''} ${c.name}`.trim();
-    sel.appendChild(opt);
-  });
+  const currentFilter = filterSel.value;
+
+  const optionsHtml = countries.map(c =>
+    `<option value="${escHtml(c.id)}">${escHtml((c.flag || '') + ' ' + c.name).trim()}</option>`
+  ).join('');
+
+  sel.innerHTML = '<option value="">国を選択…</option>' + optionsHtml;
+  filterSel.innerHTML = '<option value="">すべての国</option>' + optionsHtml;
+
   if (current) sel.value = current;
+  if (currentFilter) filterSel.value = currentFilter;
 }
 
 // ========== メディアリスト ==========
@@ -376,20 +380,24 @@ function editPost(post) {
 // ========== 投稿一覧 ==========
 function renderPostList() {
   const container = $('post-list-container');
+  const filterCountryId = $('filter-country') ? $('filter-country').value : '';
 
-  if (allPosts.length === 0) {
+  const filtered = filterCountryId
+    ? allPosts.filter(p => p.countryId === filterCountryId)
+    : allPosts;
+
+  if (filtered.length === 0) {
     container.innerHTML = '<p class="empty-msg">投稿がありません。</p>';
     return;
   }
 
   let html = '';
-  allPosts.forEach(post => {
+  filtered.forEach(post => {
     const countryObj = countries.find(c => c.id === post.countryId);
     const countryName = countryObj ? countryObj.name : post.countryId;
     const mediaCount = (post.media || []).length;
     const hasCover = (post.media || []).some(m => m.isCover);
 
-    // サムネイル選出
     let thumbUrl = '';
     const coverMedia = (post.media || []).find(m => m.isCover && m.type === 'image');
     const firstImage = (post.media || []).find(m => m.type === 'image');
@@ -435,6 +443,14 @@ function renderPostList() {
     });
   });
 }
+
+// フィルター変更時に再描画
+document.addEventListener('DOMContentLoaded', () => {
+  const filterSel = $('filter-country');
+  if (filterSel) {
+    filterSel.addEventListener('change', renderPostList);
+  }
+});
 
 // ========== 国管理 ==========
 $('btn-save-country').addEventListener('click', saveCountry);

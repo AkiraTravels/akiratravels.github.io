@@ -21,13 +21,13 @@
   <div class="post-chain" id="post-chain"></div>
   <footer class="country-footer">
     <div class="footer-icons">
+      <a href="index.html" title="AKIRA travels TOP">
+        <img src="images/i_home.gif" alt="AKIRA travels"
+          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>HOME</span>';">
+      </a>
       <a href="#" title="PROFILE">
         <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
           onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>PROFILE</span>';">
-      </a>
-      <a href="#" title="MAIL">
-        <img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"
-          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>MAIL</span>';">
       </a>
       <a href="#" title="Facebook">
         <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
@@ -337,12 +337,11 @@ function renderModalFooter(idx) {
   const footer = document.getElementById('modal-footer');
   footer.innerHTML = '';
   const hasNext = idx < allPosts.length - 1;
-  const folder = countryFolder(countryName);
 
-  // 次へ
+  // 次へ（より新しい投稿がある場合）
   if (hasNext) {
     const nextImg = document.createElement('img');
-    nextImg.src = 'https://akiratravels.github.io/images/i_next.gif';
+    nextImg.src = 'images/i_next.gif';
     nextImg.alt = '次へ';
     nextImg.title = '次へ';
     nextImg.onerror = function() {
@@ -351,32 +350,16 @@ function renderModalFooter(idx) {
       btn.className = 'modal-footer-btn';
       btn.textContent = '次へ ▶';
       btn.addEventListener('click', () => navigateModal(idx + 1));
-      footer.appendChild(btn);
+      footer.insertBefore(btn, footer.firstChild);
     };
     nextImg.addEventListener('click', () => navigateModal(idx + 1));
     footer.appendChild(nextImg);
   }
 
-  // 戻る
-  const backImg = document.createElement('img');
-  backImg.src = `https://akiratravels.github.io/${folder}/images/i_${folder}.gif`;
-  backImg.alt = '戻る';
-  backImg.title = '戻る';
-  backImg.onerror = function() {
-    this.style.display = 'none';
-    const btn = document.createElement('button');
-    btn.className = 'modal-footer-btn';
-    btn.textContent = '← 戻る';
-    btn.addEventListener('click', closeModal);
-    footer.appendChild(btn);
-  };
-  backImg.addEventListener('click', closeModal);
-  footer.appendChild(backImg);
-
-  // HOME
+  // AKIRA travels（i_home.gif → トップページへ）
   const homeImg = document.createElement('img');
-  homeImg.src = 'https://akiratravels.github.io/images/i_home.gif';
-  homeImg.alt = 'HOME';
+  homeImg.src = 'images/i_home.gif';
+  homeImg.alt = 'AKIRA travels';
   homeImg.title = 'TOP';
   homeImg.onerror = function() {
     this.style.display = 'none';
@@ -388,6 +371,22 @@ function renderModalFooter(idx) {
   };
   homeImg.addEventListener('click', () => { location.href = 'index.html'; });
   footer.appendChild(homeImg);
+
+  // 前へ（i_last.gif → 国別ページに戻る / 前投稿へ）
+  const lastImg = document.createElement('img');
+  lastImg.src = 'images/i_last.gif';
+  lastImg.alt = '前へ';
+  lastImg.title = idx > 0 ? '前へ' : '国別ページへ戻る';
+  lastImg.onerror = function() {
+    this.style.display = 'none';
+    const btn = document.createElement('button');
+    btn.className = 'modal-footer-btn';
+    btn.textContent = idx > 0 ? '◀ 前へ' : '← 戻る';
+    btn.addEventListener('click', () => idx > 0 ? navigateModal(idx - 1) : closeModal());
+    footer.appendChild(btn);
+  };
+  lastImg.addEventListener('click', () => idx > 0 ? navigateModal(idx - 1) : closeModal());
+  footer.appendChild(lastImg);
 }
 
 function navigateModal(idx) {
