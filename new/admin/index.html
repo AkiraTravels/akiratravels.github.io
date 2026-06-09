@@ -4,140 +4,114 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>管理画面 — AKIRA travels</title>
-  <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
 
-<!-- ヘッダー -->
 <header class="admin-header">
   <div>
-    <div class="admin-header-title">AKIRA travels</div>
-    <div class="admin-header-sub">ADMIN</div>
+    <span class="admin-header-title">AKIRA travels</span>
+    <span class="admin-header-sub">ADMIN</span>
   </div>
-  <div class="admin-header-right" id="header-user" style="display:none;">
-    <span id="user-email"></span>
-    <button class="btn-logout" id="btn-logout">ログアウト</button>
+  <div id="header-user" style="display:none;">
+    <span id="header-email"></span>
+    <button id="btn-logout">ログアウト</button>
   </div>
 </header>
 
 <!-- ログイン画面 -->
 <div id="login-screen" class="login-screen">
-  <div class="login-title">AKIRA travels</div>
-  <div class="login-subtitle">ADMIN LOGIN</div>
-  <div class="login-card">
-    <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
-    <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
-    <button class="btn-login" id="btn-login">ログイン</button>
-    <p class="login-error" id="login-error" style="display:none;"></p>
-  </div>
+  <h2>管理者ログイン</h2>
+  <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
+  <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+  <button id="btn-login">ログイン</button>
+  <p id="login-error"></p>
 </div>
 
-<!-- 管理メイン -->
-<div id="admin-main" class="admin-main" style="display:none;">
-  <div class="tabs">
+<!-- 管理画面メイン（ログイン済み） -->
+<div id="admin-main" style="display:none;">
+  <div class="tab-bar">
     <button class="tab-btn active" data-tab="new-post">✏️ 新規投稿</button>
     <button class="tab-btn" data-tab="post-list">📋 投稿一覧</button>
     <button class="tab-btn" data-tab="country-mgmt">🌍 国管理</button>
   </div>
 
-  <!-- ━━━ 新規投稿タブ ━━━ -->
-  <div class="tab-panel active" id="tab-new-post">
-    <div class="card">
-      <div class="section-title" id="post-form-title">新規投稿</div>
+  <!-- 新規投稿タブ -->
+  <div id="tab-new-post" class="tab-panel active">
+    <div class="form-card">
+      <h2 id="post-form-title">新規投稿</h2>
       <input type="hidden" id="edit-post-id">
-
-      <div class="form-row">
-        <label>国・地域 *</label>
+      <div class="form-group">
+        <label>国・地域</label>
         <select id="f-country"></select>
       </div>
-      <div class="form-row">
-        <label>日付 *</label>
+      <div class="form-group">
+        <label>日付</label>
         <input type="date" id="f-date">
       </div>
-      <div class="form-row">
-        <label>タイトル *</label>
-        <input type="text" id="f-title" placeholder="例: サハラ砂漠に沈む夕日">
+      <div class="form-group">
+        <label>タイトル</label>
+        <input type="text" id="f-title" placeholder="投稿タイトル">
       </div>
-      <div class="form-row">
+      <div class="form-group">
         <label>場所・地名</label>
-        <input type="text" id="f-location" placeholder="例: マラケシュ">
+        <input type="text" id="f-location" placeholder="任意">
       </div>
-      <div class="form-row">
+      <div class="form-group">
         <label>投稿の説明</label>
-        <textarea id="f-caption" rows="4" placeholder="この投稿の説明文（モーダル上部に表示）"></textarea>
+        <textarea id="f-caption" placeholder="投稿全体の説明文"></textarea>
       </div>
 
-      <!-- メディアリスト -->
-      <div class="media-section-title">メディア</div>
-      <div id="media-list" class="media-list"></div>
+      <div class="media-section-label">MEDIA</div>
+      <div id="media-list"></div>
 
-      <!-- 最初のインサートボタン -->
-      <div class="insert-btn-wrap" id="insert-top">
-        <button class="btn-insert" data-pos="0">＋ ここに追加</button>
-      </div>
-
-      <!-- フォーム下部ボタン -->
       <div class="form-actions">
         <button class="btn-add-media" id="btn-add-media-bottom">☁️ メディアを追加</button>
-        <button class="btn-submit" id="btn-submit-post">投稿する</button>
-        <button class="btn-cancel" id="btn-cancel-edit" style="display:none;">キャンセル</button>
+        <button class="btn-primary" id="btn-submit-post">投稿する →</button>
+        <button class="btn-secondary" id="btn-cancel-edit" style="display:none;">キャンセル</button>
       </div>
     </div>
   </div>
 
-  <!-- ━━━ 投稿一覧タブ ━━━ -->
-  <div class="tab-panel" id="tab-post-list">
-    <div class="card">
-      <div class="section-title">投稿一覧</div>
-      <div id="post-list-container">
-        <p class="loading">読み込み中…</p>
-      </div>
-    </div>
+  <!-- 投稿一覧タブ -->
+  <div id="tab-post-list" class="tab-panel">
+    <div id="post-list-container"></div>
   </div>
 
-  <!-- ━━━ 国管理タブ ━━━ -->
-  <div class="tab-panel" id="tab-country-mgmt">
-    <div class="card">
-      <div class="section-title">国を追加</div>
-      <div class="country-form-card">
-        <input type="hidden" id="edit-country-id">
-        <div class="form-row">
-          <label>国名 *</label>
-          <input type="text" id="c-name" placeholder="例: モロッコ">
-        </div>
-        <div class="form-row">
-          <label>国旗絵文字 *</label>
-          <input type="text" id="c-flag" placeholder="例: 🇲🇦" maxlength="8">
-        </div>
-        <div class="form-row">
-          <label>表示順（数値、小さいほど先頭）</label>
-          <input type="number" id="c-order" placeholder="例: 10" value="100">
-        </div>
-        <div class="form-row">
-          <label>サブタイトル（トップページの国名下）</label>
-          <input type="text" id="c-subtitle" placeholder="例: 砂漠と迷宮の国">
-        </div>
-        <div class="form-row">
-          <label>紹介文</label>
-          <textarea id="c-description" rows="4" placeholder="国別ページの投稿リスト上部に表示される説明文"></textarea>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="btn-submit" id="btn-save-country">保存</button>
-          <button class="btn-cancel" id="btn-cancel-country" style="display:none;">キャンセル</button>
-        </div>
+  <!-- 国管理タブ -->
+  <div id="tab-country-mgmt" class="tab-panel">
+    <div class="country-form-card">
+      <h2 id="country-form-title">国・地域を追加</h2>
+      <input type="hidden" id="edit-country-id">
+      <div class="form-group">
+        <label>国名</label>
+        <input type="text" id="c-name" placeholder="例: モロッコ">
+      </div>
+      <div class="form-group">
+        <label>国旗絵文字</label>
+        <input type="text" id="c-flag" maxlength="8" placeholder="例: 🇲🇦">
+      </div>
+      <div class="form-group">
+        <label>表示順</label>
+        <input type="number" id="c-order" value="100">
+      </div>
+      <div class="form-group">
+        <label>サブタイトル</label>
+        <input type="text" id="c-subtitle" placeholder="任意">
+      </div>
+      <div class="form-group">
+        <label>紹介文</label>
+        <textarea id="c-description" placeholder="国別ページの紹介文"></textarea>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" id="btn-save-country">保存</button>
+        <button class="btn-secondary" id="btn-cancel-country" style="display:none;">キャンセル</button>
       </div>
     </div>
-    <div class="card">
-      <div class="section-title">国一覧</div>
-      <div id="country-list-mgmt">
-        <p class="loading">読み込み中…</p>
-      </div>
-    </div>
+    <div id="country-list-container"></div>
   </div>
 </div>
 
-<!-- トースト通知 -->
 <div id="toast" class="toast"></div>
 
 <script type="module" src="./index.js"></script>

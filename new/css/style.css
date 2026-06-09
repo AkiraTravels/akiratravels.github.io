@@ -1,13 +1,3 @@
-/* ========================================
-   AKIRA travels — 共通スタイル
-   ======================================== */
-
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 :root {
   --brown:      #4a3000;
   --orange:     #cc6600;
@@ -16,8 +6,10 @@
   --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
-html, body {
-  min-height: 100%;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -34,15 +26,7 @@ a {
   text-decoration: none;
 }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* ========================================
-   管理者リンク（右上固定）
-   ======================================== */
+/* 管理者リンク（右上固定） */
 #admin-link {
   position: fixed;
   top: 10px;
@@ -55,82 +39,86 @@ img {
   border-radius: 10px;
   backdrop-filter: blur(4px);
 }
-
 #admin-link a {
   color: var(--gray);
   text-decoration: none;
 }
 
-#admin-link a:hover {
-  color: var(--orange);
+/* ローディング・エラー */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--gray);
+  font-size: 14px;
+}
+.error-msg {
+  text-align: center;
+  padding: 40px;
+  color: #cc3300;
+  font-size: 14px;
 }
 
-/* ========================================
-   トップページ
-   ======================================== */
+/* ========== トップページ ========== */
 .top-wrap {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px 16px 60px;
-  text-align: center;
+  padding: 24px 16px 40px;
 }
 
 .top-logo {
-  margin: 24px auto 32px;
+  text-align: center;
+  margin-bottom: 28px;
 }
-
 .top-logo img {
-  margin: 0 auto;
-  max-height: 80px;
+  max-width: 100%;
+  height: auto;
 }
-
 .top-logo-fallback {
   font-size: 28px;
   font-weight: bold;
-  color: var(--orange);
-  letter-spacing: 2px;
+  color: var(--brown);
+  letter-spacing: 0.08em;
 }
 
 /* 国一覧テーブル */
-.country-table {
+#country-list-wrap table {
   width: 100%;
   border-collapse: collapse;
-  margin: 0 auto 32px;
 }
-
-.country-table td {
-  text-align: center;
-  padding: 10px 6px;
+#country-list-wrap td {
+  width: 50%;
+  padding: 8px 10px;
   vertical-align: top;
+  text-align: center;
 }
 
 .country-name {
+  display: block;
   font-size: 22px;
   font-weight: bold;
-  display: block;
   line-height: 1.3;
+}
+@media (min-width: 600px) {
+  .country-name {
+    font-size: 26px;
+  }
 }
 
 .country-name.has-posts {
   color: var(--orange);
 }
-
 .country-name.no-posts {
   color: var(--gray);
+}
+.country-name.has-posts:hover {
+  opacity: 0.8;
 }
 
 .country-subtitle {
   display: block;
   font-size: 13px;
   color: #7a5a20;
-  margin-top: 2px;
-  font-weight: normal;
-}
-
-@media (min-width: 600px) {
-  .country-name {
-    font-size: 26px;
-  }
+  margin-top: 3px;
 }
 
 /* フッター */
@@ -138,118 +126,107 @@ img {
   margin-top: 40px;
   text-align: center;
 }
-
 .footer-icons {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 16px;
 }
-
-.footer-icons a img {
-  height: 28px;
+.footer-icons a {
+  display: inline-block;
+}
+.footer-icons img {
+  height: 30px;
   width: auto;
 }
-
+.footer-icon-text {
+  font-size: 11px;
+  color: var(--gray);
+}
 .copyright {
-  font-size: 12px;
-  color: #8a7060;
+  font-size: 11px;
+  color: var(--gray);
 }
 
-/* ========================================
-   国別ページ
-   ======================================== */
+/* ========== 国別ページ ========== */
 .country-wrap {
   max-width: 640px;
   margin: 0 auto;
-  padding: 20px 0 60px;
+  padding: 20px 16px 40px;
 }
 
 .country-header {
   text-align: center;
-  padding: 20px 16px 16px;
+  margin-bottom: 20px;
 }
-
 .country-title {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: bold;
   color: var(--brown);
   margin-bottom: 10px;
 }
-
 .country-description {
   font-size: 14px;
-  color: var(--brown);
+  color: #7a5a20;
   line-height: 1.7;
   white-space: pre-wrap;
   text-align: left;
-  margin: 0 auto;
-  max-width: 560px;
-  padding: 0 16px;
 }
 
 /* 代表写真 */
 .cover-photo-wrap {
-  margin: 16px 0;
+  margin-bottom: 24px;
+  text-align: center;
   cursor: pointer;
-  position: relative;
   overflow: hidden;
 }
-
 .cover-photo-wrap img {
   width: 100%;
+  max-height: 400px;
+  object-fit: cover;
   display: block;
   transition: transform 0.3s ease;
 }
-
 .cover-photo-wrap:hover img {
   transform: scale(1.01);
 }
 
 /* 投稿チェーン */
 .post-chain {
-  padding: 20px 16px;
-}
-
-.chain-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.chain-link {
-  font-size: 18px;
-  color: var(--orange);
-  font-weight: bold;
   text-align: center;
-  padding: 4px 0;
-  cursor: pointer;
-  display: block;
-  transition: opacity 0.2s;
 }
-
+.chain-item {
+  margin: 2px 0;
+}
+.chain-link {
+  font-size: 16px;
+  color: var(--orange);
+  cursor: pointer;
+  font-weight: bold;
+}
 .chain-link:hover {
   opacity: 0.75;
 }
-
 .chain-meta {
   font-size: 12px;
-  color: #9a7a50;
-  margin-top: 1px;
-  margin-bottom: 4px;
-}
-
-.chain-arrow {
-  font-size: 16px;
   color: var(--gray);
-  margin: 2px 0;
+  margin-left: 8px;
+}
+.chain-arrow {
+  font-size: 14px;
+  color: var(--gray);
+  display: block;
+  line-height: 1.6;
 }
 
-/* ========================================
-   詳細モーダル
-   ======================================== */
+/* 国別ページフッター */
+.country-footer {
+  margin-top: 40px;
+  text-align: center;
+}
+
+/* ========== 詳細モーダル ========== */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -259,12 +236,10 @@ img {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-
 .modal-overlay.open {
   display: block;
 }
 
-/* 上部固定バー */
 .modal-sticky-bar {
   position: sticky;
   top: 0;
@@ -274,22 +249,20 @@ img {
   padding: 10px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
-
 .modal-sticky-title {
   font-size: 16px;
   font-weight: bold;
   color: #f0e0c8;
-  margin-bottom: 2px;
 }
-
 .modal-sticky-meta {
   font-size: 12px;
   color: #b09070;
+  margin-top: 2px;
 }
 
-/* モーダル本体 */
 .modal-body {
-  padding: 16px 0 0;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .modal-caption {
@@ -298,26 +271,21 @@ img {
   font-weight: normal;
   line-height: 1.75;
   white-space: pre-wrap;
-  padding: 4px 16px 20px;
+  padding: 16px 16px 20px;
 }
 
-/* メディアアイテム */
 .media-item {
-  margin-bottom: 0;
-  position: relative;
+  margin-bottom: 4px;
 }
-
 .media-item img,
 .media-item video {
   width: 100%;
   display: block;
 }
-
 .media-item video {
   background: #000;
   cursor: pointer;
 }
-
 .media-caption {
   font-size: 14px;
   color: #b09070;
@@ -325,7 +293,6 @@ img {
   line-height: 1.6;
 }
 
-/* 下部ナビゲーション */
 .modal-footer {
   padding: 24px 16px 40px;
   display: flex;
@@ -333,15 +300,13 @@ img {
   align-items: center;
   gap: 16px;
   background: rgba(10,6,0,0.5);
+  max-width: 640px;
+  margin: 0 auto;
 }
-
 .modal-footer img {
   height: 36px;
-  width: auto;
   cursor: pointer;
-  display: block;
 }
-
 .modal-footer-btn {
   cursor: pointer;
   padding: 8px 20px;
@@ -350,12 +315,9 @@ img {
   background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
   border-radius: 4px;
-  transition: background 0.2s;
-  font-family: var(--font-main);
 }
-
 .modal-footer-btn:hover {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.18);
 }
 
 .modal-copyright {
@@ -363,19 +325,4 @@ img {
   font-size: 11px;
   color: #6a5040;
   padding: 0 16px 20px;
-}
-
-/* ローディング */
-.loading {
-  text-align: center;
-  padding: 60px 16px;
-  color: #9a7a50;
-  font-size: 14px;
-}
-
-.error-msg {
-  text-align: center;
-  padding: 40px 16px;
-  color: #cc4444;
-  font-size: 14px;
 }

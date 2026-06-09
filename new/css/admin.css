@@ -1,8 +1,4 @@
-/* ========================================
-   AKIRA travels — 管理画面スタイル
-   ======================================== */
-
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+JP:wght@300;400;600&family=Montserrat:wght@400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Noto+Serif+JP:wght@400;600&family=Montserrat:wght@400;500;600&display=swap');
 
 :root {
   --ink:     #1a1410;
@@ -17,7 +13,11 @@
   --font-sans:  "Montserrat", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: var(--font-sans);
@@ -27,92 +27,71 @@ body {
   min-height: 100vh;
 }
 
-/* ─── ヘッダー ─── */
+/* ヘッダー */
 .admin-header {
   background: var(--ink);
   color: #f0e0c8;
   padding: 14px 24px;
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 200;
+  align-items: center;
 }
-
 .admin-header-title {
   font-family: var(--font-serif);
   font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 2px;
+  letter-spacing: 0.05em;
 }
-
 .admin-header-sub {
-  font-size: 11px;
+  font-size: 10px;
+  letter-spacing: 0.2em;
   color: var(--accent);
-  letter-spacing: 1px;
+  display: block;
+  margin-top: 1px;
 }
-
-.admin-header-right {
+#header-user {
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 13px;
-}
-
-.admin-header-right span {
+  font-size: 12px;
   color: #b09070;
 }
-
-.btn-logout {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  padding: 4px 12px;
+#header-email {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#btn-logout {
+  background: rgba(255,255,255,0.1);
   border: 1px solid rgba(255,255,255,0.2);
-  background: transparent;
   color: #f0e0c8;
+  padding: 4px 12px;
+  border-radius: 2px;
   cursor: pointer;
-  border-radius: var(--radius);
-  transition: background 0.2s;
+  font-size: 12px;
+  font-family: var(--font-sans);
+}
+#btn-logout:hover {
+  background: rgba(255,255,255,0.18);
 }
 
-.btn-logout:hover { background: rgba(255,255,255,0.1); }
-
-/* ─── ログイン画面 ─── */
+/* ログイン画面 */
 .login-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 40px 16px;
-  background: var(--ink);
-}
-
-.login-title {
-  font-family: var(--font-serif);
-  font-size: 28px;
-  color: #f0e0c8;
-  margin-bottom: 8px;
-  letter-spacing: 3px;
-}
-
-.login-subtitle {
-  font-size: 11px;
-  color: var(--muted);
-  letter-spacing: 2px;
-  margin-bottom: 36px;
-}
-
-.login-card {
+  max-width: 380px;
+  margin: 80px auto;
+  padding: 40px;
   background: var(--card-bg);
-  padding: 32px;
-  width: 100%;
-  max-width: 360px;
+  border: 1px solid var(--border);
   box-shadow: var(--shadow);
 }
-
-.login-card input {
+.login-screen h2 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  margin-bottom: 28px;
+  color: var(--ink);
+  text-align: center;
+}
+.login-screen input {
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -124,191 +103,202 @@ body {
   margin-bottom: 12px;
   display: block;
 }
-
-.login-card input:focus {
+.login-screen input:focus {
   outline: none;
   border-color: var(--accent);
 }
-
-.btn-login {
+#btn-login {
   width: 100%;
-  padding: 11px;
-  background: var(--accent);
-  color: #fff;
+  padding: 10px;
+  background: var(--ink);
+  color: #f0e0c8;
   border: none;
+  border-radius: var(--radius);
   font-family: var(--font-sans);
   font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 1px;
   cursor: pointer;
-  border-radius: var(--radius);
   margin-top: 4px;
-  transition: background 0.2s;
 }
-
-.btn-login:hover { background: #b07030; }
-
-.login-error {
-  color: #c04040;
+#btn-login:hover {
+  background: #2e2520;
+}
+#login-error {
+  color: #8b2020;
   font-size: 13px;
   margin-top: 10px;
   text-align: center;
 }
 
-/* ─── タブ ─── */
-.admin-main {
-  max-width: 860px;
+/* 管理画面メイン */
+#admin-main {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 24px 16px 80px;
+  padding: 24px 16px 60px;
 }
 
-.tabs {
+/* タブ */
+.tab-bar {
   display: flex;
-  gap: 0;
+  gap: 4px;
+  margin-bottom: 24px;
   border-bottom: 2px solid var(--border);
-  margin-bottom: 28px;
+  padding-bottom: 0;
 }
-
 .tab-btn {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 500;
-  padding: 10px 20px;
+  padding: 8px 18px 10px;
   background: none;
   border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-sans);
+  font-size: 13px;
   color: var(--muted);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
   margin-bottom: -2px;
-  transition: color 0.2s;
-  letter-spacing: 0.5px;
 }
-
-.tab-btn:hover { color: var(--ink); }
-
 .tab-btn.active {
-  color: var(--accent);
+  color: var(--ink);
   border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.tab-btn:hover:not(.active) {
+  color: var(--ink);
+}
+.tab-panel {
+  display: none;
+}
+.tab-panel.active {
+  display: block;
 }
 
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-
-/* ─── カード / セクション ─── */
-.card {
+/* カードセクション */
+.form-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  border-radius: var(--radius);
   padding: 24px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-
-.section-title {
+.form-card h2 {
   font-family: var(--font-serif);
   font-size: 18px;
-  font-weight: 600;
-  color: var(--ink);
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: 1px;
+  color: var(--ink);
 }
 
-/* ─── フォーム ─── */
-.form-row {
-  margin-bottom: 16px;
+/* フォーム要素 */
+.form-group {
+  margin-bottom: 14px;
 }
-
-.form-row label {
+.form-group label {
   display: block;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.1em;
   color: var(--muted);
   text-transform: uppercase;
   margin-bottom: 5px;
 }
-
-.form-row input,
-.form-row select,
-.form-row textarea {
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 9px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-family: var(--font-sans);
   font-size: 14px;
   color: var(--ink);
   background: var(--paper);
-  transition: border-color 0.2s;
 }
-
-.form-row input:focus,
-.form-row select:focus,
-.form-row textarea:focus {
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: var(--accent);
 }
-
-.form-row textarea {
-  resize: vertical;
+.form-group textarea {
   min-height: 80px;
-  line-height: 1.6;
+  resize: vertical;
 }
 
-/* ─── メディアセクション ─── */
-.media-section-title {
+/* メディアセクション */
+.media-section-label {
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 0.15em;
   color: var(--muted);
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  margin-top: 8px;
 }
 
-.media-list {
+#media-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 16px;
 }
 
 .media-row {
-  background: var(--paper);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
   position: relative;
+  border: 1px solid var(--border);
+  background: #fdfaf7;
+  padding: 10px;
+  border-radius: var(--radius);
+}
+
+.btn-remove-media {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+.btn-remove-media:hover {
+  background: #f0d0c8;
+  border-color: #cc6060;
+  color: #8b2020;
 }
 
 .media-row-header {
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
-.media-preview {
+.preview-wrap {
   width: 80px;
+  min-width: 80px;
   height: 60px;
-  object-fit: cover;
-  border-radius: var(--radius);
-  background: var(--border);
-  flex-shrink: 0;
-}
-
-.media-preview-placeholder {
-  width: 80px;
-  height: 60px;
-  background: var(--border);
+  background: #e0d8cf;
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.preview-wrap img,
+.preview-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.preview-no-media {
   font-size: 10px;
   color: var(--muted);
-  border-radius: var(--radius);
-  flex-shrink: 0;
+  text-align: center;
 }
 
 .media-row-fields {
@@ -316,350 +306,313 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding-right: 28px;
 }
-
 .media-row-fields input,
 .media-row-fields select,
 .media-row-fields textarea {
   width: 100%;
-  padding: 7px 10px;
+  padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink);
-  background: #fff;
+  background: var(--paper);
 }
-
 .media-row-fields input:focus,
 .media-row-fields select:focus,
 .media-row-fields textarea:focus {
   outline: none;
   border-color: var(--accent);
 }
+.media-row-fields textarea {
+  min-height: 48px;
+  resize: vertical;
+}
 
 .media-row-controls {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
+  margin-top: 8px;
   flex-wrap: wrap;
-  margin-top: 4px;
 }
 
 .cover-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-size: 12px;
-  color: var(--accent);
+  color: var(--muted);
   cursor: pointer;
-  user-select: none;
 }
-
-.cover-checkbox-label input[type="checkbox"] {
-  accent-color: var(--accent);
-  width: 14px;
-  height: 14px;
+.cover-checkbox-label input[type=checkbox]:checked + span {
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .btn-upload {
-  font-size: 12px;
-  padding: 5px 12px;
   background: var(--ink);
   color: #f0e0c8;
   border: none;
+  padding: 4px 10px;
+  font-size: 12px;
   border-radius: var(--radius);
   cursor: pointer;
   font-family: var(--font-sans);
-  transition: background 0.2s;
-  white-space: nowrap;
 }
-
-.btn-upload:hover { background: #3a2a1a; }
+.btn-upload:hover {
+  background: #2e2520;
+}
 
 .btn-move {
-  font-size: 12px;
-  padding: 4px 8px;
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  font-family: var(--font-sans);
-  transition: background 0.2s;
-}
-
-.btn-move:hover { background: var(--border); }
-
-.btn-remove-media {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   background: none;
   border: 1px solid var(--border);
-  color: var(--muted);
-  font-size: 14px;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  padding: 3px 7px;
+  font-size: 11px;
   border-radius: var(--radius);
-  transition: all 0.2s;
-  line-height: 1;
-  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
 }
-
-.btn-remove-media:hover {
-  background: #ffeaea;
-  border-color: #cc4444;
-  color: #cc4444;
+.btn-move:hover {
+  background: var(--border);
 }
 
 .upload-progress {
   font-size: 11px;
-  color: var(--accent);
-  margin-top: 4px;
-}
-
-/* ─── フォーム下部ボタン行 ─── */
-.form-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.btn-add-media {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  padding: 9px 18px;
-  background: transparent;
-  border: 1px dashed var(--accent);
-  color: var(--accent);
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: all 0.2s;
-  font-weight: 500;
-}
-
-.btn-add-media:hover {
-  background: rgba(196,135,58,0.08);
-}
-
-.btn-submit {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  padding: 9px 24px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  cursor: pointer;
-  border-radius: var(--radius);
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: background 0.2s;
-  margin-left: auto;
-}
-
-.btn-submit:hover { background: #b07030; }
-
-.btn-cancel {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  padding: 9px 18px;
-  background: transparent;
-  border: 1px solid var(--border);
   color: var(--muted);
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: all 0.2s;
+}
+.upload-progress.success {
+  color: #3a7a3a;
+}
+.upload-progress.error {
+  color: #8b2020;
 }
 
-.btn-cancel:hover {
-  border-color: var(--ink);
+/* 挿入ボタン */
+.insert-btn-wrap {
+  text-align: center;
+  margin: 4px 0;
+}
+.btn-insert {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  padding: 3px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.btn-insert:hover {
+  background: var(--border);
   color: var(--ink);
 }
 
-/* ─── 投稿一覧 ─── */
+/* フォームアクション */
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: var(--ink);
+  color: #f0e0c8;
+  border: none;
+  padding: 10px 24px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: #2e2520;
+}
+.btn-secondary {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 10px 20px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: var(--border);
+  color: var(--ink);
+}
+.btn-add-media {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 10px 20px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.btn-add-media:hover {
+  background: #fdf3e8;
+}
+
+/* 投稿一覧 */
 .post-list-item {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 10px;
   display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  box-shadow: var(--shadow);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
 }
-
 .post-thumb {
   width: 80px;
   height: 60px;
   object-fit: cover;
-  border-radius: var(--radius);
-  background: var(--border);
   flex-shrink: 0;
+  background: #e0d8cf;
 }
-
 .post-thumb-placeholder {
   width: 80px;
   height: 60px;
-  background: var(--border);
+  background: #e0d8cf;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
-  border-radius: var(--radius);
   flex-shrink: 0;
 }
-
 .post-info {
   flex: 1;
   min-width: 0;
 }
-
 .post-title-text {
   font-weight: 600;
   font-size: 14px;
-  margin-bottom: 3px;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
 .post-meta-text {
   font-size: 12px;
   color: var(--muted);
+  margin-top: 3px;
 }
-
 .post-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
 }
-
-.btn-edit, .btn-delete {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  padding: 5px 12px;
+.btn-edit {
+  background: none;
   border: 1px solid var(--border);
-  background: var(--paper);
   color: var(--ink);
-  cursor: pointer;
+  padding: 4px 12px;
+  font-size: 12px;
   border-radius: var(--radius);
-  transition: all 0.2s;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.btn-edit:hover {
+  background: var(--border);
+}
+.btn-delete {
+  background: none;
+  border: 1px solid #e0c0c0;
+  color: #8b4040;
+  padding: 4px 12px;
+  font-size: 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.btn-delete:hover:not(:disabled) {
+  background: #f0d0c8;
+}
+.btn-delete:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.btn-edit:hover { border-color: var(--accent); color: var(--accent); }
-.btn-delete:hover { border-color: #cc4444; color: #cc4444; }
-
-/* ─── 国管理 ─── */
+/* 国管理 */
 .country-form-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
   box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 24px;
 }
-
+.country-form-card h2 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  margin-bottom: 20px;
+}
 .country-list-item {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px 18px;
-  margin-bottom: 8px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  margin-bottom: 8px;
 }
-
-.country-list-flag { font-size: 24px; }
-
+.country-flag-icon {
+  font-size: 24px;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
 .country-list-info {
   flex: 1;
+  min-width: 0;
 }
-
 .country-list-name {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
 }
-
-.country-list-order {
-  font-size: 11px;
+.country-list-meta {
+  font-size: 12px;
   color: var(--muted);
+  margin-top: 2px;
 }
-
 .country-list-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-/* ─── 通知トースト ─── */
+/* トースト */
 .toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
-  transform: translateX(-50%) translateY(80px);
+  transform: translateX(-50%) translateY(20px);
   background: var(--ink);
   color: #f0e0c8;
   padding: 10px 24px;
-  border-radius: 24px;
-  font-size: 13px;
-  z-index: 9999;
-  transition: transform 0.3s ease;
+  border-radius: 4px;
+  font-size: 14px;
+  opacity: 0;
   pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 9999;
   white-space: nowrap;
 }
-
 .toast.show {
+  opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
-
 .toast.error {
   background: #8b2020;
 }
 
-/* ─── 空メッセージ ─── */
+/* 空ステート */
 .empty-msg {
   text-align: center;
-  padding: 40px;
   color: var(--muted);
+  padding: 32px;
   font-size: 14px;
-}
-
-/* ─── インサートボタン ─── */
-.insert-btn-wrap {
-  display: flex;
-  justify-content: center;
-  margin: 4px 0;
-}
-
-.btn-insert {
-  font-family: var(--font-sans);
-  font-size: 11px;
-  padding: 3px 12px;
-  background: transparent;
-  border: 1px dashed var(--border);
-  color: var(--muted);
-  cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.2s;
-}
-
-.btn-insert:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-@media (max-width: 500px) {
-  .admin-main { padding: 16px 10px 80px; }
-  .card { padding: 16px; }
-  .post-list-item { flex-wrap: wrap; }
 }

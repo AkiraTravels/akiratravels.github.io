@@ -8,45 +8,32 @@
 </head>
 <body>
 
-<!-- 管理者リンク（右上固定） -->
-<div id="admin-link">
-  <a href="admin/" id="admin-link-text">管理者</a>
-</div>
+<div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
 
 <div class="top-wrap">
-  <!-- ロゴ -->
   <div class="top-logo">
-    <img
-      src="https://akiratravels.github.io/images/home.gif"
-      alt="AKIRA travels"
-      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-    >
+    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
   </div>
-
-  <!-- 国一覧 -->
-  <div id="country-list-wrap">
-    <p class="loading">読み込み中…</p>
-  </div>
-
-  <!-- フッター -->
+  <div id="country-list-wrap"><p class="loading">読み込み中…</p></div>
   <footer class="top-footer">
     <div class="footer-icons">
-      <a href="https://akiratravels.github.io/profile/" target="_blank" rel="noopener">
+      <a href="#" title="PROFILE">
         <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>PROFILE</span>'">
+          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>PROFILE</span>';">
       </a>
-      <a href="mailto:">
+      <a href="#" title="MAIL">
         <img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL"
-          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>MAIL</span>'">
+          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>MAIL</span>';">
       </a>
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+      <a href="#" title="Facebook">
         <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>Facebook</span>'">
+          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>Facebook</span>';">
       </a>
-      <a href="https://m.me/" target="_blank" rel="noopener">
+      <a href="#" title="FB Messenger">
         <img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"
-          onerror="this.outerHTML='<span style=\'font-size:12px;color:#8a7060\'>Messenger</span>'">
+          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>Messenger</span>';">
       </a>
     </div>
     <p class="copyright" id="copyright-text"></p>
@@ -56,23 +43,26 @@
 <script type="module">
 import { db, auth } from './js/firebase-config.js';
 import {
-  collection, getDocs, query, orderBy, where
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+  collection, getDocs, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 著作権年
+// 著作権年表示
 const yr = new Date().getFullYear();
-document.getElementById('copyright-text').textContent =
-  `© 1998–${yr} AKIRA travels. All rights reserved.`;
+document.getElementById('copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-// 管理者リンク
+// 管理者リンクの表示切り替え
 onAuthStateChanged(auth, user => {
-  document.getElementById('admin-link-text').textContent =
-    user ? '管理画面' : '管理者';
+  const linkText = document.getElementById('admin-link-text');
+  if (user) {
+    linkText.textContent = '管理画面';
+  } else {
+    linkText.textContent = '管理者';
+  }
 });
 
-// 国一覧を表示
-async function loadCountries() {
+// データ読み込み
+async function init() {
   const wrap = document.getElementById('country-list-wrap');
   try {
     const [countriesSnap, postsSnap] = await Promise.all([
@@ -80,62 +70,66 @@ async function loadCountries() {
       getDocs(collection(db, 'posts'))
     ]);
 
-    // 国ごとの投稿数
+    // 投稿数集計
     const postCount = {};
     postsSnap.forEach(d => {
       const cid = d.data().countryId;
-      postCount[cid] = (postCount[cid] || 0) + 1;
+      if (cid) postCount[cid] = (postCount[cid] || 0) + 1;
     });
 
     const countries = [];
     countriesSnap.forEach(d => countries.push({ id: d.id, ...d.data() }));
 
     if (countries.length === 0) {
-      wrap.innerHTML = '<p class="loading">国データがありません</p>';
+      wrap.innerHTML = '<p class="loading">国データがありません。</p>';
       return;
     }
 
     // 2カラムテーブル
-    let rows = '';
+    let html = '<table><tbody>';
     for (let i = 0; i < countries.length; i += 2) {
-      rows += '<tr>';
-      for (let j = i; j < i + 2; j++) {
-        const c = countries[j];
-        if (!c) { rows += '<td></td>'; continue; }
-        const cnt = postCount[c.id] || 0;
-        const subtitleHtml = c.subtitle
-          ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>` : '';
-        if (cnt > 0) {
-          rows += `<td>
-            <a href="country.html?id=${c.id}" style="text-decoration:none;">
-              <span class="country-name has-posts">${escHtml(c.name)}</span>
-              ${subtitleHtml}
-            </a>
-          </td>`;
-        } else {
-          rows += `<td>
-            <span class="country-name no-posts">${escHtml(c.name)}</span>
-            ${subtitleHtml}
-          </td>`;
-        }
+      html += '<tr>';
+      html += renderCountryCell(countries[i], postCount);
+      if (i + 1 < countries.length) {
+        html += renderCountryCell(countries[i + 1], postCount);
+      } else {
+        html += '<td></td>';
       }
-      rows += '</tr>';
+      html += '</tr>';
     }
+    html += '</tbody></table>';
+    wrap.innerHTML = html;
 
-    wrap.innerHTML = `<table class="country-table"><tbody>${rows}</tbody></table>`;
-  } catch (e) {
-    console.error(e);
-    wrap.innerHTML = '<p class="error-msg">読み込みに失敗しました。</p>';
+  } catch (err) {
+    console.error(err);
+    wrap.innerHTML = '<p class="loading">読み込みに失敗しました。</p>';
+  }
+}
+
+function renderCountryCell(c, postCount) {
+  const hasPosts = (postCount[c.id] || 0) > 0;
+  const nameClass = hasPosts ? 'country-name has-posts' : 'country-name no-posts';
+  const subtitleHtml = c.subtitle
+    ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>` : '';
+
+  const inner = `<span class="${nameClass}">${escHtml(c.name)}</span>${subtitleHtml}`;
+
+  if (hasPosts) {
+    return `<td><a href="country.html?id=${encodeURIComponent(c.id)}">${inner}</a></td>`;
+  } else {
+    return `<td>${inner}</td>`;
   }
 }
 
 function escHtml(s) {
-  return String(s || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
-loadCountries();
+init();
 </script>
 </body>
 </html>
