@@ -16,20 +16,25 @@
       onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
     <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
   </div>
+
   <div id="country-list-wrap"><p class="loading">読み込み中…</p></div>
+
   <footer class="top-footer">
     <div class="footer-icons">
-      <a href="#" title="PROFILE">
+      <a href="https://akiratravels.github.io/profile/" target="_blank" rel="noopener">
         <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>PROFILE</span>';">
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <span style="display:none;">PROFILE</span>
       </a>
-      <a href="#" title="Facebook">
+      <a href="https://www.facebook.com/" target="_blank" rel="noopener">
         <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>Facebook</span>';">
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <span style="display:none;">Facebook</span>
       </a>
-      <a href="#" title="FB Messenger">
-        <img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"
-          onerror="this.style.display='none'; this.parentNode.innerHTML='<span class=\'footer-icon-text\'>Messenger</span>';">
+      <a href="https://m.me/" target="_blank" rel="noopener">
+        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <span style="display:none;">Messenger</span>
       </a>
     </div>
     <p class="copyright" id="copyright-text"></p>
@@ -43,30 +48,26 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 著作権年表示
+// 著作権
 const yr = new Date().getFullYear();
-document.getElementById('copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
+document.getElementById('copyright-text').textContent =
+  `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-// 管理者リンクの表示切り替え
+// 管理者リンク
 onAuthStateChanged(auth, user => {
-  const linkText = document.getElementById('admin-link-text');
-  if (user) {
-    linkText.textContent = '管理画面';
-  } else {
-    linkText.textContent = '管理者';
-  }
+  document.getElementById('admin-link-text').textContent =
+    user ? '管理画面' : '管理者';
 });
 
-// データ読み込み
+// データ取得
 async function init() {
-  const wrap = document.getElementById('country-list-wrap');
   try {
     const [countriesSnap, postsSnap] = await Promise.all([
       getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
       getDocs(collection(db, 'posts'))
     ]);
 
-    // 投稿数集計
+    // 国ごとの投稿数集計
     const postCount = {};
     postsSnap.forEach(d => {
       const cid = d.data().countryId;
@@ -76,49 +77,59 @@ async function init() {
     const countries = [];
     countriesSnap.forEach(d => countries.push({ id: d.id, ...d.data() }));
 
-    if (countries.length === 0) {
-      wrap.innerHTML = '<p class="loading">国データがありません。</p>';
-      return;
-    }
-
-    // 2カラムテーブル
-    let html = '<table><tbody>';
-    for (let i = 0; i < countries.length; i += 2) {
-      html += '<tr>';
-      html += renderCountryCell(countries[i], postCount);
-      if (i + 1 < countries.length) {
-        html += renderCountryCell(countries[i + 1], postCount);
-      } else {
-        html += '<td></td>';
-      }
-      html += '</tr>';
-    }
-    html += '</tbody></table>';
-    wrap.innerHTML = html;
-
-  } catch (err) {
-    console.error(err);
-    wrap.innerHTML = '<p class="loading">読み込みに失敗しました。</p>';
+    renderCountries(countries, postCount);
+  } catch (e) {
+    document.getElementById('country-list-wrap').innerHTML =
+      '<p class="loading" style="color:#cc2200;">データの読み込みに失敗しました。</p>';
+    console.error(e);
   }
 }
 
-function renderCountryCell(c, postCount) {
-  const hasPosts = (postCount[c.id] || 0) > 0;
-  const nameClass = hasPosts ? 'country-name has-posts' : 'country-name no-posts';
+function renderCountries(countries, postCount) {
+  const wrap = document.getElementById('country-list-wrap');
+  if (countries.length === 0) {
+    wrap.innerHTML = '<p class="loading">国がまだ登録されていません。</p>';
+    return;
+  }
+
+  let html = '<table><tbody>';
+  for (let i = 0; i < countries.length; i += 2) {
+    html += '<tr>';
+    html += buildCell(countries[i], postCount);
+    if (i + 1 < countries.length) {
+      html += buildCell(countries[i + 1], postCount);
+    } else {
+      html += '<td></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function buildCell(c, postCount) {
+  const count = postCount[c.id] || 0;
   const subtitleHtml = c.subtitle
-    ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>` : '';
+    ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>`
+    : '';
 
-  const inner = `<span class="${nameClass}">${escHtml(c.name)}</span>${subtitleHtml}`;
-
-  if (hasPosts) {
-    return `<td><a href="country.html?id=${encodeURIComponent(c.id)}">${inner}</a></td>`;
+  if (count > 0) {
+    return `<td>
+      <a href="country.html?id=${encodeURIComponent(c.id)}">
+        <span class="country-name has-posts">${escHtml(c.name)}</span>
+        ${subtitleHtml}
+      </a>
+    </td>`;
   } else {
-    return `<td>${inner}</td>`;
+    return `<td>
+      <span class="country-name no-posts">${escHtml(c.name)}</span>
+      ${subtitleHtml}
+    </td>`;
   }
 }
 
-function escHtml(s) {
-  return String(s)
+function escHtml(str) {
+  return String(str)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

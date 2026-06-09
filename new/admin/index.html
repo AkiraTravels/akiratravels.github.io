@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理画面 — AKIRA travels</title>
+  <title>AKIRA travels — ADMIN</title>
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
 
 <header class="admin-header">
-  <div>
-    <span class="admin-header-title">AKIRA travels</span>
-    <span class="admin-header-sub">ADMIN</span>
+  <div class="admin-header-title">
+    AKIRA travels
+    <span class="admin-sub">ADMIN</span>
   </div>
   <div id="header-user" style="display:none;">
     <span id="header-email"></span>
@@ -19,16 +19,18 @@
   </div>
 </header>
 
-<!-- ログイン画面 -->
+<!-- 未ログイン時 -->
 <div id="login-screen" class="login-screen">
   <h2>管理者ログイン</h2>
-  <input type="email" id="login-email" placeholder="メールアドレス" autocomplete="email">
-  <input type="password" id="login-password" placeholder="パスワード" autocomplete="current-password">
+  <label for="login-email">メールアドレス</label>
+  <input type="email" id="login-email" autocomplete="username" placeholder="admin@example.com">
+  <label for="login-password">パスワード</label>
+  <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
   <button id="btn-login">ログイン</button>
-  <p id="login-error"></p>
+  <div id="login-error"></div>
 </div>
 
-<!-- 管理画面メイン（ログイン済み） -->
+<!-- ログイン済み時 -->
 <div id="admin-main" style="display:none;">
   <div class="tab-bar">
     <button class="tab-btn active" data-tab="new-post">✏️ 新規投稿</button>
@@ -39,84 +41,80 @@
   <!-- 新規投稿タブ -->
   <div id="tab-new-post" class="tab-panel active">
     <div class="form-card">
-      <h2 id="post-form-title">新規投稿</h2>
-      <input type="hidden" id="edit-post-id">
+      <h3 id="form-title">新規投稿</h3>
       <div class="form-group">
-        <label>国・地域</label>
+        <label for="f-country">国・地域</label>
         <select id="f-country"></select>
       </div>
       <div class="form-group">
-        <label>日付</label>
+        <label for="f-date">日付</label>
         <input type="date" id="f-date">
       </div>
       <div class="form-group">
-        <label>タイトル</label>
+        <label for="f-title">タイトル</label>
         <input type="text" id="f-title" placeholder="投稿タイトル">
       </div>
       <div class="form-group">
-        <label>場所・地名</label>
-        <input type="text" id="f-location" placeholder="任意">
+        <label for="f-location">場所・地名</label>
+        <input type="text" id="f-location" placeholder="（任意）">
       </div>
       <div class="form-group">
-        <label>投稿の説明</label>
-        <textarea id="f-caption" placeholder="投稿全体の説明文"></textarea>
+        <label for="f-caption">投稿の説明</label>
+        <textarea id="f-caption" rows="4" placeholder="（任意）"></textarea>
       </div>
 
-      <div class="media-section-label">MEDIA</div>
+      <div class="media-section-title">MEDIA</div>
       <div id="media-list"></div>
 
       <div class="form-actions">
-        <button class="btn-add-media" id="btn-add-media-bottom">☁️ メディアを追加</button>
-        <button class="btn-primary" id="btn-submit-post">投稿する →</button>
-        <button class="btn-secondary" id="btn-cancel-edit" style="display:none;">キャンセル</button>
+        <button class="btn-accent" id="btn-add-media-bottom">☁️ メディアを追加</button>
+        <button class="btn-primary" id="btn-submit">投稿する →</button>
+        <button class="btn-secondary" id="btn-cancel" style="display:none;">キャンセル</button>
       </div>
     </div>
   </div>
 
   <!-- 投稿一覧タブ -->
   <div id="tab-post-list" class="tab-panel">
-    <div class="form-card" style="margin-bottom:16px; padding:16px 24px;">
-      <div class="form-group" style="margin-bottom:0;">
-        <label>国・地域でフィルター</label>
-        <select id="filter-country">
-          <option value="">すべての国</option>
-        </select>
-      </div>
+    <div class="list-filter-bar">
+      <select id="list-country-filter">
+        <option value="">すべての国</option>
+      </select>
     </div>
-    <div id="post-list-container"></div>
+    <div id="post-list-wrap"></div>
   </div>
 
   <!-- 国管理タブ -->
   <div id="tab-country-mgmt" class="tab-panel">
     <div class="country-form-card">
-      <h2 id="country-form-title">国・地域を追加</h2>
+      <h3 id="country-form-title">国を追加</h3>
       <input type="hidden" id="edit-country-id">
       <div class="form-group">
-        <label>国名</label>
+        <label for="c-name">国名</label>
         <input type="text" id="c-name" placeholder="例: モロッコ">
       </div>
       <div class="form-group">
-        <label>国旗絵文字</label>
+        <label for="c-flag">国旗絵文字</label>
         <input type="text" id="c-flag" maxlength="8" placeholder="例: 🇲🇦">
       </div>
       <div class="form-group">
-        <label>表示順</label>
-        <input type="number" id="c-order" value="100">
+        <label for="c-order">表示順</label>
+        <input type="number" id="c-order" value="100" min="0">
       </div>
       <div class="form-group">
-        <label>サブタイトル</label>
-        <input type="text" id="c-subtitle" placeholder="任意">
+        <label for="c-subtitle">サブタイトル</label>
+        <input type="text" id="c-subtitle" placeholder="（任意）">
       </div>
       <div class="form-group">
-        <label>紹介文</label>
-        <textarea id="c-description" placeholder="国別ページの紹介文"></textarea>
+        <label for="c-description">紹介文</label>
+        <textarea id="c-description" rows="4" placeholder="（任意）"></textarea>
       </div>
       <div class="form-actions">
         <button class="btn-primary" id="btn-save-country">保存</button>
         <button class="btn-secondary" id="btn-cancel-country" style="display:none;">キャンセル</button>
       </div>
     </div>
-    <div id="country-list-container"></div>
+    <div id="country-list-wrap"></div>
   </div>
 </div>
 
