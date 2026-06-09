@@ -21,8 +21,11 @@
     
     <div class="post-chain" id="post-chain"></div>
 
-    <!-- 国別ページの最下部に追加された同一構造のフッター -->
-    <footer class="top-footer">
+    <!-- 要件：最下部の左端に既存サイトのimages/i_home.gifを配置してトップにリンク -->
+    <footer class="country-footer">
+      <div class="country-footer-left-home">
+        <a href="index.html"><img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME"></a>
+      </div>
       <div class="footer-icons">
         <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
         <a href="#" id="f-link-mail"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')"></a>
@@ -36,7 +39,7 @@
   <div id="loading-msg" class="loading">読み込み中…</div>
   <div id="error-msg" class="error-msg" style="display:none;"></div>
 
-  <!-- 詳細モーダル -->
+  <!-- 詳細モーダルページ構造 -->
   <div id="modal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-sticky-bar">
       <div class="modal-sticky-title" id="modal-title"></div>
@@ -179,7 +182,6 @@
       });
     }
 
-    // モーダル処理
     window.openModal = function(idx) {
       currentIdx = idx;
       renderModal(idx);
@@ -240,9 +242,7 @@
                 el.pause();
               }
             };
-            el.onended = () => {
-              el.load();
-            };
+            el.onended = () => { el.load(); };
           } else {
             el = document.createElement('img');
             el.src = m.url;
@@ -288,58 +288,40 @@
       videos.forEach(v => videoObserver.observe(v));
     }
 
+    // 要件：最下部のリンクアイコンは、next、home、lastの順番で配置
     function renderModalFooter(idx) {
       const footer = document.getElementById('modal-footer');
       footer.innerHTML = '';
 
       const hasNext = idx < allPosts.length - 1;
 
-      // 「戻る」ボタンに代えて、指定の既存サイト画像「i_last.gif」を適用
-      const btnBack = document.createElement('img');
-      btnBack.src = "https://akiratravels.github.io/images/i_last.gif";
-      btnBack.alt = "戻る";
-      btnBack.onerror = function() {
-        this.style.display = 'none';
-        const txtBtn = document.createElement('button');
-        txtBtn.className = 'modal-footer-btn';
-        txtBtn.textContent = '← 戻る';
-        txtBtn.onclick = () => closeModal();
-        footer.insertBefore(txtBtn, btnBack);
-      };
-      btnBack.onclick = () => closeModal();
-      footer.appendChild(btnBack);
-
-      // HOMEボタン
-      const btnHome = document.createElement('img');
-      btnHome.src = "https://akiratravels.github.io/images/i_home.gif";
-      btnHome.alt = "HOME";
-      btnHome.onerror = function() {
-        this.style.display = 'none';
-        const txtBtn = document.createElement('button');
-        txtBtn.className = 'modal-footer-btn';
-        txtBtn.textContent = '🏠 TOP';
-        txtBtn.onclick = () => { location.href = 'index.html'; };
-        footer.insertBefore(txtBtn, btnHome);
-      };
-      btnHome.onclick = () => { location.href = 'index.html'; };
-      footer.appendChild(btnHome);
-
-      // 次へボタン
+      // 1. [next] アイコン (次の記事がある場合のみ表示、または非活性プレースホルダ)
       if (hasNext) {
         const btnNext = document.createElement('img');
         btnNext.src = "https://akiratravels.github.io/images/i_next.gif";
-        btnNext.alt = "次へ";
-        btnNext.onerror = function() {
-          this.style.display = 'none';
-          const txtBtn = document.createElement('button');
-          txtBtn.className = 'modal-footer-btn';
-          txtBtn.textContent = '次へ ▶';
-          txtBtn.onclick = () => navigateModal(idx + 1);
-          footer.appendChild(txtBtn);
-        };
+        btnNext.alt = "NEXT";
         btnNext.onclick = () => navigateModal(idx + 1);
         footer.appendChild(btnNext);
+      } else {
+        // 次がない場合はレイアウト維持のため空要素を置くか、表示しない
+        const spacer = document.createElement('div');
+        spacer.style.width = '36px';
+        footer.appendChild(spacer);
       }
+
+      // 2. [home] アイコン (国別インデックスに常時戻る、またはトップへ)
+      const btnHome = document.createElement('img');
+      btnHome.src = "https://akiratravels.github.io/images/i_home.gif";
+      btnHome.alt = "HOME";
+      btnHome.onclick = () => closeModal(); // モーダルを閉じて国別一覧に戻る
+      footer.appendChild(btnHome);
+
+      // 3. [last] アイコン (モーダルを閉じる、あるいは前の画面の代わり)
+      const btnLast = document.createElement('img');
+      btnLast.src = "https://akiratravels.github.io/images/i_last.gif";
+      btnLast.alt = "LAST";
+      btnLast.onclick = () => closeModal();
+      footer.appendChild(btnLast);
     }
 
     function navigateModal(idx) {

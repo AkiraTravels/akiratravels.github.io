@@ -15,7 +15,6 @@
     </div>
   </header>
 
-  <!-- 未ログイン画面 -->
   <div id="login-screen" class="login-screen">
     <h2>管理者ログイン</h2>
     <input type="email" id="login-email" placeholder="メールアドレス">
@@ -24,7 +23,6 @@
     <p id="login-error" style="color:red; font-size:13px; text-align:center;"></p>
   </div>
 
-  <!-- ログイン後メイン画面 -->
   <div id="admin-main" style="display:none;">
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="tab-new-post">✏️ 新規投稿</button>
@@ -32,7 +30,6 @@
       <button class="tab-btn" data-tab="tab-country-mgmt">🌍 国管理</button>
     </div>
 
-    <!-- 新規投稿タブ -->
     <div id="tab-new-post" class="tab-panel active">
       <h3 id="form-title">新規投稿</h3>
       <div class="form-group">
@@ -67,13 +64,11 @@
       </div>
     </div>
 
-    <!-- 投稿一覧タブ -->
     <div id="tab-post-list" class="tab-panel">
       <h3>投稿一覧</h3>
       <div id="list-posts"></div>
     </div>
 
-    <!-- 国管理タブ -->
     <div id="tab-country-mgmt" class="tab-panel">
       <h3>国管理</h3>
       <div class="country-form-card" style="border:1px solid var(--border); padding:15px; margin-bottom:20px; background:#fdfdfd;">

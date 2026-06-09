@@ -35,7 +35,7 @@ body {
   text-decoration: none;
 }
 
-/* 共通フッター（トップ＆国別共通） */
+/* 共通フッター（トップ用） */
 .top-footer {
   margin-top: 40px;
   padding-bottom: 30px;
@@ -53,6 +53,33 @@ body {
   vertical-align: middle;
 }
 .copyright {
+  font-size: 12px;
+  color: var(--brown);
+}
+
+/* 国別ページ専用フッター（左端にHOMEアイコンを配置するための専用レイアウト） */
+.country-footer {
+  margin-top: 40px;
+  padding-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+.country-footer-left-home {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.country-footer-left-home img {
+  height: 32px;
+  cursor: pointer;
+}
+.country-footer .footer-icons {
+  margin-bottom: 15px;
+}
+.country-footer .copyright {
   font-size: 12px;
   color: var(--brown);
 }
@@ -81,7 +108,7 @@ body {
   padding: 20px;
 }
 
-/* 国名リスト（テーブル）の隙間を狭く、太字プロポーショナルに */
+/* 国名リスト（テーブル）要件：太字プロポーショナル・ワンサイズ拡大・件数で色分け */
 .country-table {
   width: 100%;
   border-collapse: collapse;
@@ -89,34 +116,35 @@ body {
 }
 .country-table td {
   width: 50%;
-  padding: 4px 8px; /* 行間・隙間を狭く設定 */
+  padding: 6px 8px;
   text-align: left;
   vertical-align: top;
 }
 .country-link-cell {
-  font-size: 22px;
-  font-weight: bold; /* 太字化 */
-  line-height: 1.2;  /* 行間の隙間を狭く */
+  font-family: var(--font-main); /* プロポーショナルフォント */
+  font-size: 24px;               /* ワンサイズ大きく（旧22pxから拡大） */
+  font-weight: bold;             /* 太字化 */
+  line-height: 1.2;
   display: block;
 }
 @media (min-width: 600px) {
   .country-link-cell {
-    font-size: 26px;
+    font-size: 28px;             /* レスポンシブでもワンサイズ大きく */
   }
 }
 .has-posts {
-  color: var(--orange);
+  color: var(--orange);         /* 登録あり：オレンジ */
   text-decoration: none;
 }
 .no-posts {
-  color: var(--gray);
+  color: var(--gray);           /* 登録なし：グレー */
 }
 .country-subtitle {
   display: block;
   font-size: 13px;
   color: #7a5a20;
   font-weight: normal;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 /* --- 国別ページ専用スタイル --- */
@@ -180,13 +208,13 @@ body {
   font-size: 14px;
 }
 
-/* --- 詳細モーダル（明色基調への変更反映） --- */
+/* --- 詳細モーダル（要件：背景色を国別ページと統一、フォント色は黒、キャプションサイズ変更） --- */
 .modal-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background-color: var(--bg-fallback);                 /* 暗色から明色に変更 */
-  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 国別ページと同様の背景 */
+  background-color: var(--bg-fallback);                 /* 黒から国別ページと同様の明色背景に変更 */
+  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 背景画像も国別ページと統一 */
   background-repeat: repeat;
   z-index: 500;
   overflow-y: auto;
@@ -199,7 +227,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 510;
-  background: rgba(240, 224, 200, 0.95); /* 明色の粘着バー */
+  background: rgba(240, 224, 200, 0.95);
   backdrop-filter: blur(8px);
   padding: 12px 16px;
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
@@ -211,7 +239,7 @@ body {
 }
 .modal-sticky-meta {
   font-size: 12px;
-  color: #555555; /* 暗いグレーに変更 */
+  color: #444444; /* 見やすさのため暗い色に変更 */
   margin-top: 2px;
 }
 .modal-body {
@@ -220,7 +248,7 @@ body {
   padding-top: 20px;
 }
 .modal-caption {
-  font-size: 17px; /* 15pxからワンサイズ（17px）に拡大 */
+  font-size: 18px; /* 本文キャプションもワンサイズ拡大 */
   color: #000000; /* フォント色を黒に変更 */
   font-weight: normal;
   line-height: 1.75;
@@ -238,9 +266,10 @@ body {
   background: #000;
   cursor: pointer;
 }
+/* 要件：各メディアのキャプションのフォントをワンサイズ大きく、色は黒に */
 .media-caption {
-  font-size: 14px;
-  color: var(--brown); /* 明色背景に合わせて茶色に変更 */
+  font-size: 16px; /* 旧14pxからワンサイズ大きく変更 */
+  color: #000000; /* フォント色を黒に変更 */
   padding: 8px 16px 16px;
   line-height: 1.6;
 }
@@ -249,21 +278,12 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   background: rgba(74, 48, 0, 0.05);
 }
 .modal-footer img {
   height: 36px;
   cursor: pointer;
-}
-.modal-footer-btn {
-  cursor: pointer;
-  padding: 8px 20px;
-  font-size: 13px;
-  color: var(--brown);
-  background: rgba(0,0,0,0.05);
-  border: 1px solid rgba(0,0,0,0.15);
-  border-radius: 4px;
 }
 .modal-copyright {
   text-align: center;

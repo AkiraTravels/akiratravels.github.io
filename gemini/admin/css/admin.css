@@ -117,7 +117,6 @@ body {
   display: block;
 }
 
-/* フォーム共通 */
 .form-group {
   margin-bottom: 15px;
 }
@@ -139,7 +138,6 @@ body {
   box-sizing: border-box;
 }
 
-/* メディア行 */
 .media-section-title {
   border-top: 1px solid var(--border);
   padding-top: 15px;
@@ -252,7 +250,6 @@ body {
   cursor: pointer;
 }
 
-/* 一覧アイテム */
 .post-list-item, .country-list-item {
   display: flex;
   align-items: center;
@@ -276,7 +273,6 @@ body {
   cursor: pointer;
 }
 
-/* トースト */
 .toast {
   position: fixed;
   bottom: -50px;
