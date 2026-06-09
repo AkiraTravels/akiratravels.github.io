@@ -18,7 +18,19 @@
     <div class="cover-photo-wrap" id="cover-photo-wrap" style="display:none;">
       <img id="cover-photo" src="" alt="代表写真">
     </div>
+    
     <div class="post-chain" id="post-chain"></div>
+
+    <!-- 国別ページの最下部に追加された同一構造のフッター -->
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
+        <a href="#" id="f-link-mail"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')"></a>
+        <a href="#" id="f-link-fb"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')"></a>
+        <a href="#" id="f-link-msg"><img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')"></a>
+      </div>
+      <p class="copyright" id="country-copyright-text"></p>
+    </footer>
   </div>
 
   <div id="loading-msg" class="loading">読み込み中…</div>
@@ -39,14 +51,15 @@
   </div>
 
   <script type="module">
-    import { db, auth } from "./js/firebase-config.js";
-    import { doc, collection, getDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { db, auth } from './js/firebase-config.js';
+    import { doc, getDoc, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     let countryId = '';
-    let countryName = '';
+    let countryData = null;
     let allPosts = [];
-    let observer = null;
+    let currentIdx = 0;
+    let videoObserver = null;
 
     onAuthStateChanged(auth, user => {
       const linkText = document.getElementById('admin-link-text');
@@ -54,33 +67,34 @@
       else linkText.textContent = '管理者';
     });
 
+    const yr = new Date().getFullYear();
+    document.getElementById('country-copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
+
     async function init() {
-      const params = new URLSearchParams(location.search);
-      countryId = params.get('id');
+      const urlParams = new URLSearchParams(window.location.search);
+      countryId = urlParams.get('id');
+      
       if (!countryId) {
         showError('国IDが指定されていません。');
         return;
       }
 
       try {
-        const countrySnap = await getDoc(doc(db, 'countries', countryId));
-        if (!countrySnap.exists()) {
+        const countryDoc = await getDoc(doc(db, 'countries', countryId));
+        if (!countryDoc.exists()) {
           showError('指定された国が見つかりません。');
           return;
         }
-        const countryData = countrySnap.data();
-        countryName = countryData.name;
-        document.title = `${countryName} — AKIRA travels`;
-
-        document.getElementById('country-title').textContent = countryName;
+        countryData = countryDoc.data();
+        document.title = `${countryData.name} — AKIRA travels`;
+        document.getElementById('country-title').textContent = countryData.name;
         document.getElementById('country-description').textContent = countryData.description || '';
 
         const postsSnap = await getDocs(query(collection(db, 'posts'), orderBy('date', 'asc')));
-        allPosts = [];
-        postsSnap.forEach(d => {
-          const p = d.data();
+        postsSnap.forEach(doc => {
+          const p = doc.data();
           if (p.countryId === countryId) {
-            allPosts.push({ id: d.id, ...p });
+            allPosts.push({ id: doc.id, ...p });
           }
         });
 
@@ -90,9 +104,15 @@
         renderCoverPhoto();
         renderChain();
 
+        window.addEventListener('popstate', e => {
+          if (document.getElementById('modal').classList.contains('open')) {
+            closeModal(false);
+          }
+        });
+
       } catch (err) {
         console.error(err);
-        showError('データの読み込みに失敗しました。');
+        showError('データの取得に失敗しました。');
       }
     }
 
@@ -105,14 +125,12 @@
 
     function renderCoverPhoto() {
       let coverMedia = null;
-      // 優先1: isCover: true かつ type: "image"
       for (const p of allPosts) {
         if (p.media && Array.isArray(p.media)) {
           coverMedia = p.media.find(m => m.isCover && m.type === 'image');
           if (coverMedia) break;
         }
       }
-      // 優先2: 最初に見つかった type: "image"
       if (!coverMedia) {
         for (const p of allPosts) {
           if (p.media && Array.isArray(p.media)) {
@@ -122,77 +140,70 @@
         }
       }
 
-      const wrap = document.getElementById('cover-photo-wrap');
-      if (coverMedia && coverMedia.url) {
+      if (coverMedia) {
         const img = document.getElementById('cover-photo');
         img.src = coverMedia.url;
+        const wrap = document.getElementById('cover-photo-wrap');
         wrap.style.display = 'block';
         wrap.onclick = () => openModal(0);
-      } else {
-        wrap.style.display = 'none';
       }
     }
 
     function renderChain() {
-      const container = document.getElementById('post-chain');
-      container.innerHTML = '';
+      const chainWrap = document.getElementById('post-chain');
+      chainWrap.innerHTML = '';
 
-      allPosts.forEach((post, idx) => {
+      allPosts.forEach((p, idx) => {
         const item = document.createElement('div');
         item.className = 'chain-item';
         
         const link = document.createElement('span');
         link.className = 'chain-link';
-        link.dataset.idx = idx;
-        link.textContent = post.title;
+        link.textContent = p.title;
         link.onclick = () => openModal(idx);
         
         const meta = document.createElement('span');
         meta.className = 'chain-meta';
-        meta.textContent = post.location ? `${post.date} · ${post.location}` : post.date;
-
+        meta.textContent = p.location ? `${p.date} · ${p.location}` : p.date;
+        
         item.appendChild(link);
         item.appendChild(meta);
-        container.appendChild(item);
+        chainWrap.appendChild(item);
 
         if (idx < allPosts.length - 1) {
           const arrowItem = document.createElement('div');
           arrowItem.className = 'chain-item';
           arrowItem.innerHTML = '<span class="chain-arrow">▼</span>';
-          container.appendChild(arrowItem);
+          chainWrap.appendChild(arrowItem);
         }
       });
     }
 
-    // --- モーダル制御 ---
+    // モーダル処理
     window.openModal = function(idx) {
+      currentIdx = idx;
       renderModal(idx);
-      const modal = document.getElementById('modal');
-      modal.classList.add('open');
-      modal.scrollTop = 0;
+      document.getElementById('modal').classList.add('open');
+      document.getElementById('modal').scrollTop = 0;
       document.body.style.overflow = 'hidden';
-      history.pushState({ modal: true, idx }, '', location.href);
-    }
+      history.pushState({ modal: true, idx }, '', window.location.href);
+    };
 
-    window.closeModal = function() {
-      const modal = document.getElementById('modal');
-      modal.classList.remove('open');
+    function closeModal(doBack = true) {
+      document.getElementById('modal').classList.remove('open');
       document.body.style.overflow = '';
       stopAllVideos();
-      if (observer) {
-        observer.disconnect();
-        observer = null;
+      if (videoObserver) {
+        videoObserver.disconnect();
+        videoObserver = null;
+      }
+      if (doBack && window.history.state && window.history.state.modal) {
+        window.history.back();
       }
     }
 
-    window.addEventListener('popstate', e => {
-      if (document.getElementById('modal').classList.contains('open')) {
-        closeModal();
-      }
-    });
-
     function stopAllVideos() {
-      const videos = document.querySelectorAll('#modal video');
+      const videos = document.querySelectorAll('#modal-media-list video');
       videos.forEach(v => v.pause());
     }
 
@@ -211,42 +222,43 @@
 
       if (post.media && Array.isArray(post.media)) {
         post.media.forEach(m => {
-          const item = document.createElement('div');
-          item.className = 'media-item';
+          const row = document.createElement('div');
+          row.className = 'media-item';
 
+          let el;
           if (m.type === 'video') {
-            const vid = document.createElement('video');
-            vid.src = m.url;
-            vid.playsInline = true;
-            vid.controls = false;
-            vid.preload = 'metadata';
-            vid.onclick = () => {
-              if (vid.paused) {
+            el = document.createElement('video');
+            el.src = m.url;
+            el.playsInline = true;
+            el.controls = false;
+            el.preload = 'metadata';
+            el.onclick = () => {
+              if (el.paused) {
                 stopAllVideos();
-                vid.play().catch(() => {});
+                el.play().catch(() => {});
               } else {
-                vid.pause();
+                el.pause();
               }
             };
-            vid.addEventListener('ended', () => {
-              vid.load();
-            });
-            item.appendChild(vid);
+            el.onended = () => {
+              el.load();
+            };
           } else {
-            const img = document.createElement('img');
-            img.src = m.url;
-            img.loading = 'lazy';
-            item.appendChild(img);
+            el = document.createElement('img');
+            el.src = m.url;
+            el.loading = 'lazy';
           }
+
+          row.appendChild(el);
 
           if (m.caption) {
-            const mCap = document.createElement('div');
-            mCap.className = 'media-caption';
-            mCap.textContent = m.caption;
-            item.appendChild(mCap);
+            const cap = document.createElement('div');
+            cap.className = 'media-caption';
+            cap.textContent = m.caption;
+            row.appendChild(cap);
           }
 
-          mediaList.appendChild(item);
+          mediaList.appendChild(row);
         });
       }
 
@@ -258,22 +270,22 @@
     }
 
     function setupVideoAutoplay() {
-      if (observer) observer.disconnect();
+      if (videoObserver) videoObserver.disconnect();
       
-      observer = new IntersectionObserver(entries => {
+      videoObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           const vid = entry.target;
-          if (entry.isIntersecting && vid.paused) {
+          if (entry.intersecting && vid.paused) {
             stopAllVideos();
             vid.play().catch(() => {});
-          } else if (!entry.isIntersecting && !vid.paused) {
+          } else if (!entry.intersecting && !vid.paused) {
             vid.pause();
           }
         });
       }, { threshold: 0.6 });
 
-      const videos = document.querySelectorAll('#modal video');
-      videos.forEach(v => observer.observe(v));
+      const videos = document.querySelectorAll('#modal-media-list video');
+      videos.forEach(v => videoObserver.observe(v));
     }
 
     function renderModalFooter(idx) {
@@ -281,67 +293,62 @@
       footer.innerHTML = '';
 
       const hasNext = idx < allPosts.length - 1;
-      const countryFolder = countryName.toLowerCase().replace(/\s+/g, '-');
 
-      // 1. 次へボタン
-      if (hasNext) {
-        const nextImg = document.createElement('img');
-        nextImg.src = 'https://akiratravels.github.io/images/i_next.gif';
-        nextImg.alt = '次へ';
-        nextImg.onerror = function() {
-          this.style.display = 'none';
-          const btn = document.createElement('button');
-          btn.className = 'modal-footer-btn';
-          btn.textContent = '次へ ▶';
-          btn.onclick = () => navigateModal(idx + 1);
-          footer.insertBefore(btn, nextImg);
-        };
-        nextImg.onclick = () => navigateModal(idx + 1);
-        footer.appendChild(nextImg);
-      }
-
-      // 2. 戻るボタン
-      const backImg = document.createElement('img');
-      backImg.src = `https://akiratravels.github.io/\${countryFolder}/images/i_\${countryFolder}.gif`;
-      backImg.alt = '戻る';
-      const bindBackFallback = () => {
-        backImg.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'modal-footer-btn';
-        btn.textContent = '← 戻る';
-        btn.onclick = () => closeModal();
-        footer.appendChild(btn);
-      };
-      backImg.onerror = bindBackFallback;
-      backImg.onclick = () => closeModal();
-      footer.appendChild(backImg);
-
-      // 3. HOMEボタン
-      const homeImg = document.createElement('img');
-      homeImg.src = 'https://akiratravels.github.io/images/i_home.gif';
-      homeImg.alt = 'HOME';
-      homeImg.onerror = function() {
+      // 「戻る」ボタンに代えて、指定の既存サイト画像「i_last.gif」を適用
+      const btnBack = document.createElement('img');
+      btnBack.src = "https://akiratravels.github.io/images/i_last.gif";
+      btnBack.alt = "戻る";
+      btnBack.onerror = function() {
         this.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'modal-footer-btn';
-        btn.textContent = '🏠 TOP';
-        btn.onclick = () => { location.href = 'index.html'; };
-        footer.appendChild(btn);
+        const txtBtn = document.createElement('button');
+        txtBtn.className = 'modal-footer-btn';
+        txtBtn.textContent = '← 戻る';
+        txtBtn.onclick = () => closeModal();
+        footer.insertBefore(txtBtn, btnBack);
       };
-      homeImg.onclick = () => { location.href = 'index.html'; };
-      footer.appendChild(homeImg);
+      btnBack.onclick = () => closeModal();
+      footer.appendChild(btnBack);
+
+      // HOMEボタン
+      const btnHome = document.createElement('img');
+      btnHome.src = "https://akiratravels.github.io/images/i_home.gif";
+      btnHome.alt = "HOME";
+      btnHome.onerror = function() {
+        this.style.display = 'none';
+        const txtBtn = document.createElement('button');
+        txtBtn.className = 'modal-footer-btn';
+        txtBtn.textContent = '🏠 TOP';
+        txtBtn.onclick = () => { location.href = 'index.html'; };
+        footer.insertBefore(txtBtn, btnHome);
+      };
+      btnHome.onclick = () => { location.href = 'index.html'; };
+      footer.appendChild(btnHome);
+
+      // 次へボタン
+      if (hasNext) {
+        const btnNext = document.createElement('img');
+        btnNext.src = "https://akiratravels.github.io/images/i_next.gif";
+        btnNext.alt = "次へ";
+        btnNext.onerror = function() {
+          this.style.display = 'none';
+          const txtBtn = document.createElement('button');
+          txtBtn.className = 'modal-footer-btn';
+          txtBtn.textContent = '次へ ▶';
+          txtBtn.onclick = () => navigateModal(idx + 1);
+          footer.appendChild(txtBtn);
+        };
+        btnNext.onclick = () => navigateModal(idx + 1);
+        footer.appendChild(btnNext);
+      }
     }
 
     function navigateModal(idx) {
       stopAllVideos();
-      if (observer) {
-        observer.disconnect();
-        observer = null;
-      }
+      if (videoObserver) videoObserver.disconnect();
+      currentIdx = idx;
       renderModal(idx);
-      const modal = document.getElementById('modal');
-      modal.scrollTop = 0;
-      history.replaceState({ modal: true, idx }, '', location.href);
+      document.getElementById('modal').scrollTop = 0;
+      history.replaceState({ modal: true, idx }, '', window.location.href);
     }
 
     init();

@@ -3,7 +3,7 @@
   --orange:     #cc6600;
   --gray:       #aaaaaa;
   --bg-fallback:#f0e0c8;
-  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  --font-main:  "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
 }
 
 body {
@@ -35,84 +35,91 @@ body {
   text-decoration: none;
 }
 
-/* トップページスタイル */
+/* 共通フッター（トップ＆国別共通） */
+.top-footer {
+  margin-top: 40px;
+  padding-bottom: 30px;
+  text-align: center;
+}
+.footer-icons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 15px;
+}
+.footer-icons a img {
+  height: 32px;
+  border: none;
+  vertical-align: middle;
+}
+.copyright {
+  font-size: 12px;
+  color: var(--brown);
+}
+
+/* --- トップページ専用スタイル --- */
 .top-wrap {
   max-width: 600px;
   margin: 0 auto;
   padding: 40px 20px;
   text-align: center;
 }
-.top-logo {
-  margin-bottom: 40px;
-}
 .top-logo img {
   max-width: 100%;
   height: auto;
 }
+.top-logo-fallback {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--brown);
+}
+#country-list-wrap {
+  margin-top: 30px;
+}
 .loading, .error-msg {
+  text-align: center;
   padding: 20px;
-  font-size: 14px;
 }
 
-#country-list-wrap table {
+/* 国名リスト（テーブル）の隙間を狭く、太字プロポーショナルに */
+.country-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 40px;
+  margin: 0 auto;
 }
-#country-list-wrap td {
+.country-table td {
   width: 50%;
-  padding: 15px 10px;
+  padding: 4px 8px; /* 行間・隙間を狭く設定 */
+  text-align: left;
   vertical-align: top;
-  border: none;
 }
-.country-cell {
-  display: block;
-}
-.country-cell.has-posts a {
-  color: var(--orange);
-  text-decoration: none;
-  font-weight: bold;
-}
-.country-cell.no-posts {
-  color: var(--gray);
-  cursor: default;
-}
-.country-name {
+.country-link-cell {
   font-size: 22px;
+  font-weight: bold; /* 太字化 */
+  line-height: 1.2;  /* 行間の隙間を狭く */
   display: block;
 }
 @media (min-width: 600px) {
-  .country-name {
+  .country-link-cell {
     font-size: 26px;
   }
 }
-.country-subtitle {
-  font-size: 13px;
-  color: #7a5a20;
-  display: block;
-  margin-top: 4px;
-  font-weight: normal;
+.has-posts {
+  color: var(--orange);
+  text-decoration: none;
 }
-
-.top-footer {
-  margin-top: 60px;
-}
-.footer-icons {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-.footer-icons img {
-  height: 24px;
-  cursor: pointer;
-}
-.copyright {
-  font-size: 11px;
+.no-posts {
   color: var(--gray);
 }
+.country-subtitle {
+  display: block;
+  font-size: 13px;
+  color: #7a5a20;
+  font-weight: normal;
+  margin-top: 1px;
+}
 
-/* 国別ページスタイル */
+/* --- 国別ページ専用スタイル --- */
 .country-wrap {
   max-width: 600px;
   margin: 0 auto;
@@ -120,24 +127,25 @@ body {
 }
 .country-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 24px;
 }
 .country-title {
   font-size: 28px;
   color: var(--brown);
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
 }
 .country-description {
   font-size: 15px;
   line-height: 1.6;
   white-space: pre-wrap;
   text-align: left;
+  color: var(--brown);
 }
 .cover-photo-wrap {
   width: 100%;
-  margin-bottom: 40px;
-  cursor: pointer;
+  margin-bottom: 30px;
   overflow: hidden;
+  cursor: pointer;
 }
 .cover-photo-wrap img {
   width: 100%;
@@ -148,120 +156,118 @@ body {
   transform: scale(1.01);
 }
 .post-chain {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin-bottom: 40px;
 }
 .chain-item {
   text-align: center;
-  margin-bottom: 5px;
+  margin: 8px 0;
 }
 .chain-link {
   font-size: 18px;
   color: var(--orange);
   cursor: pointer;
   text-decoration: underline;
-  display: block;
   font-weight: bold;
 }
 .chain-meta {
-  font-size: 12px;
-  color: var(--brown);
-  opacity: 0.8;
   display: block;
+  font-size: 13px;
+  color: var(--brown);
   margin-top: 2px;
 }
 .chain-arrow {
+  color: var(--orange);
   font-size: 14px;
-  color: var(--gray);
-  margin: 10px 0;
-  display: block;
 }
 
-/* モーダルスタイル */
+/* --- 詳細モーダル（明色基調への変更反映） --- */
 .modal-overlay {
-  display: none; 
-  position: fixed; 
+  display: none;
+  position: fixed;
   inset: 0;
-  background: #111; 
+  background-color: var(--bg-fallback);                 /* 暗色から明色に変更 */
+  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 国別ページと同様の背景 */
+  background-repeat: repeat;
   z-index: 500;
-  overflow-y: auto; 
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.modal-overlay.open { 
-  display: block; 
+.modal-overlay.open {
+  display: block;
 }
 .modal-sticky-bar {
-  position: sticky; 
-  top: 0; 
+  position: sticky;
+  top: 0;
   z-index: 510;
-  background: rgba(20, 12, 0, 0.92);
+  background: rgba(240, 224, 200, 0.95); /* 明色の粘着バー */
   backdrop-filter: blur(8px);
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.modal-sticky-title { 
-  font-size: 16px; 
-  font-weight: bold; 
-  color: #f0e0c8; 
+.modal-sticky-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #000000; /* フォント色を黒に変更 */
 }
-.modal-sticky-meta  { 
-  font-size: 12px; 
-  color: #b09070; 
+.modal-sticky-meta {
+  font-size: 12px;
+  color: #555555; /* 暗いグレーに変更 */
+  margin-top: 2px;
 }
 .modal-body {
-  padding-top: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-top: 20px;
 }
 .modal-caption {
-  font-size: 15px; 
-  color: #e0cdb0; 
+  font-size: 17px; /* 15pxからワンサイズ（17px）に拡大 */
+  color: #000000; /* フォント色を黒に変更 */
   font-weight: normal;
-  line-height: 1.75; 
+  line-height: 1.75;
   white-space: pre-wrap;
   padding: 4px 16px 20px;
 }
 .media-item {
+  margin-bottom: 20px;
+}
+.media-item img, .media-item video {
   width: 100%;
-  margin-bottom: 10px;
+  display: block;
 }
-.media-item img, .media-item video { 
-  width: 100%; 
-  display: block; 
+.media-item video {
+  background: #000;
+  cursor: pointer;
 }
-.media-item video { 
-  background: #000; 
-  cursor: pointer; 
-}
-.media-caption { 
-  font-size: 14px; 
-  color: #b09070; 
-  padding: 8px 16px 16px; 
-  line-height: 1.6; 
+.media-caption {
+  font-size: 14px;
+  color: var(--brown); /* 明色背景に合わせて茶色に変更 */
+  padding: 8px 16px 16px;
+  line-height: 1.6;
 }
 .modal-footer {
   padding: 24px 16px 40px;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
-  background: rgba(10,6,0,0.5);
+  background: rgba(74, 48, 0, 0.05);
 }
-.modal-footer img { 
-  height: 36px; 
-  cursor: pointer; 
+.modal-footer img {
+  height: 36px;
+  cursor: pointer;
 }
 .modal-footer-btn {
-  cursor: pointer; 
-  padding: 8px 20px; 
+  cursor: pointer;
+  padding: 8px 20px;
   font-size: 13px;
-  color: #f0e0c8; 
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2); 
+  color: var(--brown);
+  background: rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.15);
   border-radius: 4px;
 }
-.modal-copyright { 
-  text-align: center; 
-  font-size: 11px; 
-  color: #6a5040; 
-  padding: 0 16px 20px; 
+.modal-copyright {
+  text-align: center;
+  font-size: 11px;
+  color: var(--brown);
+  padding: 0 16px 20px;
 }

@@ -14,7 +14,7 @@
     <div class="top-logo">
       <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="top-logo-fallback" style="display:none; font-size:24px; font-weight:bold; color:var(--brown);">AKIRA travels</span>
+      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
     </div>
     
     <div id="country-list-wrap">
@@ -23,21 +23,21 @@
     
     <footer class="top-footer">
       <div class="footer-icons">
-        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')">
-        <img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')">
-        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')">
-        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')">
+        <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
+        <a href="#" id="f-link-mail"><img src="https://akiratravels.github.io/images/i_mail.gif" alt="MAIL" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>MAIL</span>')"></a>
+        <a href="#" id="f-link-fb"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')"></a>
+        <a href="#" id="f-link-msg"><img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')"></a>
       </div>
       <p class="copyright" id="copyright-text"></p>
     </footer>
   </div>
 
   <script type="module">
-    import { db, auth } from "./js/firebase-config.js";
+    import { db, auth } from './js/firebase-config.js';
     import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // 認証監視
+    // 管理者リンクの状態監視
     onAuthStateChanged(auth, user => {
       const linkText = document.getElementById('admin-link-text');
       if (user) {
@@ -47,11 +47,12 @@
       }
     });
 
-    // 著作権年動的設定
+    // 著作権年の動的設定
     const yr = new Date().getFullYear();
     document.getElementById('copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
     async function init() {
+      const wrap = document.getElementById('country-list-wrap');
       try {
         const [countriesSnap, postsSnap] = await Promise.all([
           getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
@@ -60,9 +61,9 @@
 
         const postCount = {};
         postsSnap.forEach(doc => {
-          const post = doc.data();
-          if (post.countryId) {
-            postCount[post.countryId] = (postCount[post.countryId] || 0) + 1;
+          const p = doc.data();
+          if (p.countryId) {
+            postCount[p.countryId] = (postCount[p.countryId] || 0) + 1;
           }
         });
 
@@ -71,20 +72,19 @@
           countries.push({ id: doc.id, ...doc.data() });
         });
 
-        const wrap = document.getElementById('country-list-wrap');
         if (countries.length === 0) {
-          wrap.innerHTML = '<p class="loading">国情報がありません。</p>';
+          wrap.innerHTML = '<p class="loading">国データがありません。</p>';
           return;
         }
 
-        let tableHtml = '<table><tbody>';
+        let tableHtml = '<table class="country-table">';
         for (let i = 0; i < countries.length; i += 2) {
           tableHtml += '<tr>';
           
-          // 左セル
+          // 左カラム
           tableHtml += `<td>${renderCell(countries[i], postCount)}</td>`;
           
-          // 右セル
+          // 右カラム
           if (i + 1 < countries.length) {
             tableHtml += `<td>${renderCell(countries[i+1], postCount)}</td>`;
           } else {
@@ -93,12 +93,12 @@
           
           tableHtml += '</tr>';
         }
-        tableHtml += '</tbody></table>';
+        tableHtml += '</table>';
         wrap.innerHTML = tableHtml;
 
       } catch (err) {
         console.error(err);
-        document.getElementById('country-list-wrap').innerHTML = '<p class="loading">データの取得に失敗しました。</p>';
+        wrap.innerHTML = `<p class="error-msg">データの取得に失敗しました。</p>`;
       }
     }
 
@@ -108,17 +108,15 @@
       
       if (count > 0) {
         return `
-          <div class="country-cell has-posts">
-            <a href="country.html?id=${c.id}">
-              <span class="country-name">${c.name}</span>
-              ${subtitleHtml}
-            </a>
+          <div class="country-link-cell">
+            <a href="country.html?id=${c.id}" class="has-posts">${c.name}</a>
+            ${subtitleHtml}
           </div>
         `;
       } else {
         return `
-          <div class="country-cell no-posts">
-            <span class="country-name">${c.name}</span>
+          <div class="country-link-cell">
+            <span class="no-posts">${c.name}</span>
             ${subtitleHtml}
           </div>
         `;
