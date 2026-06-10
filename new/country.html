@@ -25,7 +25,7 @@
       <div class="footer-icons">
         <a href="index.html">
           <img src="https://akiratravels.github.io/images/i_home.gif" alt="AKIRA travels"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.onclick=()=>location.href='index.html';">
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.onclick=()=>location.href='index.html';">
           <button class="modal-footer-btn" style="display:none;">🏠 TOP</button>
         </a>
       </div>
@@ -56,43 +56,49 @@
       collection, getDocs, getDoc, doc, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 著作権表示
+    const BASE_IMAGES = 'https://akiratravels.github.io/images/';
+    let allPosts = [];
+    let currentIdx = 0;
+    let ioInstance = null;
+
+    // 著作権
     const yr = new Date().getFullYear();
     document.getElementById('copyright-text').textContent =
       `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-    let allPosts = [];
-    let currentIdx = 0;
-    let intersectionObserver = null;
-
-    // ===== 初期化 =====
     async function init() {
       const params = new URLSearchParams(location.search);
       const countryId = params.get('id');
       if (!countryId) {
-        showError('国IDが指定されていません');
+        showError('国IDが指定されていません。');
         return;
       }
 
       try {
-        const countryDoc = await getDoc(doc(db, 'countries', countryId));
-        if (!countryDoc.exists()) {
-          showError('指定された国が見つかりません');
+        const [countrySnap, postsSnap] = await Promise.all([
+          getDoc(doc(db, 'countries', countryId)),
+          getDocs(query(collection(db, 'posts'), orderBy('date', 'asc')))
+        ]);
+
+        if (!countrySnap.exists()) {
+          showError('指定された国が見つかりません。');
           return;
         }
-        const country = { id: countryDoc.id, ...countryDoc.data() };
+
+        const country = { id: countrySnap.id, ...countrySnap.data() };
         document.title = `${country.name} — AKIRA travels`;
+
+        // JS側でフィルタリング
+        allPosts = [];
+        postsSnap.forEach(d => {
+          const p = { id: d.id, ...d.data() };
+          if (p.countryId === countryId) allPosts.push(p);
+        });
+
         document.getElementById('country-title').textContent = country.name;
         if (country.description) {
           document.getElementById('country-description').textContent = country.description;
         }
-
-        const postsSnap = await getDocs(
-          query(collection(db, 'posts'), orderBy('date', 'asc'))
-        );
-        const allFetched = [];
-        postsSnap.forEach(d => allFetched.push({ id: d.id, ...d.data() }));
-        allPosts = allFetched.filter(p => p.countryId === countryId);
 
         document.getElementById('loading-msg').style.display = 'none';
         document.getElementById('country-wrap').style.display = '';
@@ -100,15 +106,15 @@
         renderCoverPhoto();
         renderChain();
 
-        // URLにpost指定があれば自動オープン
+        // URLに post パラメータがあれば該当投稿を開く
         const postParam = params.get('post');
         if (postParam) {
           const idx = allPosts.findIndex(p => p.id === postParam);
           if (idx >= 0) openModal(idx);
         }
-      } catch (err) {
-        showError('データの読み込みに失敗しました');
-        console.error(err);
+      } catch (e) {
+        showError('読み込みに失敗しました。');
+        console.error(e);
       }
     }
 
@@ -119,23 +125,18 @@
       el.style.display = '';
     }
 
-    // ===== 代表写真 =====
     function renderCoverPhoto() {
       let coverMedia = null;
-      // 優先1: isCover=true かつ type=image
-      outer:
-      for (const post of allPosts) {
-        for (const m of (post.media || [])) {
-          if (m.isCover && m.type === 'image') { coverMedia = m; break outer; }
-        }
+      // 優先1: isCover:true かつ type:"image"
+      for (const p of allPosts) {
+        const m = (p.media || []).find(m => m.isCover && m.type === 'image');
+        if (m) { coverMedia = m; break; }
       }
       // 優先2: 最初のimage
       if (!coverMedia) {
-        outer2:
-        for (const post of allPosts) {
-          for (const m of (post.media || [])) {
-            if (m.type === 'image') { coverMedia = m; break outer2; }
-          }
+        for (const p of allPosts) {
+          const m = (p.media || []).find(m => m.type === 'image');
+          if (m) { coverMedia = m; break; }
         }
       }
       if (!coverMedia) return;
@@ -148,7 +149,6 @@
       wrap.style.display = '';
     }
 
-    // ===== 投稿チェーン =====
     function renderChain() {
       const chain = document.getElementById('post-chain');
       chain.innerHTML = '';
@@ -164,18 +164,15 @@
         chain.appendChild(item);
 
         if (idx < allPosts.length - 1) {
-          const arrowItem = document.createElement('div');
-          arrowItem.className = 'chain-item';
-          const arrow = document.createElement('span');
-          arrow.className = 'chain-arrow';
-          arrow.textContent = '▼';
-          arrowItem.appendChild(arrow);
-          chain.appendChild(arrowItem);
+          const arrow = document.createElement('div');
+          arrow.className = 'chain-item';
+          arrow.innerHTML = '<span class="chain-arrow">▼</span>';
+          chain.appendChild(arrow);
         }
       });
     }
 
-    // ===== モーダル =====
+    /* ─── モーダル ─── */
     function openModal(idx) {
       currentIdx = idx;
       renderModal(idx);
@@ -190,15 +187,22 @@
       document.getElementById('modal').classList.remove('open');
       document.body.style.overflow = '';
       stopAllVideos();
-      if (intersectionObserver) {
-        intersectionObserver.disconnect();
-        intersectionObserver = null;
-      }
+      if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
     }
 
     window.addEventListener('popstate', () => {
       if (document.getElementById('modal').classList.contains('open')) closeModal();
     });
+
+    function navigateModal(idx) {
+      stopAllVideos();
+      if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
+      currentIdx = idx;
+      renderModal(idx);
+      const modal = document.getElementById('modal');
+      modal.scrollTop = 0;
+      history.replaceState({ modal: true, idx }, '', location.href);
+    }
 
     function renderModal(idx) {
       const post = allPosts[idx];
@@ -210,14 +214,7 @@
       document.getElementById('modal-meta').textContent = metaParts.join(' · ');
 
       // キャプション
-      const captionEl = document.getElementById('modal-caption');
-      if (post.caption) {
-        captionEl.textContent = post.caption;
-        captionEl.style.display = '';
-      } else {
-        captionEl.textContent = '';
-        captionEl.style.display = 'none';
-      }
+      document.getElementById('modal-caption').textContent = post.caption || '';
 
       // メディアリスト
       const mediaList = document.getElementById('modal-media-list');
@@ -261,8 +258,6 @@
       });
 
       setupVideoAutoplay();
-
-      // フッター
       renderModalFooter(idx);
 
       // 著作権
@@ -271,61 +266,10 @@
         `© 1998–${yr} AKIRA travels. All rights reserved.`;
     }
 
-    function renderModalFooter(idx) {
-      const footer = document.getElementById('modal-footer');
-      footer.innerHTML = '';
-      const hasNext = idx < allPosts.length - 1;
-
-      const makeImgBtn = (src, alt, fallbackText, onClick) => {
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = alt;
-        img.addEventListener('click', onClick);
-        img.onerror = function() {
-          this.style.display = 'none';
-          const btn = document.createElement('button');
-          btn.className = 'modal-footer-btn';
-          btn.textContent = fallbackText;
-          btn.addEventListener('click', onClick);
-          footer.insertBefore(btn, this.nextSibling);
-        };
-        return img;
-      };
-
-      const BASE = 'https://akiratravels.github.io/images/';
-
-      if (hasNext) {
-        footer.appendChild(makeImgBtn(BASE + 'i_next.gif', '次へ', '次へ →',
-          () => navigateModal(idx + 1)));
-      }
-      footer.appendChild(makeImgBtn(BASE + 'i_home.gif', 'AKIRA travels', '🏠 AKIRA travels',
-        () => { location.href = 'index.html'; }));
-      footer.appendChild(makeImgBtn(BASE + 'i_last.gif', '前', '← 前',
-        () => closeModal()));
-    }
-
-    function navigateModal(idx) {
-      stopAllVideos();
-      if (intersectionObserver) { intersectionObserver.disconnect(); intersectionObserver = null; }
-      currentIdx = idx;
-      renderModal(idx);
-      const modal = document.getElementById('modal');
-      modal.scrollTop = 0;
-      history.replaceState({ modal: true, idx }, '', location.href);
-    }
-
-    function stopAllVideos() {
-      document.querySelectorAll('#modal-media-list video').forEach(v => {
-        if (!v.paused) v.pause();
-      });
-    }
-
     function setupVideoAutoplay() {
-      if (intersectionObserver) intersectionObserver.disconnect();
-      const videos = document.querySelectorAll('#modal-media-list video');
+      const videos = document.getElementById('modal-media-list').querySelectorAll('video');
       if (videos.length === 0) return;
-
-      intersectionObserver = new IntersectionObserver(entries => {
+      ioInstance = new IntersectionObserver(entries => {
         entries.forEach(entry => {
           const vid = entry.target;
           if (entry.isIntersecting && vid.paused) {
@@ -336,8 +280,40 @@
           }
         });
       }, { threshold: 0.6 });
+      videos.forEach(v => ioInstance.observe(v));
+    }
 
-      videos.forEach(v => intersectionObserver.observe(v));
+    function stopAllVideos() {
+      document.querySelectorAll('#modal-media-list video').forEach(v => {
+        if (!v.paused) v.pause();
+      });
+    }
+
+    function renderModalFooter(idx) {
+      const footer = document.getElementById('modal-footer');
+      footer.innerHTML = '';
+      const hasNext = idx < allPosts.length - 1;
+
+      function makeImgBtn(src, alt, fallbackText, onClick) {
+        const img = document.createElement('img');
+        img.src = BASE_IMAGES + src;
+        img.alt = alt;
+        img.addEventListener('click', onClick);
+        img.onerror = function() {
+          const btn = document.createElement('button');
+          btn.className = 'modal-footer-btn';
+          btn.textContent = fallbackText;
+          btn.addEventListener('click', onClick);
+          img.replaceWith(btn);
+        };
+        return img;
+      }
+
+      if (hasNext) {
+        footer.appendChild(makeImgBtn('i_next.gif', '次へ', '次へ', () => navigateModal(idx + 1)));
+      }
+      footer.appendChild(makeImgBtn('i_home.gif', 'AKIRA travels', '🏠 TOP', () => { location.href = 'index.html'; }));
+      footer.appendChild(makeImgBtn('i_last.gif', '前', '前', () => closeModal()));
     }
 
     init();

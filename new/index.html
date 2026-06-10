@@ -16,25 +16,23 @@
         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
       <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
     </div>
-
     <div id="country-list-wrap"><p class="loading">読み込み中…</p></div>
-
     <footer class="top-footer">
       <div class="footer-icons">
-        <a href="https://akiratravels.github.io/profile.html">
+        <a href="https://akiratravels.github.io/profile.html" target="_blank" rel="noopener">
           <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-          <span class="footer-icon-btn" style="display:none;">PROFILE</span>
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="modal-footer-btn" style="display:none;">PROFILE</button>
         </a>
         <a href="https://www.facebook.com/" target="_blank" rel="noopener">
           <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-          <span class="footer-icon-btn" style="display:none;">Facebook</span>
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="modal-footer-btn" style="display:none;">Facebook</button>
         </a>
-        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
-          <span class="footer-icon-btn" style="display:none;">Messenger</span>
+        <a href="https://m.me/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="FB Messenger"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="modal-footer-btn" style="display:none;">Messenger</button>
         </a>
       </div>
       <p class="copyright" id="copyright-text"></p>
@@ -50,118 +48,115 @@
       onAuthStateChanged
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // 著作権表示
+    // 著作権
     const yr = new Date().getFullYear();
     document.getElementById('copyright-text').textContent =
       `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-    // 管理者リンク認証監視
+    // 管理者リンク
     onAuthStateChanged(auth, user => {
       const linkText = document.getElementById('admin-link-text');
-      if (user) {
-        linkText.textContent = '管理画面';
-      } else {
-        linkText.textContent = '管理者';
-      }
+      linkText.textContent = user ? '管理画面' : '管理者';
     });
 
     // データ取得
-    async function loadCountries() {
-      const [countriesSnap, postsSnap] = await Promise.all([
-        getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
-        getDocs(collection(db, 'posts'))
-      ]);
+    async function loadPage() {
+      try {
+        const [countriesSnap, postsSnap] = await Promise.all([
+          getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
+          getDocs(collection(db, 'posts'))
+        ]);
 
-      const countries = [];
-      countriesSnap.forEach(doc => countries.push({ id: doc.id, ...doc.data() }));
+        const countries = [];
+        countriesSnap.forEach(d => countries.push({ id: d.id, ...d.data() }));
 
-      const posts = [];
-      postsSnap.forEach(doc => posts.push({ id: doc.id, ...doc.data() }));
+        const postsByCountry = {};
+        postsSnap.forEach(d => {
+          const p = { id: d.id, ...d.data() };
+          if (!postsByCountry[p.countryId]) postsByCountry[p.countryId] = [];
+          postsByCountry[p.countryId].push(p);
+        });
 
-      // 国ごとの投稿数集計
-      const postCount = {};
-      posts.forEach(p => {
-        postCount[p.countryId] = (postCount[p.countryId] || 0) + 1;
-      });
-
-      renderCountryList(countries, posts, postCount);
+        renderList(countries, postsByCountry);
+      } catch (e) {
+        document.getElementById('country-list-wrap').innerHTML =
+          '<p class="loading">読み込みに失敗しました。</p>';
+        console.error(e);
+      }
     }
 
-    function renderCountryList(countries, posts, postCount) {
+    function renderList(countries, postsByCountry) {
       const wrap = document.getElementById('country-list-wrap');
       if (countries.length === 0) {
-        wrap.innerHTML = '<p class="loading">国データがありません</p>';
+        wrap.innerHTML = '<p class="loading">国情報がありません。</p>';
         return;
       }
 
       const table = document.createElement('table');
-      for (let i = 0; i < countries.length; i += 2) {
-        const tr = document.createElement('tr');
-        tr.appendChild(makeCountryCell(countries[i], posts, postCount));
-        if (i + 1 < countries.length) {
-          tr.appendChild(makeCountryCell(countries[i + 1], posts, postCount));
-        } else {
-          tr.appendChild(document.createElement('td')); // 空セル
+      let row;
+      countries.forEach((c, i) => {
+        if (i % 2 === 0) {
+          row = document.createElement('tr');
+          table.appendChild(row);
         }
-        table.appendChild(tr);
+        const td = document.createElement('td');
+        td.appendChild(buildCountryCell(c, postsByCountry));
+        row.appendChild(td);
+      });
+      // 奇数件のとき最終行の右セルは空
+      if (countries.length % 2 !== 0) {
+        const empty = document.createElement('td');
+        row.appendChild(empty);
       }
+
       wrap.innerHTML = '';
       wrap.appendChild(table);
     }
 
-    function makeCountryCell(c, posts, postCount) {
-      const td = document.createElement('td');
-      td.className = 'country-cell';
+    function buildCountryCell(c, postsByCountry) {
+      const countryPosts = postsByCountry[c.id] || [];
+      const hasPosts = countryPosts.length > 0;
 
-      const count = postCount[c.id] || 0;
-      const countryPosts = posts.filter(p => p.countryId === c.id);
-
-      // リンク先決定ロジック
-      let href = null;
+      // リンク先決定
+      let href;
       if (countryPosts.length === 0) {
         href = null;
       } else if (countryPosts.length === 1 && countryPosts[0].location?.startsWith('https')) {
         href = countryPosts[0].location;
-      } else if (countryPosts.length === 1) {
-        href = `country.html?id=${c.id}`;
       } else {
         const oldest = countryPosts.slice().sort((a, b) => a.date.localeCompare(b.date))[0];
-        href = `country.html?id=${c.id}&post=${oldest.id}`;
+        href = countryPosts.length === 1
+          ? `country.html?id=${c.id}`
+          : `country.html?id=${c.id}&post=${oldest.id}`;
       }
+
+      const wrap = document.createElement('div');
+      wrap.style.padding = '6px 4px';
 
       const nameEl = document.createElement('span');
-      nameEl.className = 'country-name-text';
-      nameEl.textContent = c.name;
+      nameEl.className = 'country-name-text ' + (hasPosts ? 'has-posts' : 'no-posts');
 
-      let inner;
       if (href) {
-        inner = document.createElement('a');
-        inner.href = href;
-        inner.className = 'country-name-link';
-        inner.appendChild(nameEl);
+        const a = document.createElement('a');
+        a.href = href;
+        a.textContent = c.name;
+        nameEl.appendChild(a);
       } else {
-        inner = document.createElement('span');
-        inner.className = 'country-name-nolink';
-        inner.appendChild(nameEl);
+        nameEl.textContent = c.name;
       }
-
-      td.appendChild(inner);
+      wrap.appendChild(nameEl);
 
       if (c.subtitle) {
         const sub = document.createElement('span');
         sub.className = 'country-subtitle';
         sub.textContent = c.subtitle;
-        td.appendChild(sub);
+        wrap.appendChild(sub);
       }
 
-      return td;
+      return wrap;
     }
 
-    loadCountries().catch(err => {
-      document.getElementById('country-list-wrap').innerHTML =
-        '<p class="loading">データの読み込みに失敗しました</p>';
-      console.error(err);
-    });
+    loadPage();
   </script>
 </body>
 </html>
