@@ -1,3 +1,5 @@
+/* ===== css/style.css — 閲覧ページ共通スタイル ===== */
+
 :root {
   --brown:      #4a3000;
   --orange:     #cc6600;
@@ -6,321 +8,261 @@
   --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-main);
   font-size: 16px;
   color: var(--brown);
   background-color: var(--bg-fallback);
-  background-image: url("https://akiratravels.github.io/images/bg.gif");
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
   background-repeat: repeat;
-  min-height: 100vh;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { color: inherit; text-decoration: none; }
 
-/* ── 管理者リンク（右上固定） ── */
+/* ===== 管理者リンク（index.html のみ） ===== */
 #admin-link {
-  position: fixed;
-  top: 10px;
-  right: 12px;
-  z-index: 100;
-  font-size: 11px;
-  color: var(--gray);
+  position: fixed; top: 10px; right: 12px; z-index: 100;
+  font-size: 11px; color: var(--gray);
   background: rgba(255,255,255,0.6);
-  padding: 3px 8px;
-  border-radius: 10px;
-  backdrop-filter: blur(4px);
+  padding: 3px 8px; border-radius: 10px; backdrop-filter: blur(4px);
 }
-#admin-link a {
-  color: var(--gray);
-  text-decoration: none;
-}
+#admin-link a { color: var(--gray); text-decoration: none; }
 
-/* ── ローディング / エラー ── */
-.loading {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--gray);
-  font-size: 14px;
-}
-.error-msg {
-  text-align: center;
-  padding: 40px 20px;
-  color: #cc2200;
-  font-size: 14px;
-}
+/* ===== ローディング / エラー ===== */
+.loading { text-align: center; padding: 40px; color: var(--gray); }
+.error-msg { text-align: center; padding: 40px; color: #c00; }
 
-/* ════════════════════════════════
-   index.html — トップページ
-════════════════════════════════ */
+/* ===== トップページ ===== */
 .top-wrap {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 20px 16px 0;
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 
 .top-logo {
   text-align: center;
-  padding: 24px 0 28px;
+  padding: 24px 0 16px;
 }
-.top-logo img {
-  max-width: 100%;
-  height: auto;
-}
+.top-logo img { max-width: 280px; height: auto; }
 .top-logo-fallback {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--brown);
-  letter-spacing: 0.05em;
+  font-size: 28px; font-weight: bold;
+  color: var(--brown); letter-spacing: 0.05em;
 }
 
-/* 国一覧テーブル */
+/* 国名リスト */
 #country-list-wrap table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 #country-list-wrap td {
-  width: 50%;
-  padding: 8px 12px;
-  vertical-align: top;
+  text-align: center;
+  padding: 2px 0;
+  vertical-align: middle;
 }
 
-.country-name {
-  font-size: 22px;
+.country-cell {
+  padding: 10px 4px;
+}
+
+.country-name-text {
+  font-family: "Hiragino Mincho ProN", "ヒラギノ明朝 ProN",
+               "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN",
+               "游ゴシック", "Yu Gothic", Meiryo, sans-serif;
+  font-feature-settings: "palt";
   font-weight: bold;
-  line-height: 1.3;
-}
-.country-name.has-posts {
-  color: var(--orange);
-}
-.country-name.has-posts:hover {
-  text-decoration: underline;
-}
-.country-name.no-posts {
-  color: var(--gray);
-}
-.country-subtitle {
+  font-size: 22px;
   display: block;
+}
+@media (min-width: 600px) {
+  .country-name-text { font-size: 26px; }
+}
+
+.country-subtitle {
+  font-family: "Hiragino Mincho ProN", "ヒラギノ明朝 ProN",
+               "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN",
+               "游ゴシック", "Yu Gothic", Meiryo, sans-serif;
+  font-feature-settings: "palt";
   font-size: 13px;
   color: #7a5a20;
-  margin-top: 2px;
+  display: block;
 }
 
-@media (min-width: 600px) {
-  .country-name { font-size: 26px; }
-}
+.has-posts .country-name-text { color: #cc6600; }
+.has-posts { cursor: pointer; }
+.no-posts .country-name-text { color: #aaaaaa; }
 
-/* フッター（トップページ） */
+/* フッター */
 .top-footer {
-  margin-top: 48px;
+  margin-top: 24px;
+  padding-bottom: 0;
+  margin-bottom: 0;
   text-align: center;
 }
+
 .footer-icons {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  padding: 12px 0;
 }
-.footer-icons img {
-  height: 32px;
-}
-.footer-icons a {
-  color: var(--brown);
-  font-size: 12px;
-  text-decoration: none;
-}
+.footer-icons img { height: 32px; }
+.footer-icons a { display: inline-flex; align-items: center; }
+
 .copyright {
   font-size: 11px;
   color: var(--gray);
+  padding: 8px 0 0;
+  text-align: center;
 }
 
-/* ════════════════════════════════
-   country.html — 国別ページ
-════════════════════════════════ */
+/* ===== 国別ページ ===== */
 .country-wrap {
-  max-width: 640px;
+  max-width: 600px;
   margin: 0 auto;
-  padding: 20px 16px 40px;
 }
 
 .country-header {
-  padding: 16px 0 20px;
-}
-.country-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: var(--brown);
-  margin-bottom: 10px;
-}
-.country-description {
-  font-size: 15px;
-  color: var(--brown);
-  line-height: 1.75;
-  white-space: pre-wrap;
-}
-
-/* 代表写真 */
-.cover-photo-wrap {
-  margin-bottom: 24px;
-  overflow: hidden;
-  cursor: pointer;
-}
-.cover-photo-wrap img {
-  width: 100%;
-  height: auto;
-  display: block;
-  transition: transform 0.3s ease;
-}
-.cover-photo-wrap:hover img {
-  transform: scale(1.01);
-}
-
-/* 投稿チェーン */
-.post-chain {
-  padding: 0 0 20px;
-}
-.chain-item {
-  text-align: center;
-  padding: 4px 0;
-}
-.chain-link {
-  font-size: 18px;
-  color: var(--orange);
-  cursor: pointer;
-  font-weight: bold;
-  line-height: 1.4;
-}
-.chain-link:hover {
-  text-decoration: underline;
-}
-.chain-arrow {
-  font-size: 14px;
-  color: var(--gray);
-}
-
-/* フッター（国別ページ） */
-.country-footer {
-  margin-top: 40px;
-  text-align: center;
-}
-.country-footer .footer-icons {
-  margin-bottom: 12px;
-}
-.country-footer .footer-icons img {
-  height: 36px;
-  cursor: pointer;
-}
-
-/* ════════════════════════════════
-   詳細モーダル（country.html 内）
-════════════════════════════════ */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background-color: var(--bg-fallback);
-  background-image: url("https://akiratravels.github.io/images/bg.gif");
-  background-repeat: repeat;
-  z-index: 500;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.modal-overlay.open {
-  display: block;
-}
-
-/* 上部 sticky バー */
-.modal-sticky-bar {
-  position: sticky;
-  top: 0;
-  z-index: 510;
+  position: sticky; top: 0; z-index: 200;
   background: rgba(240, 224, 200, 0.92);
   backdrop-filter: blur(8px);
   padding: 10px 16px;
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.modal-sticky-title {
-  font-size: 18px;
+
+.country-title {
+  text-align: center;
+  font-size: 22px;
   font-weight: bold;
   color: var(--brown);
+  margin-bottom: 4px;
 }
-.modal-sticky-meta {
+
+.country-description {
   font-size: 14px;
   color: #7a5a20;
-  margin-top: 2px;
+  text-align: center;
+  white-space: pre-wrap;
+  line-height: 1.6;
 }
+
+/* 代表写真 */
+.cover-photo-wrap { text-align: center; padding: 16px; }
+#cover-photo {
+  max-width: 60%; height: auto; display: inline-block;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+#cover-photo:hover { transform: scale(1.01); }
+@media (max-width: 599px) {
+  #cover-photo { max-width: 85%; }
+}
+
+/* 投稿チェーン */
+.post-chain {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.chain-item {
+  text-align: center;
+}
+
+.chain-link {
+  display: inline-block;
+  font-size: 16px;
+  color: var(--orange);
+  cursor: pointer;
+  padding: 6px 12px;
+  text-decoration: underline;
+  text-decoration-color: rgba(204,102,0,0.4);
+  transition: opacity 0.15s;
+}
+.chain-link:hover { opacity: 0.7; }
+
+.chain-arrow {
+  display: block;
+  font-size: 18px;
+  color: var(--gray);
+  padding: 2px 0;
+  line-height: 1;
+}
+
+/* 国別ページフッター */
+.country-footer {
+  text-align: center;
+  padding: 24px 16px 16px;
+  margin-top: 24px;
+}
+
+/* ===== 詳細モーダル ===== */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+  background-repeat: repeat;
+  z-index: 500;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-overlay.open { display: block; }
+
+@media (min-width: 900px) {
+  .modal-overlay { width: 70%; left: 15%; right: 15%; }
+}
+
+/* スティッキーバー */
+.modal-sticky-bar {
+  position: sticky; top: 0; z-index: 510;
+  background: rgba(240, 224, 200, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
+}
+.modal-sticky-title { font-size: 18px; font-weight: bold; color: var(--brown); }
+.modal-sticky-meta  { font-size: 14px; color: #7a5a20; }
 
 /* キャプション */
 .modal-caption {
-  font-size: 17px;
-  color: var(--brown);
-  font-weight: normal;
-  line-height: 1.75;
-  white-space: pre-wrap;
+  font-size: 17px; color: var(--brown); font-weight: normal;
+  line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 20px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 
 /* メディア */
-.media-item {
-  margin-bottom: 4px;
-}
 .media-item img,
-.media-item video {
-  width: 100%;
-  display: block;
-}
-.media-item video {
-  background: #000;
-  cursor: pointer;
-}
+.media-item video { width: 100%; display: block; }
+.media-item video { background: #000; cursor: pointer; }
 .media-caption {
-  font-size: 16px;
-  color: #7a5a20;
+  font-size: 16px; color: #7a5a20;
   padding: 8px 16px 16px;
   line-height: 1.6;
+  white-space: pre-wrap;
 }
 
 /* 下部ナビ */
 .modal-footer {
   padding: 24px 16px 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
+  display: flex; justify-content: center; align-items: center; gap: 16px;
   background: rgba(240, 224, 200, 0.5);
 }
-.modal-footer img {
-  height: 36px;
-  cursor: pointer;
-}
+.modal-footer img { height: 36px; cursor: pointer; }
 .modal-footer-btn {
-  cursor: pointer;
-  padding: 8px 20px;
-  font-size: 13px;
-  color: var(--brown);
-  background: rgba(74,48,0,0.08);
-  border: 1px solid rgba(74,48,0,0.2);
-  border-radius: 4px;
-  font-family: var(--font-main);
-}
-.modal-footer-btn:hover {
-  background: rgba(74,48,0,0.15);
+  cursor: pointer; padding: 8px 20px; font-size: 13px;
+  color: var(--brown); background: rgba(74,48,0,0.08);
+  border: 1px solid rgba(74,48,0,0.2); border-radius: 4px;
 }
 
 /* 著作権 */
 .modal-copyright {
-  text-align: center;
-  font-size: 13px;
-  color: #7a5a20;
+  text-align: center; font-size: 13px; color: #7a5a20;
   padding: 0 16px 20px;
 }

@@ -8,135 +8,158 @@
 </head>
 <body>
 
-<div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
+  <!-- 管理者リンク（トップページのみ） -->
+  <div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
 
-<div class="top-wrap">
-  <div class="top-logo">
-    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-      onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+  <div class="top-wrap">
+    <div class="top-logo">
+      <img
+        src="https://akiratravels.github.io/images/home.gif"
+        alt="AKIRA travels"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+    </div>
+
+    <div id="country-list-wrap">
+      <p class="loading">読み込み中…</p>
+    </div>
+
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <a href="https://akiratravels.github.io/profile.html" target="_blank" rel="noopener">
+          <img
+            src="https://akiratravels.github.io/images/i_profile.gif"
+            alt="PROFILE"
+            onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<span style=\'font-size:12px;color:#7a5a20\'>PROFILE</span>');">
+        </a>
+        <a href="https://www.facebook.com/akiratravels" target="_blank" rel="noopener">
+          <img
+            src="https://akiratravels.github.io/images/facebook.png"
+            alt="Facebook"
+            onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<span style=\'font-size:12px;color:#7a5a20\'>Facebook</span>');">
+        </a>
+        <a href="https://m.me/akiratravels" target="_blank" rel="noopener">
+          <img
+            src="https://akiratravels.github.io/images/i_fb.png"
+            alt="FB Messenger"
+            onerror="this.style.display='none'; this.insertAdjacentHTML('afterend','<span style=\'font-size:12px;color:#7a5a20\'>Messenger</span>');">
+        </a>
+      </div>
+      <p class="copyright" id="copyright-text"></p>
+    </footer>
   </div>
 
-  <div id="country-list-wrap"><p class="loading">読み込み中…</p></div>
+  <script type="module">
+    import {
+      collection, getDocs, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { db, auth } from "./js/firebase-config.js";
 
-  <footer class="top-footer">
-    <div class="footer-icons">
-      <a href="https://akiratravels.github.io/profile/" target="_blank" rel="noopener">
-        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <span style="display:none;">PROFILE</span>
-      </a>
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener">
-        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <span style="display:none;">Facebook</span>
-      </a>
-      <a href="https://m.me/" target="_blank" rel="noopener">
-        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
-          onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <span style="display:none;">Messenger</span>
-      </a>
-    </div>
-    <p class="copyright" id="copyright-text"></p>
-  </footer>
-</div>
+    // 著作権年
+    const yr = new Date().getFullYear();
+    document.getElementById('copyright-text').textContent =
+      `© 1998–${yr} AKIRA travels. All rights reserved.`;
 
-<script type="module">
-import { db, auth } from './js/firebase-config.js';
-import {
-  collection, getDocs, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-// 著作権
-const yr = new Date().getFullYear();
-document.getElementById('copyright-text').textContent =
-  `© 1998–${yr} AKIRA travels. All rights reserved.`;
-
-// 管理者リンク
-onAuthStateChanged(auth, user => {
-  document.getElementById('admin-link-text').textContent =
-    user ? '管理画面' : '管理者';
-});
-
-// データ取得
-async function init() {
-  try {
-    const [countriesSnap, postsSnap] = await Promise.all([
-      getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
-      getDocs(collection(db, 'posts'))
-    ]);
-
-    // 国ごとの投稿数集計
-    const postCount = {};
-    postsSnap.forEach(d => {
-      const cid = d.data().countryId;
-      if (cid) postCount[cid] = (postCount[cid] || 0) + 1;
+    // 管理者リンク表示制御
+    onAuthStateChanged(auth, user => {
+      const linkText = document.getElementById('admin-link-text');
+      if (user) {
+        linkText.textContent = '管理画面';
+      } else {
+        linkText.textContent = '管理者';
+      }
     });
 
-    const countries = [];
-    countriesSnap.forEach(d => countries.push({ id: d.id, ...d.data() }));
+    // データ取得
+    async function init() {
+      const wrap = document.getElementById('country-list-wrap');
+      try {
+        const [countriesSnap, postsSnap] = await Promise.all([
+          getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
+          getDocs(collection(db, 'posts'))
+        ]);
 
-    renderCountries(countries, postCount);
-  } catch (e) {
-    document.getElementById('country-list-wrap').innerHTML =
-      '<p class="loading" style="color:#cc2200;">データの読み込みに失敗しました。</p>';
-    console.error(e);
-  }
-}
+        const posts = postsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-function renderCountries(countries, postCount) {
-  const wrap = document.getElementById('country-list-wrap');
-  if (countries.length === 0) {
-    wrap.innerHTML = '<p class="loading">国がまだ登録されていません。</p>';
-    return;
-  }
+        // 国ごとの投稿数
+        const postCount = {};
+        // 国ごとの投稿リスト
+        const postsByCountry = {};
+        posts.forEach(p => {
+          postCount[p.countryId] = (postCount[p.countryId] || 0) + 1;
+          if (!postsByCountry[p.countryId]) postsByCountry[p.countryId] = [];
+          postsByCountry[p.countryId].push(p);
+        });
 
-  let html = '<table><tbody>';
-  for (let i = 0; i < countries.length; i += 2) {
-    html += '<tr>';
-    html += buildCell(countries[i], postCount);
-    if (i + 1 < countries.length) {
-      html += buildCell(countries[i + 1], postCount);
-    } else {
-      html += '<td></td>';
+        const countries = countriesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        if (countries.length === 0) {
+          wrap.innerHTML = '<p class="loading">国情報がありません</p>';
+          return;
+        }
+
+        // 2カラム table
+        const table = document.createElement('table');
+        for (let i = 0; i < countries.length; i += 2) {
+          const tr = document.createElement('tr');
+          [countries[i], countries[i + 1] || null].forEach(c => {
+            const td = document.createElement('td');
+            td.className = 'country-cell';
+            if (!c) { tr.appendChild(td); return; }
+
+            const count = postCount[c.id] || 0;
+            const div = document.createElement('div');
+            div.className = count > 0 ? 'has-posts' : 'no-posts';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'country-name-text';
+            nameSpan.textContent = c.name;
+            div.appendChild(nameSpan);
+
+            if (c.subtitle) {
+              const subSpan = document.createElement('span');
+              subSpan.className = 'country-subtitle';
+              subSpan.textContent = c.subtitle;
+              div.appendChild(subSpan);
+            }
+
+            // リンク先決定
+            if (count > 0) {
+              const countryPosts = postsByCountry[c.id] || [];
+              let href;
+              if (
+                countryPosts.length === 1 &&
+                countryPosts[0].location?.startsWith('https')
+              ) {
+                href = countryPosts[0].location;
+              } else {
+                const oldest = countryPosts
+                  .slice()
+                  .sort((a, b) => a.date.localeCompare(b.date))[0];
+                href = `country.html?id=${c.id}&post=${oldest.id}`;
+              }
+              div.addEventListener('click', () => { location.href = href; });
+            }
+
+            td.appendChild(div);
+            tr.appendChild(td);
+          });
+          table.appendChild(tr);
+        }
+
+        wrap.innerHTML = '';
+        wrap.appendChild(table);
+
+      } catch (err) {
+        console.error(err);
+        wrap.innerHTML = '<p class="loading" style="color:#c00;">読み込みに失敗しました</p>';
+      }
     }
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
 
-function buildCell(c, postCount) {
-  const count = postCount[c.id] || 0;
-  const subtitleHtml = c.subtitle
-    ? `<span class="country-subtitle">${escHtml(c.subtitle)}</span>`
-    : '';
-
-  if (count > 0) {
-    return `<td>
-      <a href="country.html?id=${encodeURIComponent(c.id)}">
-        <span class="country-name has-posts">${escHtml(c.name)}</span>
-        ${subtitleHtml}
-      </a>
-    </td>`;
-  } else {
-    return `<td>
-      <span class="country-name no-posts">${escHtml(c.name)}</span>
-      ${subtitleHtml}
-    </td>`;
-  }
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-init();
-</script>
+    init();
+  </script>
 </body>
 </html>

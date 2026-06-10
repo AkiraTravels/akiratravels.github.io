@@ -1,564 +1,664 @@
-import { db, auth, CLOUDINARY_CONFIG } from '../js/firebase-config.js';
+// admin/index.js — 管理画面ロジック（ES Module）
+
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc,
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc,
   doc, query, orderBy, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   onAuthStateChanged, signInWithEmailAndPassword, signOut
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { db, auth, CLOUDINARY_CONFIG } from "../js/firebase-config.js";
 
-// ── 状態 ──
+// ===== 状態 =====
 let countries = [];
-let allPosts = [];
+let posts = [];
 let mediaRows = [];
 let editPostId = null;
-let editCountryId = null;
 let deletedMediaUrls = [];
 
-// ── ユーティリティ ──
-const $ = id => document.getElementById(id);
-
-function escHtml(str) {
-  return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function showToast(msg, isError = false) {
-  const toast = $('toast');
-  toast.textContent = msg;
-  toast.className = 'toast' + (isError ? ' error' : '');
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-// ── 認証 ──
+// ===== 認証 =====
 onAuthStateChanged(auth, user => {
   if (user) {
-    $('login-screen').style.display = 'none';
-    $('admin-main').style.display = 'block';
-    $('header-user').style.display = 'flex';
-    $('header-email').textContent = user.email;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-main').style.display = '';
+    document.getElementById('header-user').style.display = 'flex';
+    document.getElementById('header-user-email').textContent = user.email;
     loadAll();
   } else {
-    $('login-screen').style.display = 'block';
-    $('admin-main').style.display = 'none';
-    $('header-user').style.display = 'none';
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('admin-main').style.display = 'none';
+    document.getElementById('header-user').style.display = 'none';
   }
 });
 
-$('login-password').addEventListener('keydown', e => {
-  if (e.key === 'Enter') $('btn-login').click();
+// ログイン
+document.getElementById('btn-login').addEventListener('click', login);
+document.getElementById('login-password').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+document.getElementById('login-email').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('login-password').focus();
 });
 
-$('btn-login').addEventListener('click', async () => {
-  const email = $('login-email').value.trim();
-  const password = $('login-password').value;
-  $('login-error').textContent = '';
+async function login() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
   try {
     await signInWithEmailAndPassword(auth, email, password);
-  } catch (e) {
-    $('login-error').textContent = 'ログインに失敗しました。メールアドレスとパスワードを確認してください。';
+  } catch (err) {
+    errEl.textContent = 'ログインに失敗しました。メールアドレスまたはパスワードを確認してください。';
+    console.error(err);
   }
+}
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  signOut(auth);
 });
 
-$('btn-logout').addEventListener('click', async () => {
-  await signOut(auth);
-});
-
-// ── データロード ──
+// ===== データロード =====
 async function loadAll() {
   await Promise.all([loadCountries(), loadPosts()]);
 }
 
 async function loadCountries() {
   const snap = await getDocs(query(collection(db, 'countries'), orderBy('order', 'asc')));
-  countries = [];
-  snap.forEach(d => countries.push({ id: d.id, ...d.data() }));
-  renderCountrySelect();
+  countries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  renderCountrySelects();
   renderCountryList();
-  renderListFilter();
 }
 
 async function loadPosts() {
   const snap = await getDocs(query(collection(db, 'posts'), orderBy('date', 'desc')));
-  allPosts = [];
-  snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
+  posts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderPostList();
 }
 
-// ── タブ切り替え ──
+// ===== タブ =====
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    $(`tab-${tab}`).classList.add('active');
-    if (tab === 'post-list') renderPostList();
-    if (tab === 'country-mgmt') renderCountryList();
+    const tabId = 'tab-' + btn.dataset.tab;
+    document.getElementById(tabId).classList.add('active');
+
+    if (btn.dataset.tab === 'post-list') renderPostList();
+    if (btn.dataset.tab === 'country-mgmt') renderCountryList();
   });
 });
 
-// ── 国セレクト（新規投稿フォーム用） ──
-function renderCountrySelect() {
-  const sel = $('f-country');
-  sel.innerHTML = '<option value="">国を選択…</option>';
+// ===== 新規投稿フォーム =====
+
+// 国セレクト同期
+function renderCountrySelects() {
+  const sel = document.getElementById('f-country');
+  const currentVal = sel.value;
+  sel.innerHTML = '<option value="">— 国を選択 —</option>';
   countries.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c.id;
     opt.textContent = `${c.flag || ''} ${c.name}`.trim();
     sel.appendChild(opt);
   });
-}
+  if (currentVal) sel.value = currentVal;
 
-// ── 投稿一覧フィルター ──
-function renderListFilter() {
-  const sel = $('list-country-filter');
-  // 既存オプションをリセット（"すべての国"は残す）
-  while (sel.options.length > 1) sel.remove(1);
+  // 投稿一覧フィルター
+  const filterSel = document.getElementById('list-country-filter');
+  filterSel.innerHTML = '<option value="">すべての国</option>';
   countries.forEach(c => {
     const opt = document.createElement('option');
     opt.value = c.id;
     opt.textContent = `${c.flag || ''} ${c.name}`.trim();
-    sel.appendChild(opt);
+    filterSel.appendChild(opt);
   });
 }
 
-$('list-country-filter').addEventListener('change', () => renderPostList());
-
-// ── 投稿一覧 ──
-function renderPostList() {
-  const wrap = $('post-list-wrap');
-  const selectedId = $('list-country-filter').value;
-  const posts = selectedId
-    ? allPosts.filter(p => p.countryId === selectedId)
-    : allPosts;
-
-  if (posts.length === 0) {
-    wrap.innerHTML = '<p style="color:#8a7e74;font-size:13px;padding:12px 0;">投稿がありません。</p>';
-    return;
-  }
-
-  wrap.innerHTML = posts.map(post => {
-    const country = countries.find(c => c.id === post.countryId);
-    const countryName = country ? country.name : '?';
-    const media = post.media || [];
-    const mediaCount = media.length;
-
-    // サムネイル選出
-    const coverImg = media.find(m => m.isCover && m.type === 'image')
-      || media.find(m => m.type === 'image');
-    const hasCover = media.some(m => m.isCover);
-
-    const thumbHtml = coverImg
-      ? `<img src="${escHtml(coverImg.url)}" alt="" loading="lazy">`
-      : '<span>📷</span>';
-
-    const metaText = `${escHtml(countryName)} ／ ${escHtml(post.date || '')} ／ 📎 ${mediaCount}件${hasCover ? ' ／ ★代表写真あり' : ''}`;
-
-    return `<div class="post-list-item" data-id="${escHtml(post.id)}">
-      <div class="post-thumb">${thumbHtml}</div>
-      <div class="post-info">
-        <div class="post-title-text">${escHtml(post.title)}</div>
-        <div class="post-meta-text">${metaText}</div>
-      </div>
-      <div class="post-actions">
-        <button class="btn-secondary btn-sm btn-edit-post" data-id="${escHtml(post.id)}">編集</button>
-        <button class="btn-danger btn-sm btn-delete-post" data-id="${escHtml(post.id)}">削除</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  // イベント
-  wrap.querySelectorAll('.btn-edit-post').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const post = allPosts.find(p => p.id === btn.dataset.id);
-      if (post) editPost(post);
-    });
-  });
-  wrap.querySelectorAll('.btn-delete-post').forEach(btn => {
-    btn.addEventListener('click', () => deletePost(btn.dataset.id));
-  });
-}
-
-// ── 投稿の編集 ──
-function editPost(post) {
-  // 新規投稿タブに切り替え
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelector('.tab-btn[data-tab="new-post"]').classList.add('active');
-  $('tab-new-post').classList.add('active');
-
-  // フィールドにロード
-  editPostId = post.id;
-  $('form-title').textContent = '投稿を編集';
-  $('btn-submit').textContent = '更新する →';
-  $('btn-cancel').style.display = '';
-
-  $('f-country').value = post.countryId || '';
-  $('f-date').value = post.date || '';
-  $('f-title').value = post.title || '';
-  $('f-location').value = post.location || '';
-  $('f-caption').value = post.caption || '';
-
-  mediaRows = (post.media || []).map(m => ({ ...m }));
-  deletedMediaUrls = [];
-  renderMediaList();
-}
-
-// ── 投稿の削除 ──
-async function deletePost(id) {
-  if (!confirm('この投稿を削除してもよいですか？')) return;
-  try {
-    await deleteDoc(doc(db, 'posts', id));
-    showToast('投稿を削除しました。');
-    await loadPosts();
-  } catch (e) {
-    showToast('削除に失敗しました。', true);
-    console.error(e);
-  }
-}
-
-// ── メディアリスト ──
+// メディアリスト描画
 function renderMediaList() {
-  const list = $('media-list');
-  list.innerHTML = '';
+  const container = document.getElementById('media-list');
+  container.innerHTML = '';
 
-  mediaRows.forEach((row, idx) => {
-    const rowEl = document.createElement('div');
-    rowEl.className = 'media-row';
+  mediaRows.forEach((row, i) => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'media-row';
+
+    // 削除ボタン
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove-media';
+    removeBtn.textContent = '×';
+    removeBtn.title = 'このメディアを削除';
+    removeBtn.addEventListener('click', () => {
+      if (editPostId && row.url) deletedMediaUrls.push(row.url);
+      mediaRows.splice(i, 1);
+      renderMediaList();
+    });
+    rowDiv.appendChild(removeBtn);
+
+    // ヘッダー（プレビュー + フィールド）
+    const header = document.createElement('div');
+    header.className = 'media-row-header';
 
     // プレビュー
-    let previewHtml = '<span style="font-size:11px;color:#8a7e74;">No media</span>';
+    const preview = document.createElement('div');
+    preview.className = 'preview-wrap';
     if (row.url) {
       if (row.type === 'video') {
-        previewHtml = `<video src="${escHtml(row.url)}" preload="metadata"></video>`;
+        const vid = document.createElement('video');
+        vid.src = row.url;
+        vid.muted = true;
+        vid.preload = 'metadata';
+        preview.appendChild(vid);
       } else {
-        previewHtml = `<img src="${escHtml(row.url)}" alt="">`;
+        const img = document.createElement('img');
+        img.src = row.url;
+        img.alt = '';
+        preview.appendChild(img);
       }
+    } else {
+      preview.textContent = 'No media';
     }
+    header.appendChild(preview);
 
-    const coverChecked = row.isCover ? 'checked' : '';
+    // フィールド群
+    const fields = document.createElement('div');
+    fields.className = 'media-row-fields';
 
-    rowEl.innerHTML = `
-      <button class="btn-remove-media" data-idx="${idx}" title="削除">×</button>
-      <div class="media-row-header">
-        <div class="preview-wrap">${previewHtml}</div>
-        <div class="media-row-fields">
-          <input type="url" class="m-url" placeholder="https://..." value="${escHtml(row.url || '')}">
-          <select class="m-type">
-            <option value="image" ${row.type !== 'video' ? 'selected' : ''}>📷 写真</option>
-            <option value="video" ${row.type === 'video' ? 'selected' : ''}>🎬 動画</option>
-          </select>
-          <textarea class="m-caption" rows="2" placeholder="キャプション（任意）">${escHtml(row.caption || '')}</textarea>
-        </div>
-      </div>
-      <div class="media-row-controls">
-        <label class="cover-checkbox-label">
-          <input type="checkbox" class="m-cover" ${coverChecked}> ★ 代表写真
-        </label>
-        <button class="btn-upload">☁️ アップロード</button>
-        <button class="btn-move" data-dir="up">↑</button>
-        <button class="btn-move" data-dir="down">↓</button>
-        <span class="upload-progress"></span>
-      </div>
-    `;
-
-    list.appendChild(rowEl);
-
-    // URL
-    rowEl.querySelector('.m-url').addEventListener('input', e => {
-      mediaRows[idx].url = e.target.value.trim();
-      updatePreview(rowEl, mediaRows[idx]);
-    });
-    // type
-    rowEl.querySelector('.m-type').addEventListener('change', e => {
-      mediaRows[idx].type = e.target.value;
-    });
-    // caption
-    rowEl.querySelector('.m-caption').addEventListener('input', e => {
-      mediaRows[idx].caption = e.target.value;
-    });
-    // cover
-    rowEl.querySelector('.m-cover').addEventListener('change', e => {
-      mediaRows.forEach((r, i) => r.isCover = (i === idx && e.target.checked));
+    const urlInput = document.createElement('input');
+    urlInput.type = 'url';
+    urlInput.className = 'form-input m-url';
+    urlInput.placeholder = 'https://res.cloudinary.com/...';
+    urlInput.value = row.url || '';
+    urlInput.addEventListener('input', () => {
+      mediaRows[i].url = urlInput.value;
       renderMediaList();
     });
-    // remove
-    rowEl.querySelector('.btn-remove-media').addEventListener('click', () => {
-      if (editPostId && mediaRows[idx].url) {
-        deletedMediaUrls.push(mediaRows[idx].url);
-      }
-      mediaRows.splice(idx, 1);
+    fields.appendChild(urlInput);
+
+    const typeSelect = document.createElement('select');
+    typeSelect.className = 'form-select m-type';
+    [['image', '📷 写真'], ['video', '🎬 動画']].forEach(([val, label]) => {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = label;
+      if (row.type === val) opt.selected = true;
+      typeSelect.appendChild(opt);
+    });
+    typeSelect.addEventListener('change', () => {
+      mediaRows[i].type = typeSelect.value;
+    });
+    fields.appendChild(typeSelect);
+
+    const capTextarea = document.createElement('textarea');
+    capTextarea.className = 'form-textarea m-caption';
+    capTextarea.rows = 9;
+    capTextarea.placeholder = 'このメディアのキャプション（任意）';
+    capTextarea.value = row.caption || '';
+    capTextarea.style.width = '100%';
+    capTextarea.addEventListener('input', () => {
+      mediaRows[i].caption = capTextarea.value;
+    });
+    fields.appendChild(capTextarea);
+
+    header.appendChild(fields);
+    rowDiv.appendChild(header);
+
+    // コントロール行
+    const controls = document.createElement('div');
+    controls.className = 'media-row-controls';
+
+    // 代表写真チェックボックス
+    const coverLabel = document.createElement('label');
+    coverLabel.className = 'cover-checkbox-label';
+    const coverCheck = document.createElement('input');
+    coverCheck.type = 'checkbox';
+    coverCheck.className = 'm-cover';
+    coverCheck.checked = !!row.isCover;
+    coverCheck.addEventListener('change', () => {
+      mediaRows.forEach((r, j) => { r.isCover = j === i && coverCheck.checked; });
       renderMediaList();
     });
-    // upload
-    rowEl.querySelector('.btn-upload').addEventListener('click', () => uploadMedia(idx));
-    // move
-    rowEl.querySelectorAll('.btn-move').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const dir = btn.dataset.dir;
-        if (dir === 'up' && idx > 0) {
-          [mediaRows[idx - 1], mediaRows[idx]] = [mediaRows[idx], mediaRows[idx - 1]];
-          renderMediaList();
-        } else if (dir === 'down' && idx < mediaRows.length - 1) {
-          [mediaRows[idx], mediaRows[idx + 1]] = [mediaRows[idx + 1], mediaRows[idx]];
-          renderMediaList();
-        }
-      });
-    });
+    coverLabel.appendChild(coverCheck);
+    coverLabel.appendChild(document.createTextNode(' ★ 代表写真'));
+    controls.appendChild(coverLabel);
 
-    // 挿入ボタン
+    // アップロードボタン
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'btn btn-secondary btn-small btn-upload';
+    uploadBtn.textContent = '☁️ Cloudinaryにアップロード';
+    const progressSpan = document.createElement('span');
+    progressSpan.className = 'upload-progress';
+    uploadBtn.addEventListener('click', () => uploadMedia(i, progressSpan));
+    controls.appendChild(uploadBtn);
+
+    // 上移動
+    const upBtn = document.createElement('button');
+    upBtn.className = 'btn btn-secondary btn-small btn-move';
+    upBtn.dataset.dir = 'up';
+    upBtn.textContent = '↑';
+    upBtn.disabled = i === 0;
+    upBtn.addEventListener('click', () => {
+      if (i === 0) return;
+      [mediaRows[i - 1], mediaRows[i]] = [mediaRows[i], mediaRows[i - 1]];
+      renderMediaList();
+    });
+    controls.appendChild(upBtn);
+
+    // 下移動
+    const downBtn = document.createElement('button');
+    downBtn.className = 'btn btn-secondary btn-small btn-move';
+    downBtn.dataset.dir = 'down';
+    downBtn.textContent = '↓';
+    downBtn.disabled = i === mediaRows.length - 1;
+    downBtn.addEventListener('click', () => {
+      if (i === mediaRows.length - 1) return;
+      [mediaRows[i + 1], mediaRows[i]] = [mediaRows[i], mediaRows[i + 1]];
+      renderMediaList();
+    });
+    controls.appendChild(downBtn);
+
+    controls.appendChild(progressSpan);
+    rowDiv.appendChild(controls);
+    container.appendChild(rowDiv);
+
+    // 挿入ボタン（各行の下）
     const insertWrap = document.createElement('div');
     insertWrap.className = 'insert-btn-wrap';
     const insertBtn = document.createElement('button');
     insertBtn.className = 'btn-insert';
-    insertBtn.dataset.pos = idx + 1;
-    insertBtn.textContent = '＋ ここに追加';
+    insertBtn.dataset.pos = String(i + 1);
+    insertBtn.textContent = '＋ ここに挿入';
     insertBtn.addEventListener('click', () => {
-      const pos = parseInt(insertBtn.dataset.pos);
-      mediaRows.splice(pos, 0, { url: '', type: 'image', caption: '', isCover: false });
+      mediaRows.splice(i + 1, 0, { url: '', type: 'image', caption: '', isCover: false });
       renderMediaList();
     });
     insertWrap.appendChild(insertBtn);
-    list.appendChild(insertWrap);
+    container.appendChild(insertWrap);
   });
 }
 
-function updatePreview(rowEl, row) {
-  const wrap = rowEl.querySelector('.preview-wrap');
-  if (!row.url) {
-    wrap.innerHTML = '<span style="font-size:11px;color:#8a7e74;">No media</span>';
-    return;
-  }
-  if (row.type === 'video') {
-    wrap.innerHTML = `<video src="${escHtml(row.url)}" preload="metadata"></video>`;
-  } else {
-    wrap.innerHTML = `<img src="${escHtml(row.url)}" alt="">`;
-  }
-}
-
-// ── Cloudinary アップロード ──
-async function uploadMedia(idx) {
-  const rowEl = document.querySelectorAll('.media-row')[idx];
-  const progressEl = rowEl.querySelector('.upload-progress');
-  progressEl.textContent = 'アップロード中…';
-
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*,video/*';
-  input.click();
-
-  input.onchange = async () => {
-    const file = input.files[0];
-    if (!file) { progressEl.textContent = ''; return; }
-
-    const resourceType = file.type.startsWith('video/') ? 'video' : 'image';
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
-
-    try {
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${resourceType}/upload`,
-        { method: 'POST', body: formData }
-      );
-      const data = await res.json();
-      if (data.secure_url) {
-        mediaRows[idx].url = data.secure_url;
-        mediaRows[idx].type = resourceType;
-        renderMediaList();
-        const newRowEl = document.querySelectorAll('.media-row')[idx];
-        const newProgress = newRowEl.querySelector('.upload-progress');
-        newProgress.textContent = '✓ アップロード完了';
-        setTimeout(() => { newProgress.textContent = ''; }, 2000);
-      } else {
-        progressEl.textContent = 'アップロードエラー';
-      }
-    } catch (e) {
-      progressEl.textContent = 'アップロードに失敗しました';
-      console.error(e);
-    }
-  };
-}
-
-// ── メディアを追加 ──
-$('btn-add-media-bottom').addEventListener('click', () => {
+// メディア追加ボタン
+document.getElementById('btn-add-media').addEventListener('click', () => {
   mediaRows.push({ url: '', type: 'image', caption: '', isCover: false });
   renderMediaList();
 });
 
-// ── 投稿の保存 ──
-$('btn-submit').addEventListener('click', () => submitPost());
+// ===== Cloudinaryアップロード =====
+async function uploadMedia(idx, progressEl) {
+  const { cloudName, uploadPreset } = CLOUDINARY_CONFIG;
+  if (!cloudName || cloudName === 'YOUR_CLOUD_NAME') {
+    progressEl.textContent = '⚠ firebase-config.jsのCloudinary設定を入力してください';
+    return;
+  }
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*,video/*';
+  input.addEventListener('change', async () => {
+    const file = input.files[0];
+    if (!file) return;
+
+    const isVideo = file.type.startsWith('video/');
+    const resourceType = isVideo ? 'video' : 'image';
+
+    // 既存URLがあれば削除対象に追記
+    if (mediaRows[idx].url) deletedMediaUrls.push(mediaRows[idx].url);
+
+    progressEl.textContent = 'アップロード中…';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', uploadPreset);
+
+    try {
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+        { method: 'POST', body: formData }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error?.message || 'Upload failed');
+
+      mediaRows[idx].url = data.secure_url;
+      mediaRows[idx].type = isVideo ? 'video' : 'image';
+      progressEl.textContent = '✓ アップロード完了';
+      setTimeout(() => { progressEl.textContent = ''; }, 2000);
+      renderMediaList();
+    } catch (err) {
+      progressEl.textContent = `エラー: ${err.message}`;
+      console.error(err);
+    }
+  });
+  input.click();
+}
+
+// ===== Cloudinary削除（Signed Upload環境では別途実装が必要） =====
+async function deleteFromCloudinary(urls) {
+  const { cloudName } = CLOUDINARY_CONFIG;
+  for (const url of urls) {
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/);
+    if (!match) continue;
+    const publicId = match[1];
+    // Unsigned Upload 環境ではフロントからの削除は原則不可。
+    // Signed Upload に切り替えた場合はここで destroy API を呼ぶ。
+    console.log('[Cloudinary] 削除対象 publicId:', publicId, '/ URL:', url);
+  }
+}
+
+// ===== 投稿保存 =====
+document.getElementById('btn-submit-post').addEventListener('click', submitPost);
 
 async function submitPost() {
-  const countryId = $('f-country').value;
-  const date = $('f-date').value;
-  const title = $('f-title').value.trim();
+  const countryId = document.getElementById('f-country').value;
+  const date = document.getElementById('f-date').value;
+  const title = document.getElementById('f-title').value.trim();
+  const location = document.getElementById('f-location').value.trim();
+  const caption = document.getElementById('f-caption').value.trim();
 
-  if (!countryId) { showToast('国・地域を選択してください。', true); return; }
-  if (!date)      { showToast('日付を入力してください。', true); return; }
-  if (!title)     { showToast('タイトルを入力してください。', true); return; }
+  if (!countryId) { showToast('国を選択してください', true); return; }
+  if (!date) { showToast('日付を入力してください', true); return; }
+  if (!title) { showToast('タイトルを入力してください', true); return; }
 
-  const postData = {
-    countryId,
-    date,
-    title,
-    location: $('f-location').value.trim(),
-    caption:  $('f-caption').value.trim(),
-    media: mediaRows.map(r => ({
-      url:     r.url || '',
-      type:    r.type || 'image',
-      caption: r.caption || '',
-      isCover: r.isCover || false
-    })),
+  const mediaData = mediaRows.map(r => ({
+    url: r.url || '',
+    type: r.type || 'image',
+    caption: r.caption || '',
+    isCover: !!r.isCover
+  }));
+
+  const payload = {
+    countryId, date, title, location, caption,
+    media: mediaData,
     updatedAt: serverTimestamp()
   };
 
   try {
     if (editPostId) {
-      await updateDoc(doc(db, 'posts', editPostId), postData);
-      showToast('投稿を更新しました。');
+      await updateDoc(doc(db, 'posts', editPostId), payload);
+      showToast('投稿を更新しました');
     } else {
-      postData.createdAt = serverTimestamp();
-      await addDoc(collection(db, 'posts'), postData);
-      showToast('投稿しました。');
+      payload.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'posts'), payload);
+      showToast('投稿しました');
     }
+    await deleteFromCloudinary(deletedMediaUrls);
     resetPostForm();
     await loadPosts();
-  } catch (e) {
-    showToast('保存に失敗しました。', true);
-    console.error(e);
+  } catch (err) {
+    console.error(err);
+    showToast('保存に失敗しました: ' + err.message, true);
   }
 }
 
-// ── フォームリセット ──
 function resetPostForm() {
+  document.getElementById('f-country').value = '';
+  document.getElementById('f-date').value = '';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-location').value = '';
+  document.getElementById('f-caption').value = '';
   editPostId = null;
   mediaRows = [];
   deletedMediaUrls = [];
-  $('form-title').textContent = '新規投稿';
-  $('btn-submit').textContent = '投稿する →';
-  $('btn-cancel').style.display = 'none';
-  $('f-country').value = '';
-  $('f-date').value = '';
-  $('f-title').value = '';
-  $('f-location').value = '';
-  $('f-caption').value = '';
   renderMediaList();
+  document.getElementById('post-form-title').textContent = '新規投稿';
+  document.getElementById('btn-submit-post').textContent = '投稿する';
+  document.getElementById('btn-cancel-edit').style.display = 'none';
 }
 
-$('btn-cancel').addEventListener('click', () => {
-  if (confirm('編集をキャンセルしますか？')) resetPostForm();
+document.getElementById('btn-cancel-edit').addEventListener('click', () => {
+  resetPostForm();
 });
 
-// ── 国管理 ──
-function renderCountryList() {
-  const wrap = $('country-list-wrap');
+// ===== 投稿一覧 =====
+document.getElementById('list-country-filter').addEventListener('change', renderPostList);
 
-  // 投稿数マップ
-  const countMap = {};
-  allPosts.forEach(p => {
-    if (p.countryId) countMap[p.countryId] = (countMap[p.countryId] || 0) + 1;
-  });
+function renderPostList() {
+  const container = document.getElementById('post-list-container');
+  const filterVal = document.getElementById('list-country-filter').value;
 
-  if (countries.length === 0) {
-    wrap.innerHTML = '<p style="color:#8a7e74;font-size:13px;padding:12px 0;">国がまだ登録されていません。</p>';
+  const filtered = filterVal
+    ? posts.filter(p => p.countryId === filterVal)
+    : posts;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p style="color:#8a7e74; font-size:14px; text-align:center; padding:24px;">投稿がありません</p>';
     return;
   }
 
-  wrap.innerHTML = countries.map(c => {
-    const count = countMap[c.id] || 0;
-    const canDelete = count === 0;
-    return `<div class="country-list-item" data-id="${escHtml(c.id)}">
-      <div class="country-flag-display">${escHtml(c.flag || '')}</div>
-      <div class="country-list-info">
-        <div class="c-name">${escHtml(c.name)}</div>
-        <div class="c-meta">表示順: ${escHtml(String(c.order ?? ''))} ／ 投稿: ${count}件</div>
-      </div>
-      <div class="country-actions">
-        <button class="btn-secondary btn-sm btn-edit-country" data-id="${escHtml(c.id)}">編集</button>
-        <button class="btn-danger btn-sm btn-delete-country" data-id="${escHtml(c.id)}" ${canDelete ? '' : 'disabled'}>削除</button>
-      </div>
-    </div>`;
-  }).join('');
+  container.innerHTML = '';
+  filtered.forEach(post => {
+    const country = countries.find(c => c.id === post.countryId);
+    const countryName = country ? country.name : '不明';
 
-  wrap.querySelectorAll('.btn-edit-country').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const c = countries.find(x => x.id === btn.dataset.id);
-      if (c) loadCountryForm(c);
+    const mediaCount = (post.media || []).length;
+    const hasCover = (post.media || []).some(m => m.isCover && m.type === 'image');
+
+    // サムネイル取得
+    const coverMedia = (post.media || []).find(m => m.isCover && m.type === 'image')
+      || (post.media || []).find(m => m.type === 'image');
+
+    const item = document.createElement('div');
+    item.className = 'post-list-item';
+
+    // サムネイル
+    const thumb = document.createElement('div');
+    thumb.className = 'post-thumb';
+    if (coverMedia) {
+      const img = document.createElement('img');
+      img.src = coverMedia.url;
+      img.alt = '';
+      img.onerror = () => { thumb.textContent = '📷'; };
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = '📷';
+    }
+    item.appendChild(thumb);
+
+    // 投稿情報
+    const info = document.createElement('div');
+    info.className = 'post-info';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'post-title-text';
+    titleEl.textContent = post.title || '（タイトルなし）';
+    info.appendChild(titleEl);
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'post-meta-text';
+    let metaStr = `${countryName} ／ ${post.date} ／ 📎 ${mediaCount}件`;
+    if (hasCover) metaStr += ' ／ ★代表写真あり';
+    metaEl.textContent = metaStr;
+    info.appendChild(metaEl);
+    item.appendChild(info);
+
+    // アクション
+    const actions = document.createElement('div');
+    actions.className = 'post-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-secondary btn-small';
+    editBtn.textContent = '編集';
+    editBtn.addEventListener('click', () => {
+      editPost(post);
+      // 新規投稿タブへ切り替え
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-tab="new-post"]').classList.add('active');
+      document.getElementById('tab-new-post').classList.add('active');
     });
+    actions.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn btn-danger btn-small';
+    deleteBtn.textContent = '削除';
+    deleteBtn.addEventListener('click', async () => {
+      if (!confirm(`「${post.title}」を削除しますか？`)) return;
+      try {
+        await deleteDoc(doc(db, 'posts', post.id));
+        showToast('削除しました');
+        await loadPosts();
+      } catch (err) {
+        console.error(err);
+        showToast('削除に失敗しました', true);
+      }
+    });
+    actions.appendChild(deleteBtn);
+
+    item.appendChild(actions);
+    container.appendChild(item);
   });
-  wrap.querySelectorAll('.btn-delete-country').forEach(btn => {
-    btn.addEventListener('click', () => deleteCountry(btn.dataset.id));
-  });
 }
 
-function loadCountryForm(c) {
-  editCountryId = c.id;
-  $('country-form-title').textContent = '国を編集';
-  $('edit-country-id').value = c.id;
-  $('c-name').value = c.name || '';
-  $('c-flag').value = c.flag || '';
-  $('c-order').value = c.order ?? 100;
-  $('c-subtitle').value = c.subtitle || '';
-  $('c-description').value = c.description || '';
-  $('btn-cancel-country').style.display = '';
+function editPost(post) {
+  editPostId = post.id;
+  deletedMediaUrls = [];
+
+  document.getElementById('f-country').value = post.countryId || '';
+  document.getElementById('f-date').value = post.date || '';
+  document.getElementById('f-title').value = post.title || '';
+  document.getElementById('f-location').value = post.location || '';
+  document.getElementById('f-caption').value = post.caption || '';
+
+  mediaRows = (post.media || []).map(m => ({ ...m }));
+  renderMediaList();
+
+  document.getElementById('post-form-title').textContent = '投稿を編集';
+  document.getElementById('btn-submit-post').textContent = '更新する';
+  document.getElementById('btn-cancel-edit').style.display = '';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function resetCountryForm() {
-  editCountryId = null;
-  $('country-form-title').textContent = '国を追加';
-  $('edit-country-id').value = '';
-  $('c-name').value = '';
-  $('c-flag').value = '';
-  $('c-order').value = 100;
-  $('c-subtitle').value = '';
-  $('c-description').value = '';
-  $('btn-cancel-country').style.display = 'none';
-}
+// ===== 国管理 =====
+document.getElementById('btn-save-country').addEventListener('click', saveCountry);
+document.getElementById('btn-cancel-country').addEventListener('click', resetCountryForm);
 
-$('btn-save-country').addEventListener('click', async () => {
-  const name = $('c-name').value.trim();
-  if (!name) { showToast('国名を入力してください。', true); return; }
+async function saveCountry() {
+  const editId = document.getElementById('edit-country-id').value;
+  const name = document.getElementById('c-name').value.trim();
+  const flag = document.getElementById('c-flag').value.trim();
+  const order = parseInt(document.getElementById('c-order').value) || 100;
+  const subtitle = document.getElementById('c-subtitle').value.trim();
+  const description = document.getElementById('c-description').value.trim();
 
-  const data = {
-    name,
-    flag:        $('c-flag').value.trim(),
-    order:       parseInt($('c-order').value) || 100,
-    subtitle:    $('c-subtitle').value.trim(),
-    description: $('c-description').value.trim()
-  };
+  if (!name) { showToast('国名を入力してください', true); return; }
+
+  const payload = { name, flag, order, subtitle, description };
 
   try {
-    if (editCountryId) {
-      await updateDoc(doc(db, 'countries', editCountryId), data);
-      showToast('国を更新しました。');
+    if (editId) {
+      await updateDoc(doc(db, 'countries', editId), payload);
+      showToast('国情報を更新しました');
     } else {
-      await addDoc(collection(db, 'countries'), data);
-      showToast('国を追加しました。');
+      await addDoc(collection(db, 'countries'), payload);
+      showToast('国を追加しました');
     }
     resetCountryForm();
     await loadCountries();
-  } catch (e) {
-    showToast('保存に失敗しました。', true);
-    console.error(e);
+  } catch (err) {
+    console.error(err);
+    showToast('保存に失敗しました: ' + err.message, true);
   }
-});
+}
 
-$('btn-cancel-country').addEventListener('click', () => resetCountryForm());
+function resetCountryForm() {
+  document.getElementById('edit-country-id').value = '';
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-flag').value = '';
+  document.getElementById('c-order').value = '100';
+  document.getElementById('c-subtitle').value = '';
+  document.getElementById('c-description').value = '';
+  document.getElementById('country-form-title').textContent = '国を追加';
+  document.getElementById('btn-cancel-country').style.display = 'none';
+}
 
-async function deleteCountry(id) {
-  if (!confirm('この国を削除してもよいですか？')) return;
-  try {
-    await deleteDoc(doc(db, 'countries', id));
-    showToast('国を削除しました。');
-    await loadCountries();
-  } catch (e) {
-    showToast('削除に失敗しました。', true);
-    console.error(e);
+function renderCountryList() {
+  const container = document.getElementById('country-list-container');
+  if (countries.length === 0) {
+    container.innerHTML = '<p style="color:#8a7e74; font-size:14px; text-align:center; padding:24px;">国が登録されていません</p>';
+    return;
   }
+
+  container.innerHTML = '';
+
+  const postCountMap = {};
+  posts.forEach(p => {
+    postCountMap[p.countryId] = (postCountMap[p.countryId] || 0) + 1;
+  });
+
+  countries.forEach(c => {
+    const count = postCountMap[c.id] || 0;
+
+    const item = document.createElement('div');
+    item.className = 'country-list-item';
+
+    const flagEl = document.createElement('span');
+    flagEl.className = 'country-flag-display';
+    flagEl.textContent = c.flag || '🌍';
+    item.appendChild(flagEl);
+
+    const info = document.createElement('div');
+    info.className = 'country-info';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'country-name-admin';
+    nameEl.textContent = c.name;
+    info.appendChild(nameEl);
+    const metaEl = document.createElement('div');
+    metaEl.className = 'country-meta-admin';
+    metaEl.textContent = `表示順: ${c.order} ／ 投稿: ${count}件`;
+    info.appendChild(metaEl);
+    item.appendChild(info);
+
+    const actions = document.createElement('div');
+    actions.className = 'country-actions';
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-secondary btn-small';
+    editBtn.textContent = '編集';
+    editBtn.addEventListener('click', () => {
+      document.getElementById('edit-country-id').value = c.id;
+      document.getElementById('c-name').value = c.name || '';
+      document.getElementById('c-flag').value = c.flag || '';
+      document.getElementById('c-order').value = String(c.order ?? 100);
+      document.getElementById('c-subtitle').value = c.subtitle || '';
+      document.getElementById('c-description').value = c.description || '';
+      document.getElementById('country-form-title').textContent = '国を編集';
+      document.getElementById('btn-cancel-country').style.display = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    actions.appendChild(editBtn);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn btn-danger btn-small';
+    deleteBtn.textContent = '削除';
+    deleteBtn.disabled = count > 0;
+    deleteBtn.title = count > 0 ? '投稿がある国は削除できません' : '';
+    deleteBtn.addEventListener('click', async () => {
+      if (count > 0) return;
+      if (!confirm(`「${c.name}」を削除しますか？`)) return;
+      try {
+        await deleteDoc(doc(db, 'countries', c.id));
+        showToast('削除しました');
+        await loadCountries();
+      } catch (err) {
+        console.error(err);
+        showToast('削除に失敗しました', true);
+      }
+    });
+    actions.appendChild(deleteBtn);
+
+    item.appendChild(actions);
+    container.appendChild(item);
+  });
+}
+
+// ===== トースト =====
+let toastTimer = null;
+function showToast(msg, isError = false) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.toggle('error', isError);
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
