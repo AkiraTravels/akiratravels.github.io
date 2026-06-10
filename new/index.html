@@ -119,15 +119,12 @@
 
       // リンク先決定
       let href;
-      if (countryPosts.length === 0) {
-        href = null;
-      } else if (countryPosts.length === 1 && countryPosts[0].location?.startsWith('https')) {
-        href = countryPosts[0].location;
-      } else {
-        const oldest = countryPosts.slice().sort((a, b) => a.date.localeCompare(b.date))[0];
-        href = countryPosts.length === 1
-          ? `country.html?id=${c.id}`
-          : `country.html?id=${c.id}&post=${oldest.id}`;
+	if (countryPosts.length === 0) {
+	  href = null;
+	} else if (countryPosts.length === 1 && countryPosts[0].location?.startsWith('https')) {
+	  href = countryPosts[0].location;
+	} else {
+  href = `country.html?id=${c.id}`;
       }
 
       const wrap = document.createElement('div');
