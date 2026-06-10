@@ -140,7 +140,7 @@ body {
 
 /* ─── 国別ページ ─── */
 body.country-page {
-  background-attachment: scroll;
+  background-attachment: local;
 }
 
 .country-wrap {
@@ -226,7 +226,7 @@ body.country-page {
   background-color: var(--bg-fallback);
   background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
   background-repeat: repeat;
-  background-attachment: scroll;
+  background-attachment: local;
   z-index: 500;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
