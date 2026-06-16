@@ -3,53 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AKIRA travels ～ だから一人旅はやめられない</title>
-  <META NAME="keywords" CONTENT="旅行,旅行記,一人旅,個人旅行" />
-  <META PROPERTY="og:url" content="https://akiratravels.github.io/"/>
-  <META PROPERTY="og:type" content="website" />
-  <META PROPERTY="og:title" content="AKIRA travels ～ だから一人旅はやめられない"/>
-  <META PROPERTY="og:site_name" content="AKIRA travels ～ だから一人旅はやめられない"/>
-  <META PROPERTY="og:image" content="https://akiratravels.github.io/images/ogp.jpg" />
-  <LINK REL="shortcut icon" HREF="https://akiratravels.github.io/images/at.ico"/>
+  <title>AKIRA travels</title>
+  <meta property="og:url" content="https://akiratravels.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AKIRA travels">
+  <meta property="og:site_name" content="AKIRA travels">
+  <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-  <div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理者</a>
+  </div>
 
   <div class="top-wrap">
     <div class="top-logo">
-      <img
-        src="https://akiratravels.github.io/images/home.gif"
-        alt="AKIRA travels"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
       <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
     </div>
-
-    <div id="country-list-wrap"><p class="loading">読み込み中…</p></div>
-
+    <div id="country-list-wrap">
+      <p class="loading">読み込み中…</p>
+    </div>
     <footer class="top-footer">
       <div class="footer-icons">
         <a href="#" title="PROFILE">
-          <img
-            src="https://akiratravels.github.io/images/i_profile.gif"
-            alt="PROFILE"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="modal-footer-btn" style="display:none;" onclick="/* profile link */">PROFILE</button>
+          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="detail-footer-btn" style="display:none;">PROFILE</button>
         </a>
         <a href="https://www.facebook.com/" target="_blank" rel="noopener" title="Facebook">
-          <img
-            src="https://akiratravels.github.io/images/facebook.png"
-            alt="Facebook"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="modal-footer-btn" style="display:none;">Facebook</button>
+          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="detail-footer-btn" style="display:none;">Facebook</button>
         </a>
-        <a href="https://www.messenger.com/" target="_blank" rel="noopener" title="FB Messenger">
-          <img
-            src="https://akiratravels.github.io/images/i_fb.png"
-            alt="FB Messenger"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="modal-footer-btn" style="display:none;">Messenger</button>
+        <a href="https://www.messenger.com/" target="_blank" rel="noopener" title="Messenger">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="detail-footer-btn" style="display:none;">Messenger</button>
         </a>
       </div>
       <p class="copyright" id="copyright-text"></p>
@@ -61,95 +53,81 @@
     import {
       collection, getDocs, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import {
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // ─── 著作権年 ───
-    const yr = new Date().getFullYear();
+    // 著作権表示
     document.getElementById('copyright-text').textContent =
-      `© 1998–${yr} AKIRA travels. All rights reserved.`;
+      `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
 
-    // ─── 管理者リンク ───
+    // 管理者リンク切り替え
     onAuthStateChanged(auth, user => {
-      const linkText = document.getElementById('admin-link-text');
-      linkText.textContent = user ? '管理画面' : '管理者';
+      document.getElementById('admin-link-text').textContent = user ? '管理画面' : '管理者';
     });
 
-    // ─── データ取得 ───
+    // 国一覧取得・描画
     async function loadCountries() {
       const wrap = document.getElementById('country-list-wrap');
-
       try {
-        const [countriesSnap, postsSnap] = await Promise.all([
-          getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
-          getDocs(collection(db, 'posts'))
-        ]);
-
-        // countryId ごとの投稿リストを集計
-        const postsByCountry = {};
-        postsSnap.forEach(doc => {
-          const p = { id: doc.id, ...doc.data() };
-          if (!postsByCountry[p.countryId]) postsByCountry[p.countryId] = [];
-          postsByCountry[p.countryId].push(p);
-        });
-
+        const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
         const countries = [];
-        countriesSnap.forEach(doc => countries.push({ id: doc.id, ...doc.data() }));
+        snap.forEach(d => countries.push({ id: d.id, ...d.data() }));
 
         if (countries.length === 0) {
           wrap.innerHTML = '<p class="loading">国データがありません</p>';
           return;
         }
 
-        // 2カラムテーブル
         const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.tableLayout = 'fixed';
+
         for (let i = 0; i < countries.length; i += 2) {
           const tr = document.createElement('tr');
-          tr.appendChild(buildCountryCell(countries[i], postsByCountry));
+          tr.appendChild(buildCountryCell(countries[i]));
           if (i + 1 < countries.length) {
-            tr.appendChild(buildCountryCell(countries[i + 1], postsByCountry));
+            tr.appendChild(buildCountryCell(countries[i + 1]));
           } else {
-            // 奇数件のとき空セル
-            const td = document.createElement('td');
-            tr.appendChild(td);
+            tr.appendChild(document.createElement('td'));
           }
           table.appendChild(tr);
         }
 
         wrap.innerHTML = '';
         wrap.appendChild(table);
-
-      } catch (err) {
-        console.error(err);
-        wrap.innerHTML = '<p class="loading">読み込みに失敗しました</p>';
+      } catch (e) {
+        wrap.innerHTML = '<p class="error-msg">データの取得に失敗しました。</p>';
+        console.error(e);
       }
     }
 
-    function buildCountryCell(c, postsByCountry) {
+    function buildCountryCell(c) {
       const td = document.createElement('td');
       td.className = 'country-cell';
 
-      const countryPosts = postsByCountry[c.id] || [];
-
-      // リンク先決定ロジック
-      let href;
-      if (countryPosts.length === 0) {
-        href = null;
-      } else if (countryPosts.length === 1 && countryPosts[0].location?.startsWith('https')) {
-        href = countryPosts[0].location;
-      } else {
-        href = `country.html?id=${c.id}`;
-      }
-
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'country-name-text ' + (countryPosts.length > 0 ? 'has-posts' : 'no-posts');
+      nameSpan.className = 'country-name-text';
+
+      let href = null;
+      if (c.imgUrl) {
+        href = `country.html?id=${c.id}`;
+        nameSpan.classList.add('has-posts');
+      } else if (c.docUrl) {
+        href = c.docUrl;
+        nameSpan.classList.add('has-posts');
+      } else {
+        nameSpan.classList.add('no-posts');
+      }
       nameSpan.textContent = c.name;
 
       if (href) {
         const a = document.createElement('a');
-        a.href = href;
         a.className = 'country-link';
+        a.href = href;
+        if (c.docUrl && !c.imgUrl) {
+          a.target = '_blank';
+          a.rel = 'noopener';
+        }
         a.appendChild(nameSpan);
         td.appendChild(a);
       } else {
@@ -168,6 +146,5 @@
 
     loadCountries();
   </script>
-
 </body>
 </html>
