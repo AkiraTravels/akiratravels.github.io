@@ -6,6 +6,9 @@
   <title>AKIRA travels</title>
   <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body.country-page { background-attachment: local; }
+  </style>
 </head>
 <body class="country-page">
 
@@ -211,107 +214,4 @@
       const captionEl = document.getElementById('detail-caption');
       if (post.caption && post.caption.trim() !== '') {
         captionEl.textContent = post.caption;
-        captionEl.style.display = 'block';
-      } else {
-        captionEl.textContent = '';
-        captionEl.style.display = 'none';
-      }
-
-      const mediaListContainer = document.getElementById('detail-media-list');
-      mediaListContainer.innerHTML = '';
-
-      if (post.media && post.media.length > 0) {
-        post.media.forEach(m => {
-          if (!m.url) return;
-
-          const itemWrap = document.createElement('div');
-          itemWrap.className = 'media-item';
-
-          if (m.type === 'video') {
-            const video = document.createElement('video');
-            
-            video.playsInline = true;
-            video.webkitPlaysInline = true;
-            video.controls = true;
-            video.preload = "metadata";
-            
-            // 新仕様に基づく poster 属性URLの動的置換ロジック
-            if (m.url.includes('/upload/')) {
-              const parts = m.url.split('/upload/');
-              const partA = parts[0] + '/upload/'; // ① 前半部分A
-              const partB = parts[1];              // ① 後半部分B
-              
-              const partC = partA + 'so_0.2/';     // ② 箇所指定C
-              
-              // ③ 箇所指定Cに後半部分Bを連結し、末尾の拡張子をmp4からwebpに置換
-              const webpPath = partB.replace(/\.[^.]+$/, '.webp');
-              video.poster = partC + webpPath;
-            }
-            
-            video.src = m.url;
-
-            video.addEventListener('click', (e) => {
-              if (video.paused) {
-                video.play().catch(err => console.log("Play blocked:", err));
-              } else {
-                video.pause();
-              }
-            });
-
-            itemWrap.appendChild(video);
-          } else {
-            const img = document.createElement('img');
-            img.src = m.url;
-            img.alt = m.caption || post.title || 'Media';
-            img.loading = "lazy";
-            itemWrap.appendChild(img);
-          }
-
-          const capDiv = document.createElement('div');
-          if (m.caption && m.caption.trim() !== '') {
-            capDiv.className = 'media-caption';
-            capDiv.textContent = m.caption;
-          } else {
-            capDiv.className = 'media-spacer-double';
-          }
-          itemWrap.appendChild(capDiv);
-          mediaListContainer.appendChild(itemWrap);
-        });
-      }
-
-      const footerContainer = document.getElementById('detail-footer');
-      footerContainer.innerHTML = '';
-
-      if (idx < allPosts.length - 1) {
-        const nextA = document.createElement('a');
-        nextA.style.cursor = 'pointer';
-        nextA.onclick = () => { window.location.hash = `#post-${idx + 1}`; };
-        nextA.innerHTML = `
-          <img src="https://akiratravels.github.io/images/i_next.gif" alt="次へ" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="fallback-btn" style="display:none;">次へ ▶</button>
-        `;
-        footerContainer.appendChild(nextA);
-      }
-
-      const homeA = document.createElement('a');
-      homeA.href = 'index.html';
-      homeA.innerHTML = `
-        <img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="fallback-btn" style="display:none;">🏠 TOP</button>
-      `;
-      footerContainer.appendChild(homeA);
-
-      const backA = document.createElement('a');
-      backA.style.cursor = 'pointer';
-      backA.onclick = () => { window.history.back(); };
-      backA.innerHTML = `
-        <img src="https://akiratravels.github.io/images/i_last.gif" alt="戻る" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="fallback-btn" style="display:none;">◀ 戻る</button>
-      `;
-      footerContainer.appendChild(backA);
-    }
-
-    init();
-  </script>
-</body>
-</html>
+        captionEl.style.display = '
