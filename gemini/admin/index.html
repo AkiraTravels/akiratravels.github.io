@@ -7,15 +7,16 @@
   <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
+
   <header class="admin-header">
     <div class="admin-header-title">AKIRA travels <span>ADMIN</span></div>
-    <div id="header-user" style="display:none;">
+    <div id="header-user" style="display: none;">
       <span id="header-email"></span>
       <button id="btn-logout">ログアウト</button>
     </div>
   </header>
-  
-  <div id="login-screen" style="display:none;">
+
+  <div id="login-screen" style="display: none;">
     <div class="login-card">
       <h2>管理者ログイン</h2>
       <div class="login-field">
@@ -30,14 +31,14 @@
       <p id="login-error"></p>
     </div>
   </div>
-  
-  <div id="admin-main" style="display:none;">
+
+  <div id="admin-main" style="display: none;">
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="new-post">✏️ 新規投稿</button>
       <button class="tab-btn" data-tab="post-list">📋 投稿一覧</button>
       <button class="tab-btn" data-tab="country-mgmt">🌍 国管理</button>
     </div>
-    
+
     <div id="tab-new-post" class="tab-panel active">
       <div class="form-card">
         <h2 id="form-title">新規投稿</h2>
@@ -72,7 +73,7 @@
         </div>
       </div>
     </div>
-    
+
     <div id="tab-post-list" class="tab-panel">
       <div class="list-filter-bar">
         <label for="list-country-filter">国フィルター:</label>
@@ -80,7 +81,7 @@
       </div>
       <div id="post-list-container"></div>
     </div>
-    
+
     <div id="tab-country-mgmt" class="tab-panel">
       <div class="country-form-card">
         <h2 id="country-form-title">国を追加</h2>
@@ -114,7 +115,7 @@
       <div id="country-list-container"></div>
     </div>
   </div>
-  
+
   <div id="toast" class="toast"></div>
 
   <script type="module" src="./index.js"></script>
