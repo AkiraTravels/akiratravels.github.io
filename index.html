@@ -13,138 +13,130 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div id="admin-link">
-    <a href="admin/" id="admin-link-text">管理者</a>
+
+<div id="admin-link">
+  <a href="admin/" id="admin-link-text">管理者</a>
+</div>
+
+<div class="top-wrap">
+  <div class="top-logo">
+    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
   </div>
 
-  <div class="top-wrap">
-    <div class="top-logo">
-      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
-    </div>
-    <div id="country-list-wrap">
-      <p class="loading">読み込み中…</p>
-    </div>
-    <footer class="top-footer">
-      <div class="footer-icons">
-        <a href="#" title="PROFILE">
-          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="detail-footer-btn" style="display:none;">PROFILE</button>
-        </a>
-        <a href="https://www.facebook.com/" target="_blank" rel="noopener" title="Facebook">
-          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="detail-footer-btn" style="display:none;">Facebook</button>
-        </a>
-        <a href="https://www.messenger.com/" target="_blank" rel="noopener" title="Messenger">
-          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="detail-footer-btn" style="display:none;">Messenger</button>
-        </a>
-      </div>
-      <p class="copyright" id="copyright-text"></p>
-    </footer>
+  <div id="country-list-wrap">
+    <p class="loading" id="loading-msg">読み込み中…</p>
   </div>
 
-  <script type="module">
-    import { db, auth } from './js/firebase-config.js';
-    import {
-      collection, getDocs, query, orderBy
-    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  <footer class="top-footer">
+    <div class="footer-icons">
+      <a href="#" title="PROFILE">
+        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="detail-footer-btn" style="display:none;">PROFILE</button>
+      </a>
+      <a href="https://www.facebook.com/" target="_blank" rel="noopener" title="Facebook">
+        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="detail-footer-btn" style="display:none;">Facebook</button>
+      </a>
+      <a href="https://www.messenger.com/" target="_blank" rel="noopener" title="Messenger">
+        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="detail-footer-btn" style="display:none;">Messenger</button>
+      </a>
+    </div>
+    <p class="copyright" id="copyright-text"></p>
+  </footer>
+</div>
 
-    // 著作権表示
-    document.getElementById('copyright-text').textContent =
-      `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
+<script type="module">
+import { db, auth } from './js/firebase-config.js';
+import {
+  collection, getDocs, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // 管理者リンク切り替え
-    onAuthStateChanged(auth, user => {
-      document.getElementById('admin-link-text').textContent = user ? '管理画面' : '管理者';
-    });
+// 著作権表示
+document.getElementById('copyright-text').textContent =
+  `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
 
-    // 国一覧取得・描画
-    async function loadCountries() {
-      const wrap = document.getElementById('country-list-wrap');
-      try {
-        const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
-        const snap = await getDocs(q);
-        const countries = [];
-        snap.forEach(d => countries.push({ id: d.id, ...d.data() }));
+// 認証状態の監視
+onAuthStateChanged(auth, user => {
+  document.getElementById('admin-link-text').textContent = user ? '管理画面' : '管理者';
+});
 
-        if (countries.length === 0) {
-          wrap.innerHTML = '<p class="loading">国データがありません</p>';
-          return;
-        }
+// 国一覧の取得と描画
+async function loadCountries() {
+  const wrap = document.getElementById('country-list-wrap');
+  try {
+    const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
+    const snap = await getDocs(q);
+    const countries = [];
+    snap.forEach(doc => countries.push({ id: doc.id, ...doc.data() }));
 
-        const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.tableLayout = 'fixed';
+    wrap.innerHTML = '';
 
-        for (let i = 0; i < countries.length; i += 2) {
-          const tr = document.createElement('tr');
-          tr.appendChild(buildCountryCell(countries[i]));
-          if (i + 1 < countries.length) {
-            tr.appendChild(buildCountryCell(countries[i + 1]));
-          } else {
-            tr.appendChild(document.createElement('td'));
-          }
-          table.appendChild(tr);
-        }
-
-        wrap.innerHTML = '';
-        wrap.appendChild(table);
-      } catch (e) {
-        wrap.innerHTML = '<p class="error-msg">データの取得に失敗しました。</p>';
-        console.error(e);
-      }
+    if (countries.length === 0) {
+      wrap.innerHTML = '<p class="loading">国データがありません</p>';
+      return;
     }
 
-    function buildCountryCell(c) {
-      const td = document.createElement('td');
-      td.className = 'country-cell';
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'country-name-text';
-
-      let href = null;
-      if (c.imgUrl) {
-        href = `country.html?id=${c.id}`;
-        nameSpan.classList.add('has-posts');
-      } else if (c.docUrl) {
-        href = c.docUrl;
-        nameSpan.classList.add('has-posts');
+    const table = document.createElement('table');
+    for (let i = 0; i < countries.length; i += 2) {
+      const tr = document.createElement('tr');
+      tr.appendChild(buildCountryCell(countries[i]));
+      if (i + 1 < countries.length) {
+        tr.appendChild(buildCountryCell(countries[i + 1]));
       } else {
-        nameSpan.classList.add('no-posts');
+        tr.appendChild(document.createElement('td'));
       }
-      nameSpan.textContent = c.name;
-
-      if (href) {
-        const a = document.createElement('a');
-        a.className = 'country-link';
-        a.href = href;
-        if (c.docUrl && !c.imgUrl) {
-          a.target = '_blank';
-          a.rel = 'noopener';
-        }
-        a.appendChild(nameSpan);
-        td.appendChild(a);
-      } else {
-        td.appendChild(nameSpan);
-      }
-
-      if (c.subtitle) {
-        const sub = document.createElement('span');
-        sub.className = 'country-subtitle';
-        sub.textContent = c.subtitle;
-        td.appendChild(sub);
-      }
-
-      return td;
+      table.appendChild(tr);
     }
+    wrap.appendChild(table);
+  } catch (err) {
+    wrap.innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
+    console.error(err);
+  }
+}
 
-    loadCountries();
-  </script>
+function buildCountryCell(c) {
+  const td = document.createElement('td');
+  td.className = 'country-cell';
+
+  const hasLink = c.imgUrl || c.docUrl;
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
+  nameSpan.textContent = c.name;
+
+  if (hasLink) {
+    const a = document.createElement('a');
+    a.className = 'country-link';
+    if (c.imgUrl) {
+      a.href = `country.html?id=${c.id}`;
+    } else {
+      a.href = c.docUrl;
+      a.target = '_blank';
+      a.rel = 'noopener';
+    }
+    a.appendChild(nameSpan);
+    td.appendChild(a);
+  } else {
+    td.appendChild(nameSpan);
+  }
+
+  if (c.subtitle) {
+    const sub = document.createElement('span');
+    sub.className = 'country-subtitle';
+    sub.textContent = c.subtitle;
+    td.appendChild(sub);
+  }
+
+  return td;
+}
+
+loadCountries();
+</script>
 </body>
 </html>

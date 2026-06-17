@@ -13,7 +13,7 @@
   --font-sans:  "Montserrat", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-sans);
@@ -23,7 +23,7 @@ body {
   min-height: 100vh;
 }
 
-/* ─── ヘッダー ─── */
+/* ヘッダー */
 .admin-header {
   background: var(--ink); color: #fff;
   padding: 14px 24px;
@@ -45,7 +45,7 @@ body {
 }
 #btn-logout:hover { background: rgba(255,255,255,0.22); }
 
-/* ─── ログイン画面 ─── */
+/* ログイン画面 */
 #login-screen {
   display: flex; align-items: center; justify-content: center;
   min-height: calc(100vh - 60px); padding: 24px;
@@ -62,7 +62,6 @@ body {
   width: 100%; padding: 10px 12px; border: 1px solid var(--border);
   border-radius: var(--radius); font-family: var(--font-sans); font-size: 14px;
   color: var(--ink); background: var(--paper); transition: border-color 0.2s;
-  box-sizing: border-box;
 }
 .login-field input:focus { outline: none; border-color: var(--accent); }
 #btn-login {
@@ -74,7 +73,7 @@ body {
 #btn-login:hover { background: #2d2520; }
 #login-error { color: #8b2020; font-size: 13px; margin-top: 12px; text-align: center; min-height: 20px; }
 
-/* ─── メインコンテンツ・タブバー ─── */
+/* メインコンテンツ・タブバー */
 #admin-main { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
 
 .tab-bar {
@@ -93,7 +92,7 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* ─── カード・フォーム要素 ─── */
+/* カード・フォーム要素 */
 .form-card, .country-form-card {
   background: var(--card-bg); border: 1px solid var(--border);
   box-shadow: var(--shadow); border-radius: var(--radius);
@@ -105,16 +104,11 @@ body {
 }
 .form-row { margin-bottom: 16px; }
 .form-row label { display: block; font-size: 11px; letter-spacing: 0.12em; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; }
-.form-row input[type="text"],
-input[type="date"],
-input[type="url"],
-input[type="number"],
-.form-row select,
-.form-row textarea {
+.form-row input[type="text"], input[type="date"], input[type="url"], input[type="number"],
+.form-row select, .form-row textarea {
   width: 100%; padding: 9px 12px; border: 1px solid var(--border);
   border-radius: var(--radius); font-family: var(--font-sans);
   font-size: 14px; color: var(--ink); background: var(--paper); transition: border-color 0.2s;
-  box-sizing: border-box;
 }
 .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
   outline: none; border-color: var(--accent);
@@ -122,7 +116,7 @@ input[type="number"],
 .form-row textarea { resize: vertical; line-height: 1.6; }
 .form-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 
-/* ─── ボタン ─── */
+/* ボタン */
 .btn-primary {
   padding: 10px 24px; background: var(--ink); color: #fff;
   border: none; border-radius: var(--radius);
@@ -140,55 +134,55 @@ input[type="number"],
 .btn-secondary:hover { color: var(--ink); }
 
 .btn-danger {
-  padding: 6px 14px; background: transparent; color: #8b2020;
+  padding: 8px 16px; background: transparent; color: #8b2020;
   border: 1px solid #d0a0a0; border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px;
+  font-family: var(--font-sans); font-size: 12px;
   cursor: pointer; transition: background 0.2s;
 }
-.btn-danger:hover:not(:disabled) { background: #fff0f0; }
+.btn-danger:hover { background: #fff0f0; }
 .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .btn-edit {
-  padding: 6px 14px; background: transparent; color: var(--ink);
+  padding: 8px 16px; background: transparent; color: var(--ink);
   border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px;
+  font-family: var(--font-sans); font-size: 12px;
   cursor: pointer; transition: background 0.2s;
 }
-.btn-edit:hover { background: rgba(0,0,0,0.04); }
+.btn-edit:hover { background: var(--paper); }
 
 .btn-upload {
-  padding: 6px 12px; background: var(--accent); color: #fff;
+  padding: 7px 14px; background: var(--accent); color: #fff;
   border: none; border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 12px;
-  cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
+  cursor: pointer; transition: background 0.2s;
 }
-.btn-upload:hover { opacity: 0.85; }
+.btn-upload:hover { background: #b07030; }
 
 .btn-move {
-  padding: 4px 10px; background: transparent; color: var(--muted);
+  padding: 5px 10px; background: transparent; color: var(--muted);
   border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px;
+  font-family: var(--font-sans); font-size: 12px;
   cursor: pointer;
 }
 .btn-move:hover { color: var(--ink); }
 
 .btn-add-media {
-  width: 100%; padding: 10px; background: transparent;
-  border: 1px dashed var(--border); border-radius: var(--radius);
+  width: 100%; padding: 12px; background: transparent;
+  border: 2px dashed var(--border); border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 13px; color: var(--muted);
   cursor: pointer; margin-top: 8px; transition: color 0.2s, border-color 0.2s;
 }
 .btn-add-media:hover { color: var(--accent); border-color: var(--accent); }
 
 .btn-insert {
-  padding: 3px 12px; background: transparent; color: var(--muted);
+  padding: 4px 16px; background: transparent;
   border: 1px dashed var(--border); border-radius: 10px;
-  font-family: var(--font-sans); font-size: 11px;
+  font-family: var(--font-sans); font-size: 11px; color: var(--muted);
   cursor: pointer; transition: color 0.2s, border-color 0.2s;
 }
 .btn-insert:hover { color: var(--accent); border-color: var(--accent); }
 
-/* ─── メディアリスト ─── */
+/* メディアリスト */
 .media-row {
   position: relative; background: var(--paper);
   border: 1px solid var(--border); border-radius: var(--radius);
@@ -215,7 +209,7 @@ input[type="number"],
 .upload-progress.error   { color: #8b2020; }
 .insert-btn-wrap { text-align: center; margin: 4px 0; }
 
-/* ─── 投稿一覧 ─── */
+/* 投稿一覧 */
 .list-filter-bar { margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 .post-list-item {
   background: var(--card-bg); border: 1px solid var(--border);
@@ -234,7 +228,7 @@ input[type="number"],
 .post-meta-text { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .post-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-/* ─── 国管理 ─── */
+/* 国管理 */
 .country-list-item {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 14px;
@@ -247,7 +241,7 @@ input[type="number"],
 .country-item-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
 .country-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-/* ─── トースト通知 ─── */
+/* トースト通知 */
 .toast {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(20px);
@@ -261,17 +255,7 @@ input[type="number"],
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.error { background: #8b2020; }
 
-/* ─── m-url / m-type / m-caption の入力欄（media-row内） ─── */
-.m-url, .m-type, .m-caption {
-  width: 100%; padding: 7px 10px; border: 1px solid var(--border);
-  border-radius: var(--radius); font-family: var(--font-sans);
-  font-size: 13px; color: var(--ink); background: var(--paper);
-  box-sizing: border-box;
-}
-.m-url:focus, .m-type:focus, .m-caption:focus { outline: none; border-color: var(--accent); }
-.m-caption { resize: vertical; line-height: 1.5; }
-
-/* ─── レスポンシブ ─── */
+/* レスポンシブ */
 @media (max-width: 600px) {
   .admin-header { padding: 12px 16px; }
   #admin-main { padding: 0 10px 40px; }

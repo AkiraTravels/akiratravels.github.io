@@ -3,10 +3,10 @@
   --orange:     #cc6600;
   --gray:       #aaaaaa;
   --bg-fallback:#f0e0c8;
-  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Yu Gothic", "游ゴシック", Meiryo, "MS PGothic", sans-serif;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-main);
@@ -17,9 +17,11 @@ body {
   background-repeat: repeat;
 }
 
-body.country-page { background-attachment: local; }
+body.country-page {
+  background-attachment: local;
+}
 
-/* ─── 管理者リンク ─── */
+/* 管理者リンク */
 #admin-link {
   position: fixed; top: 10px; right: 12px; z-index: 100;
   font-size: 11px; color: var(--gray);
@@ -29,7 +31,7 @@ body.country-page { background-attachment: local; }
 }
 #admin-link a { color: var(--gray); text-decoration: none; }
 
-/* ─── トップページ ─── */
+/* トップページレイアウト */
 .top-wrap { max-width: 480px; margin: 0 auto; }
 .top-logo { text-align: center; padding: 24px 16px 16px; }
 .top-logo img { max-width: 280px; height: auto; }
@@ -43,7 +45,7 @@ body.country-page { background-attachment: local; }
 
 /* 国名テキスト */
 .country-name-text {
-  font-family: "Hiragino Mincho ProN", "ヒラギノ明朝 ProN W3", "Yu Mincho", "游明朝", "HGS明朝E", Meiryo, sans-serif;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Yu Gothic", "游ゴシック", Meiryo, "MS PGothic", sans-serif;
   font-feature-settings: "palt";
   font-weight: bold;
   font-size: 22px;
@@ -52,24 +54,18 @@ body.country-page { background-attachment: local; }
 @media (min-width: 600px) {
   .country-name-text { font-size: 26px; }
 }
-@supports (-webkit-touch-callout: none) {
-  .country-name-text {
-    font-family: "Hiragino Sans", "ヒラギノ角ゴシック", sans-serif;
-  }
-}
 .country-subtitle {
-  font-family: "Hiragino Mincho ProN", "ヒラギノ明朝 ProN W3", "Yu Mincho", "游明朝", serif;
-  font-size: 13px; color: #7a5a20; display: block; margin-top: 2px;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", "Yu Gothic", "游ゴシック", Meiryo, "MS PGothic", sans-serif;
+  font-size: 15px; font-weight: bold; color: #7a5a20; display: block; margin-top: 2px;
 }
 .country-name-text.has-posts { color: #cc6600; }
 .country-name-text.no-posts  { color: #aaaaaa; }
 a.country-link { text-decoration: none; color: inherit; }
 
-/* ─── 国別ページ ─── */
+/* 国別ページレイアウト */
 .country-wrap { max-width: 600px; margin: 0 auto; }
 .country-header {
-  background: transparent;
-  padding: 24px 16px 12px;
+  background: transparent; padding: 24px 16px 12px;
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 .country-title { text-align: center; font-size: 1.4em; font-weight: bold; color: var(--brown); }
@@ -97,19 +93,20 @@ a.country-link { text-decoration: none; color: inherit; }
 }
 @media (max-width: 599px) { .chain-separator { width: 85%; } }
 
-/* ─── 詳細画面 ─── */
-#detail-screen {
+/* 詳細画面 */
+.detail-view {
   display: none;
   background-color: var(--bg-fallback);
   background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
-  background-repeat: repeat;
-  background-attachment: local;
+  background-repeat: repeat; background-attachment: local;
+  min-height: 100vh;
 }
 
 @media (min-width: 900px) {
   .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
 }
 
+/* スティッキーバー */
 .detail-sticky-bar {
   position: sticky; top: 0; z-index: 510;
   background: rgba(255, 255, 255, 0.92);
@@ -120,17 +117,19 @@ a.country-link { text-decoration: none; color: inherit; }
 .detail-sticky-title { font-size: 18px; font-weight: bold; color: var(--brown); }
 .detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
 
+/* キャプション */
 .detail-caption {
   font-size: 17px; color: var(--brown); font-weight: normal;
   line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 20px;
-  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 
+/* メディア */
 .media-item img, .media-item video { width: 100%; display: block; }
 .media-item video { background: #000; cursor: pointer; }
 .media-caption { font-size: 16px; color: #7a5a20; padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; }
 
+/* 詳細画面フッター */
 .detail-footer {
   padding: 24px 16px 40px;
   display: flex; justify-content: center; align-items: center; gap: 16px;
@@ -145,7 +144,7 @@ a.country-link { text-decoration: none; color: inherit; }
 }
 .detail-copyright { text-align: center; font-size: 13px; color: #7a5a20; padding: 0 16px 20px; }
 
-/* ─── フッター共通 ─── */
+/* フッター共通 */
 .top-footer    { padding-top: 20px; text-align: center; }
 .country-footer{ padding: 20px 16px 0; text-align: center; }
 .footer-icons  { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px 0; }
@@ -153,6 +152,6 @@ a.country-link { text-decoration: none; color: inherit; }
 .footer-icons img { height: 32px; }
 .copyright     { font-size: 12px; color: #7a5a20; padding: 8px 0 0; }
 
-/* ─── ユーティリティ ─── */
+/* ユーティリティ */
 .loading   { text-align: center; padding: 40px 16px; color: var(--gray); font-size: 15px; }
 .error-msg { text-align: center; padding: 40px 16px; color: #8b2020;   font-size: 15px; }
