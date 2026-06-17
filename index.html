@@ -4,139 +4,172 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AKIRA travels</title>
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
+  <link rel="stylesheet" href="css/style.css">
   <meta property="og:url" content="https://akiratravels.github.io/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="AKIRA travels">
   <meta property="og:site_name" content="AKIRA travels">
   <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
-  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
-  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<div id="admin-link">
-  <a href="admin/" id="admin-link-text">管理者</a>
-</div>
-
-<div class="top-wrap">
-  <div class="top-logo">
-    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理者</a>
   </div>
 
-  <div id="country-list-wrap">
-    <p class="loading" id="loading-msg">読み込み中…</p>
-  </div>
-
-  <footer class="top-footer">
-    <div class="footer-icons">
-      <a href="#" title="PROFILE">
-        <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="detail-footer-btn" style="display:none;">PROFILE</button>
-      </a>
-      <a href="https://www.facebook.com/" target="_blank" rel="noopener" title="Facebook">
-        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="detail-footer-btn" style="display:none;">Facebook</button>
-      </a>
-      <a href="https://www.messenger.com/" target="_blank" rel="noopener" title="Messenger">
-        <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="detail-footer-btn" style="display:none;">Messenger</button>
-      </a>
+  <div class="top-wrap">
+    <div class="top-logo">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
     </div>
-    <p class="copyright" id="copyright-text"></p>
-  </footer>
-</div>
 
-<script type="module">
-import { db, auth } from './js/firebase-config.js';
-import {
-  collection, getDocs, query, orderBy
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    <div id="country-list-wrap">
+      <div class="loading" id="loading-countries">読み込み中…</div>
+    </div>
 
-// 著作権表示
-document.getElementById('copyright-text').textContent =
-  `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <a href="#" title="PROFILE">
+          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">PROFILE</button>
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">Facebook</button>
+        </a>
+        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">Messenger</button>
+        </a>
+      </div>
+      <p class="copyright" id="copyright-text"></p>
+    </footer>
+  </div>
 
-// 認証状態の監視
-onAuthStateChanged(auth, user => {
-  document.getElementById('admin-link-text').textContent = user ? '管理画面' : '管理者';
-});
+  <script type="module">
+    import { db, auth } from "./js/firebase-config.js";
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-// 国一覧の取得と描画
-async function loadCountries() {
-  const wrap = document.getElementById('country-list-wrap');
-  try {
-    const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
-    const snap = await getDocs(q);
-    const countries = [];
-    snap.forEach(doc => countries.push({ id: doc.id, ...doc.data() }));
+    // 著作権年の動的設定
+    const currentYear = new Date().getFullYear();
+    document.getElementById('copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
-    wrap.innerHTML = '';
-
-    if (countries.length === 0) {
-      wrap.innerHTML = '<p class="loading">国データがありません</p>';
-      return;
-    }
-
-    const table = document.createElement('table');
-    for (let i = 0; i < countries.length; i += 2) {
-      const tr = document.createElement('tr');
-      tr.appendChild(buildCountryCell(countries[i]));
-      if (i + 1 < countries.length) {
-        tr.appendChild(buildCountryCell(countries[i + 1]));
+    // 認証監視による管理者リンク文字切り替え
+    onAuthStateChanged(auth, (user) => {
+      const linkText = document.getElementById('admin-link-text');
+      if (user) {
+        linkText.textContent = "管理画面";
       } else {
-        tr.appendChild(document.createElement('td'));
+        linkText.textContent = "管理者";
       }
-      table.appendChild(tr);
+    });
+
+    // 国データの取得と描画
+    async function initCountries() {
+      const wrap = document.getElementById('country-list-wrap');
+      try {
+        const q = query(collection(db, "countries"), orderBy("order", "asc"));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          wrap.innerHTML = '<div class="loading">国データがありません</div>';
+          return;
+        }
+
+        const countries = [];
+        snapshot.forEach(doc => {
+          countries.push({ id: doc.id, ...doc.data() });
+        });
+
+        wrap.innerHTML = '';
+        const table = document.createElement('table');
+        
+        let tr = null;
+        countries.forEach((country, idx) => {
+          if (idx % 2 === 0) {
+            tr = document.createElement('tr');
+            table.appendChild(tr);
+          }
+          
+          const td = buildCountryCell(country);
+          tr.appendChild(td);
+        });
+
+        // 奇数の場合は右側を空のtdで埋める
+        if (countries.length % 2 !== 0 && tr) {
+          const emptyTd = document.createElement('td');
+          emptyTd.className = 'country-cell';
+          tr.appendChild(emptyTd);
+        }
+
+        wrap.appendChild(table);
+
+      } catch (err) {
+        console.error(err);
+        wrap.innerHTML = '<div class="error-msg">データの取得に失敗しました。</div>';
+      }
     }
-    wrap.appendChild(table);
-  } catch (err) {
-    wrap.innerHTML = '<p class="error-msg">データの読み込みに失敗しました。</p>';
-    console.error(err);
-  }
-}
 
-function buildCountryCell(c) {
-  const td = document.createElement('td');
-  td.className = 'country-cell';
+    function buildCountryCell(country) {
+      const td = document.createElement('td');
+      td.className = 'country-cell';
 
-  const hasLink = c.imgUrl || c.docUrl;
-  const nameSpan = document.createElement('span');
-  nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
-  nameSpan.textContent = c.name;
+      let hasLink = false;
+      let href = '';
+      let textClass = 'no-posts';
 
-  if (hasLink) {
-    const a = document.createElement('a');
-    a.className = 'country-link';
-    if (c.imgUrl) {
-      a.href = `country.html?id=${c.id}`;
-    } else {
-      a.href = c.docUrl;
-      a.target = '_blank';
-      a.rel = 'noopener';
+      if (country.imgUrl) {
+        href = `country.html?id=${country.id}`;
+        hasLink = true;
+        textClass = 'has-posts';
+      } else if (country.docUrl) {
+        href = country.docUrl;
+        hasLink = true;
+        textClass = 'has-posts';
+      }
+
+      let nameEl;
+      if (hasLink) {
+        const a = document.createElement('a');
+        a.className = 'country-link';
+        a.href = href;
+        if (country.docUrl && !country.imgUrl) {
+          a.target = '_blank';
+          a.rel = 'noopener';
+        }
+        
+        const span = document.createElement('span');
+        span.className = `country-name-text ${textClass}`;
+        span.textContent = country.name;
+        
+        a.appendChild(span);
+        nameEl = a;
+      } else {
+        const span = document.createElement('span');
+        span.className = `country-name-text ${textClass}`;
+        span.textContent = country.name;
+        nameEl = span;
+      }
+
+      td.appendChild(nameEl);
+
+      if (country.subtitle) {
+        const subSpan = document.createElement('span');
+        subSpan.className = 'country-subtitle';
+        subSpan.textContent = country.subtitle;
+        td.appendChild(subSpan);
+      }
+
+      return td;
     }
-    a.appendChild(nameSpan);
-    td.appendChild(a);
-  } else {
-    td.appendChild(nameSpan);
-  }
 
-  if (c.subtitle) {
-    const sub = document.createElement('span');
-    sub.className = 'country-subtitle';
-    sub.textContent = c.subtitle;
-    td.appendChild(sub);
-  }
-
-  return td;
-}
-
-loadCountries();
-</script>
+    initCountries();
+  </script>
 </body>
 </html>
