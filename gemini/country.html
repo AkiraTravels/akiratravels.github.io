@@ -65,6 +65,7 @@
       }
 
       try {
+        // 1. Firestoreからのデータ並行取得
         const [countrySnap, postsSnap] = await Promise.all([
           getDoc(doc(db, 'countries', countryId)),
           getDocs(query(collection(db, 'posts'), where('countryId', '==', countryId), orderBy('date', 'asc')))
@@ -82,13 +83,15 @@
           allPosts.push({ id: d.id, ...d.data() });
         });
 
+        // 2. セッションストレージへの保存（容量オーバーやエラーで画面全体をクラッシュさせないよう完全隔離）
         try {
           sessionStorage.setItem(`country_${countryId}`, JSON.stringify(currentCountry));
           sessionStorage.setItem(`posts_${countryId}`, JSON.stringify(allPosts));
         } catch (e) {
-          console.warn("sessionStorage cache write bypassed:", e);
+          console.warn("sessionStorageの書き込みをスキップしました（容量超過または制限環境）:", e);
         }
 
+        // 3. タイトル・ヘッダー情報の割当
         document.title = `${currentCountry.name || '国別ページ'} — AKIRA travels`;
         document.getElementById('country-title').textContent = currentCountry.name || '';
         document.getElementById('country-description').textContent = currentCountry.description || '';
@@ -97,18 +100,21 @@
         document.getElementById('country-copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
         document.getElementById('detail-copyright').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
+        // 4. 各コンポーネントのレンダリング
         renderCoverPhoto();
         renderChain();
 
+        // 5. ルーティング初期化
         window.removeEventListener('hashchange', router);
         window.addEventListener('hashchange', router);
         router();
 
+        // 6. すべての処理が正常完了したら、ローディング画面を非表示にする
         document.getElementById('loading-msg').style.display = 'none';
 
       } catch (err) {
-        console.error("Fatal Error:", err);
-        showError(`データの取得または処理中にエラーが発生しました: ${err.message || err}`);
+        console.error("Fatal Error during init:", err);
+        showError(`データの初期化中にエラーが発生しました: ${err.message || err}`);
       }
     }
 
@@ -163,9 +169,15 @@
           const nextPost = allPosts[i + 1];
           let diffDays = 0;
           
+          // 修正点①: 日付の存在チェックと「Invalid Date (NaN)」に対する完全な安全弁
           if (post.date && nextPost.date) {
-            const diffTime = Math.abs(new Date(nextPost.date) - new Date(post.date));
-            diffDays = diffTime / (1000 * 60 * 60 * 24);
+            const d1 = new Date(post.date);
+            const d2 = new Date(nextPost.date);
+            
+            if (!isNaN(d1.getTime()) && !isNaN(d2.getTime())) {
+              const diffTime = Math.abs(d2 - d1);
+              diffDays = diffTime / (1000 * 60 * 60 * 24);
+            }
           }
 
           const sepItem = document.createElement('div');
@@ -214,4 +226,99 @@
       const captionEl = document.getElementById('detail-caption');
       if (post.caption && post.caption.trim() !== '') {
         captionEl.textContent = post.caption;
-        captionEl.style.display = '
+        captionEl.style.display = 'block';
+      } else {
+        captionEl.textContent = '';
+        captionEl.style.display = 'none';
+      }
+
+      const mediaListContainer = document.getElementById('detail-media-list');
+      mediaListContainer.innerHTML = '';
+
+      if (post.media && post.media.length > 0) {
+        post.media.forEach(m => {
+          if (!m.url) return;
+
+          const itemWrap = document.createElement('div');
+          itemWrap.className = 'media-item';
+
+          if (m.type === 'video') {
+            const video = document.createElement('video');
+            
+            video.playsInline = true;
+            video.webkitPlaysInline = true;
+            video.controls = true;
+            video.preload = "metadata";
+            
+            if (m.url.includes('/upload/')) {
+              const parts = m.url.split('/upload/');
+              const partA = parts[0] + '/upload/';
+              const partB = parts[1];
+              const partC = partA + 'so_0.2/';
+              const webpPath = partB.replace(/\.[^.]+$/, '.webp');
+              video.poster = partC + webpPath;
+            }
+            
+            // iPhoneでのロード競合による斜線化を防ぐ遅延評価
+            setTimeout(() => {
+              video.src = m.url;
+            }, 50);
+
+            itemWrap.appendChild(video);
+          } else {
+            const img = document.createElement('img');
+            img.src = m.url;
+            img.alt = m.caption || post.title || 'Media';
+            img.loading = "lazy";
+            itemWrap.appendChild(img);
+          }
+
+          const capDiv = document.createElement('div');
+          if (m.caption && m.caption.trim() !== '') {
+            capDiv.className = 'media-caption';
+            capDiv.textContent = m.caption;
+          } else {
+            capDiv.className = 'media-spacer-double';
+          }
+          itemWrap.appendChild(capDiv);
+          mediaListContainer.appendChild(itemWrap);
+        });
+      }
+
+      const footerContainer = document.getElementById('detail-footer');
+      footerContainer.innerHTML = '';
+
+      if (idx < allPosts.length - 1) {
+        const nextA = document.createElement('a');
+        nextA.style.cursor = 'pointer';
+        nextA.onclick = () => { window.location.hash = `#post-${idx + 1}`; };
+        nextA.innerHTML = `
+          <img src="https://akiratravels.github.io/images/i_next.gif" alt="次へ" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="fallback-btn" style="display:none;">次へ ▶</button>
+        `;
+        footerContainer.appendChild(nextA);
+      }
+
+      const homeA = document.createElement('a');
+      homeA.href = 'index.html';
+      homeA.innerHTML = `
+        <img src="https://akiratravels.github.io/images/i_home.gif" alt="HOME" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="fallback-btn" style="display:none;">🏠 TOP</button>
+      `;
+      footerContainer.appendChild(homeA);
+
+      const backA = document.createElement('a');
+      backA.style.cursor = 'pointer';
+      backA.onclick = () => { window.history.back(); };
+      backA.innerHTML = `
+        <img src="https://akiratravels.github.io/images/i_last.gif" alt="戻る" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="fallback-btn" style="display:none;">◀ 戻る</button>
+      `;
+      footerContainer.appendChild(backA);
+    }
+
+    // 最速で初期化を実行
+    init();
+  </script>
+</body>
+</html>
