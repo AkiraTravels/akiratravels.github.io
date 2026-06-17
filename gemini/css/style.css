@@ -3,7 +3,8 @@
   --orange:     #cc6600;
   --gray:       #aaaaaa;
   --bg-fallback:#f0e0c8;
-  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  /* 指示に基づきすべてのデバイスで確実に適用されるようゴシック系フォントに完全統一 */
+  --font-main:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
 }
 
 body {
@@ -11,260 +12,145 @@ body {
   font-size: 16px;
   color: var(--brown);
   background-color: var(--bg-fallback);
-  background-image: url("https://akiratravels.github.io/images/bg.gif");
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
   background-repeat: repeat;
-  margin: 0;
-  padding: 0;
 }
 
-/* 管理者リンク (トップページのみで使用、国別からは削除) */
+body.country-page {
+  background-attachment: local;
+}
+
 #admin-link {
-  position: fixed;
-  top: 10px;
-  right: 12px;
-  z-index: 100;
-  font-size: 11px;
-  color: var(--gray);
-  background: rgba(255,255,255,0.6);
-  padding: 3px 8px;
-  border-radius: 10px;
+  position: fixed; top: 10px; right: 12px; z-index: 100;
+  font-size: 11px; color: var(--gray);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 3px 8px; border-radius: 10px;
   backdrop-filter: blur(4px);
 }
-#admin-link a {
-  color: var(--gray);
-  text-decoration: none;
-}
+#admin-link a { color: var(--gray); text-decoration: none; }
 
-/* 共通フッターレイアウト：すべてのアイコンを含めて中央揃え（メールは削除） */
-.shared-footer {
-  margin-top: 40px;
-  padding-bottom: 30px;
-  text-align: center;
-}
-.footer-icons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 15px;
-}
-.footer-icons a img, .footer-icons img {
-  height: 32px;
-  border: none;
-  vertical-align: middle;
-}
-.copyright {
-  font-size: 12px;
-  color: var(--brown);
-}
+.top-wrap { max-width: 480px; margin: 0 auto; }
+.top-logo { text-align: center; padding: 24px 16px 16px; }
+.top-logo img { max-width: 280px; height: auto; }
+.top-logo-fallback { font-size: 28px; font-weight: bold; color: var(--brown); letter-spacing: 0.1em; }
 
-/* --- トップページ専用スタイル --- */
-.top-wrap {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  text-align: center;
-}
-.top-logo img {
-  max-width: 100%;
-  height: auto;
-}
-.top-logo-fallback {
-  font-size: 32px;
+#country-list-wrap { padding: 8px 16px; }
+#country-list-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+#country-list-wrap td { text-align: center; padding: 2px 0; vertical-align: middle; }
+.country-cell { padding: 6px 4px; }
+
+.country-name-text {
   font-weight: bold;
-  color: var(--brown);
-}
-#country-list-wrap {
-  margin-top: 30px;
-}
-.loading, .error-msg {
-  text-align: center;
-  padding: 20px;
-}
-
-/* 国名リスト（テーブル）要件：列ごとにセンタリング、左右余白を最小限に、太字プロポーショナル・拡大 */
-.country-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 0 auto;
-}
-.country-table td {
-  width: 50%;
-  padding: 6px 2px;       /* 左右の余白を最小限に設定 */
-  text-align: center;     /* 列ごとにセンタリング */
-  vertical-align: top;
-}
-.country-link-cell {
-  font-family: var(--font-main);
   font-size: 22px;
-  font-weight: bold;
-  line-height: 1.2;
-  display: inline-block;
-  text-align: center;
+  display: block;
 }
 @media (min-width: 600px) {
-  .country-link-cell {
-    font-size: 26px;
-  }
+  .country-name-text { font-size: 26px; }
 }
-.has-posts {
-  color: var(--orange);
-  text-decoration: none;
-}
-.no-posts {
-  color: var(--gray);
-}
+
+/* 指示：フォントサイズを1つ上げ（13pxから14px）、太字に変更 */
 .country-subtitle {
-  display: block;
-  font-size: 13px;
-  color: #7a5a20;
-  font-weight: normal;
-  margin-top: 2px;
-  text-align: center;
-}
-
-/* --- 国別ページ専用スタイル --- */
-.country-wrap {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px 20px;
-}
-.country-header {
-  text-align: center;
-  margin-bottom: 24px;
-}
-.country-title {
-  font-size: 28px;
-  color: var(--brown);
-  margin: 0 0 10px 0;
-}
-.country-description {
-  font-size: 15px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  text-align: left;
-  color: var(--brown);
-}
-.cover-photo-wrap {
-  width: 100%;
-  margin-bottom: 30px;
-  overflow: hidden;
-  cursor: pointer;
-}
-.cover-photo-wrap img {
-  width: 100%;
-  display: block;
-  transition: transform 0.2s ease;
-}
-.cover-photo-wrap:hover img {
-  transform: scale(1.01);
-}
-.post-chain {
-  margin-bottom: 40px;
-}
-.chain-item {
-  text-align: center;
-  margin: 8px 0;
-}
-.chain-link {
-  font-size: 18px;
-  color: var(--orange);
-  cursor: pointer;
-  text-decoration: underline;
-  font-weight: bold;
-}
-.chain-meta {
-  display: block;
-  font-size: 13px;
-  color: var(--brown);
-  margin-top: 2px;
-}
-.chain-arrow {
-  color: var(--orange);
   font-size: 14px;
-}
-
-/* --- 詳細モーダル（要件：背景色を国別と統一、フォント色黒、個別キャプションサイズ変更＋改行再現） --- */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background-color: var(--bg-fallback);                 /* 背景色を国別ページと揃える */
-  background-image: url("https://akiratravels.github.io/images/bg.gif"); /* 背景画像も揃える */
-  background-repeat: repeat;
-  z-index: 500;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.modal-overlay.open {
+  font-weight: bold;
+  color: #7a5a20;
   display: block;
+  margin-top: 2px;
 }
-.modal-sticky-bar {
-  position: sticky;
-  top: 0;
-  z-index: 510;
-  background: rgba(240, 224, 200, 0.95);
-  backdrop-filter: blur(8px);
-  padding: 12px 16px;
+.country-name-text.has-posts { color: var(--orange); }
+.country-name-text.no-posts  { color: var(--gray); }
+a.country-link { text-decoration: none; color: inherit; }
+
+/* 国別一覧レイアウト */
+.country-wrap { max-width: 600px; margin: 0 auto; }
+.country-header {
+  background: transparent; padding: 24px 16px 12px;
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.modal-sticky-title {
-  font-size: 16px; /* 仕様書定義を維持 */
-  font-weight: bold;
-  color: #000000;  /* フォント色は黒 */
+.country-title { text-align: center; font-size: 1.4em; font-weight: bold; color: var(--brown); }
+.country-description {
+  margin-top: 12px; font-size: 15px; line-height: 1.75;
+  color: var(--brown); white-space: pre-wrap; padding: 0 4px;
 }
-.modal-sticky-meta {
-  font-size: 12px;
-  color: #444444;
-  margin-top: 2px;
+
+.cover-photo-wrap { text-align: center; padding: 16px; }
+#cover-photo { max-width: 60%; height: auto; display: inline-block; cursor: pointer; }
+@media (max-width: 599px) { #cover-photo { max-width: 85%; } }
+#cover-photo:hover { transform: scale(1.01); transition: transform 0.2s; }
+
+.post-chain { padding: 16px; max-width: 480px; margin: 0 auto; }
+.chain-item { text-align: center; padding: 4px 0; }
+.chain-link { font-size: 1.1em; font-weight: bold; cursor: pointer; color: var(--orange); }
+.chain-link:hover { text-decoration: underline; }
+.chain-arrow { color: var(--brown); font-size: 14px; }
+.chain-separator-wrap { text-align: center; padding: 8px 0; }
+.chain-separator {
+  display: inline-block; width: 60%; border: none;
+  border-top: 1px solid var(--brown); margin: 0;
 }
-.modal-body {
-  max-width: 600px;
-  margin: 0 auto;
-  padding-top: 20px;
+@media (max-width: 599px) { .chain-separator { width: 85%; } }
+
+/* 詳細画面（非モーダル型独立デザイン） */
+.detail-wrap {
+  max-width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+  background-repeat: repeat;
+  background-attachment: local;
 }
-.modal-caption {
-  font-size: 15px; /* 全体の説明に関するフォントサイズは変えない */
-  color: #000000;  /* フォント色は黒 */
-  font-weight: normal;
-  line-height: 1.75;
-  white-space: pre-wrap;
+@media (min-width: 900px) {
+  .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
+}
+
+.detail-sticky-bar {
+  position: sticky; top: 0; z-index: 510;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
+}
+.detail-sticky-title { font-size: 18px; font-weight: bold; color: var(--brown); }
+.detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
+
+/* 指示：本文（キャプション）の後に、もう一行分（margin-bottom）の余白・改行を追加 */
+.detail-caption {
+  font-size: 17px; color: var(--brown); font-weight: normal;
+  line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 20px;
+  margin-bottom: 1.75em;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.media-item {
-  margin-bottom: 20px;
+
+.media-item img, .media-item video { width: 100%; display: block; }
+.media-item video { background: #000; cursor: pointer; }
+.media-caption { font-size: 16px; color: #7a5a20; padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; }
+
+/* 指示：キャプションのないメディアの場合、スペーサーを1行分から2行分に増量 */
+.media-spacer-double {
+  height: 2.2em;
 }
-.media-item img, .media-item video {
-  width: 100%;
-  display: block;
-}
-.media-item video {
-  background: #000;
-  cursor: pointer;
-}
-/* 要件：各メディアごとのキャプションのフォントをワンサイズ大きく(旧14px->16px)、かつ改行再現 */
-.media-caption {
-  font-size: 16px;        /* ワンサイズ大きく設定 */
-  color: #000000;         /* フォント色は黒 */
-  white-space: pre-wrap;  /* 元データに改行が含まれる場合はそれを再現 */
-  padding: 8px 16px 16px;
-  line-height: 1.6;
-}
-.modal-footer {
+
+.detail-footer {
   padding: 24px 16px 40px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 24px;
-  background: rgba(74, 48, 0, 0.05);
+  display: flex; justify-content: center; align-items: center; gap: 16px;
 }
-.modal-footer img {
-  height: 36px;
-  cursor: pointer;
-}
-.modal-copyright {
-  text-align: center;
-  font-size: 11px;
+.detail-footer img { height: 36px; cursor: pointer; }
+.fallback-btn {
+  cursor: pointer; padding: 8px 20px; font-size: 13px;
   color: var(--brown);
-  padding: 0 16px 20px;
+  background: rgba(74, 48, 0, 0.08);
+  border: 1px solid rgba(74, 48, 0, 0.2);
+  border-radius: 4px; font-family: var(--font-main);
 }
+.detail-copyright { text-align: center; font-size: 13px; color: #7a5a20; padding: 0 16px 20px; }
+
+/* フッター共通 */
+.top-footer    { padding-top: 20px; text-align: center; }
+.country-footer{ padding: 20px 16px 0; text-align: center; }
+.footer-icons  { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px 0; }
+.footer-icons a { display: inline-flex; align-items: center; text-decoration: none; }
+.footer-icons img { height: 32px; }
+.copyright     { font-size: 12px; color: #7a5a20; padding: 8px 0 0; }
+
+.loading   { text-align: center; padding: 40px 16px; color: var(--gray); font-size: 15px; }
+.error-msg { text-align: center; padding: 40px 16px; color: #8b2020;   font-size: 15px; }

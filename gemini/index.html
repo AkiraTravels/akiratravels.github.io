@@ -4,29 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AKIRA travels</title>
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-  <div id="admin-link"><a href="admin/" id="admin-link-text">管理者</a></div>
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理者</a>
+  </div>
 
   <div class="top-wrap">
     <div class="top-logo">
-      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
       <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
     </div>
-    
+
     <div id="country-list-wrap">
-      <p class="loading">読み込み中…</p>
+      <div class="loading" id="loading-msg">国データを読み込み中...</div>
     </div>
-    
-    <footer class="shared-footer">
+
+    <footer class="top-footer">
       <div class="footer-icons">
-        <a href="#" id="f-link-profile"><img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>PROFILE</span>')"></a>
-        <!-- 要件：メールアイコンを削除 -->
-        <a href="#" id="f-link-fb"><img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Facebook</span>')"></a>
-        <a href="#" id="f-link-msg"><img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span>Messenger</span>')"></a>
+        <a href="#" title="PROFILE">
+          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="fallback-btn" style="display:none;">👤 PROFILE</button>
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="fallback-btn" style="display:none;">🌐 Facebook</button>
+        </a>
+        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="fallback-btn" style="display:none;">💬 Messenger</button>
+        </a>
       </div>
       <p class="copyright" id="copyright-text"></p>
     </footer>
@@ -37,7 +46,11 @@
     import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    onAuthStateChanged(auth, user => {
+    // 著作権年動的設定
+    document.getElementById('copyright-text').textContent = `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
+
+    // 管理者リンク制御
+    onAuthStateChanged(auth, (user) => {
       const linkText = document.getElementById('admin-link-text');
       if (user) {
         linkText.textContent = '管理画面';
@@ -46,74 +59,88 @@
       }
     });
 
-    const yr = new Date().getFullYear();
-    document.getElementById('copyright-text').textContent = `© 1998–${yr} AKIRA travels. All rights reserved.`;
-
     async function init() {
       const wrap = document.getElementById('country-list-wrap');
       try {
-        const [countriesSnap, postsSnap] = await Promise.all([
-          getDocs(query(collection(db, 'countries'), orderBy('order', 'asc'))),
-          getDocs(collection(db, 'posts'))
-        ]);
-
-        const postCount = {};
-        postsSnap.forEach(doc => {
-          const p = doc.data();
-          if (p.countryId) {
-            postCount[p.countryId] = (postCount[p.countryId] || 0) + 1;
-          }
-        });
-
+        const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
+        const snap = await getDocs(q);
         const countries = [];
-        countriesSnap.forEach(doc => {
+        snap.forEach(doc => {
           countries.push({ id: doc.id, ...doc.data() });
         });
 
         if (countries.length === 0) {
-          wrap.innerHTML = '<p class="loading">国データがありません。</p>';
+          wrap.innerHTML = '<div class="loading">国データがありません。</div>';
           return;
         }
 
-        let tableHtml = '<table class="country-table">';
-        for (let i = 0; i < countries.length; i += 2) {
-          tableHtml += '<tr>';
-          tableHtml += `<td>${renderCell(countries[i], postCount)}</td>`;
-          if (i + 1 < countries.length) {
-            tableHtml += `<td>${renderCell(countries[i+1], postCount)}</td>`;
-          } else {
-            tableHtml += '<td></td>';
+        const table = document.createElement('table');
+        let tr = null;
+
+        countries.forEach((country, index) => {
+          if (index % 2 === 0) {
+            tr = document.createElement('tr');
+            table.appendChild(tr);
           }
-          tableHtml += '</tr>';
+          const td = buildCountryCell(country);
+          tr.appendChild(td);
+        });
+
+        if (countries.length % 2 !== 0) {
+          const emptyTd = document.createElement('td');
+          tr.appendChild(emptyTd);
         }
-        tableHtml += '</table>';
-        wrap.innerHTML = tableHtml;
+
+        wrap.innerHTML = '';
+        wrap.appendChild(table);
 
       } catch (err) {
         console.error(err);
-        wrap.innerHTML = `<p class="error-msg">データの取得に失敗しました。</p>`;
+        wrap.innerHTML = '<div class="error-msg">データの読み込みに失敗しました。</div>';
       }
     }
 
-    function renderCell(c, postCount) {
-      const count = postCount[c.id] || 0;
-      const subtitleHtml = c.subtitle ? `<span class="country-subtitle">${c.subtitle}</span>` : '';
-      
-      if (count > 0) {
-        return `
-          <div class="country-link-cell">
-            <a href="country.html?id=${c.id}" class="has-posts">${c.name}</a>
-            ${subtitleHtml}
-          </div>
-        `;
-      } else {
-        return `
-          <div class="country-link-cell">
-            <span class="no-posts">${c.name}</span>
-            ${subtitleHtml}
-          </div>
-        `;
+    function buildCountryCell(country) {
+      const td = document.createElement('td');
+      td.className = 'country-cell';
+
+      let hasLink = false;
+      let targetUrl = '';
+
+      if (country.imgUrl) {
+        hasLink = true;
+        targetUrl = `country.html?id=${country.id}`;
+      } else if (country.docUrl) {
+        hasLink = true;
+        targetUrl = country.docUrl;
       }
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = `country-name-text ${hasLink ? 'has-posts' : 'no-posts'}`;
+      nameSpan.textContent = country.name;
+
+      if (hasLink) {
+        const a = document.createElement('a');
+        a.className = 'country-link';
+        a.href = targetUrl;
+        if (country.docUrl && !country.imgUrl) {
+          a.target = '_blank';
+          a.rel = 'noopener';
+        }
+        a.appendChild(nameSpan);
+        td.appendChild(a);
+      } else {
+        td.appendChild(nameSpan);
+      }
+
+      if (country.subtitle) {
+        const subSpan = document.createElement('span');
+        subSpan.className = 'country-subtitle';
+        subSpan.textContent = country.subtitle;
+        td.appendChild(subSpan);
+      }
+
+      return td;
     }
 
     init();
