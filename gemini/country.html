@@ -62,7 +62,6 @@
       }
 
       try {
-        // 1. Firestoreからのデータ並行取得
         const [countrySnap, postsSnap] = await Promise.all([
           getDoc(doc(db, 'countries', countryId)),
           getDocs(query(collection(db, 'posts'), where('countryId', '==', countryId), orderBy('date', 'asc')))
@@ -80,15 +79,13 @@
           allPosts.push({ id: d.id, ...d.data() });
         });
 
-        // 2. ブラウザの sessionStorage へのキャッシュ保存
         try {
           sessionStorage.setItem(`country_${countryId}`, JSON.stringify(currentCountry));
           sessionStorage.setItem(`posts_${countryId}`, JSON.stringify(allPosts));
         } catch (e) {
-          console.warn("sessionStorageの書き込みに失敗しました（シークレットモード等の可能性）:", e);
+          console.warn("sessionStorage cache write bypassed:", e);
         }
 
-        // 3. 基本UI表示の更新
         document.title = `${currentCountry.name || '国別ページ'} — AKIRA travels`;
         document.getElementById('country-title').textContent = currentCountry.name || '';
         document.getElementById('country-description').textContent = currentCountry.description || '';
@@ -97,21 +94,17 @@
         document.getElementById('country-copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
         document.getElementById('detail-copyright').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
-        // 4. コンポーネント描画（安全弁を内部に実装）
         renderCoverPhoto();
         renderChain();
 
-        // 5. ルーティング初期化と監視
         window.removeEventListener('hashchange', router);
         window.addEventListener('hashchange', router);
         router();
 
-        // ロード画面を非表示に
         document.getElementById('loading-msg').style.display = 'none';
 
       } catch (err) {
-        // 例外の型や内容を確実に文字列化して画面とコンソールに強制出力
-        console.error("致命的エラー詳細:", err);
+        console.error("Fatal Error:", err);
         showError(`データの取得または処理中にエラーが発生しました: ${err.message || err}`);
       }
     }
@@ -127,12 +120,10 @@
       const wrap = document.getElementById('cover-photo-wrap');
       const img = document.getElementById('cover-photo');
       
-      // 修正点：currentCountry自体の存在およびimgUrlプロパティの厳密な存在確認
       if (currentCountry && currentCountry.imgUrl && currentCountry.imgUrl.trim() !== '') {
         img.src = currentCountry.imgUrl;
         wrap.style.display = 'block';
         
-        // 安全弁：投稿が1件以上存在する場合のみ、代表写真クリックで最初の投稿へ遷移させる
         if (allPosts && allPosts.length > 0) {
           img.style.cursor = 'pointer';
           img.onclick = () => { window.location.hash = '#post-0'; };
@@ -194,14 +185,12 @@
 
       if (hash.startsWith('#post-')) {
         const idx = parseInt(hash.replace('#post-', ''), 10);
-        // 安全弁：インデックスがallPostsの範囲内であることを厳密にチェック
         if (!isNaN(idx) && allPosts && idx >= 0 && idx < allPosts.length) {
           countryView.style.display = 'none';
           detailView.style.display = 'block';
           renderDetail(idx);
           window.scrollTo(0, 0);
         } else {
-          // 範囲外のハッシュ、または投稿が存在しない場合はハッシュをクリアして一覧へ戻す
           window.location.hash = '';
         }
       } else {
@@ -213,7 +202,7 @@
 
     function renderDetail(idx) {
       const post = allPosts[idx];
-      if (!post) return; // 二重の安全弁
+      if (!post) return;
 
       document.getElementById('detail-title').textContent = post.title || '';
       const metaParts = [post.date, post.location].filter(Boolean);
@@ -233,30 +222,42 @@
 
       if (post.media && post.media.length > 0) {
         post.media.forEach(m => {
-          if (!m.url) return; // URLが空のメディア行はスキップ
+          if (!m.url) return;
 
           const itemWrap = document.createElement('div');
           itemWrap.className = 'media-item';
 
           if (m.type === 'video') {
             const video = document.createElement('video');
-            video.src = m.url;
+            
             video.playsInline = true;
+            video.webkitPlaysInline = true;
             video.controls = true;
             video.preload = "metadata";
             
+            // 新仕様に基づく poster 属性URLの動的置換ロジック
             if (m.url.includes('/upload/')) {
               const parts = m.url.split('/upload/');
-              const partA = parts[0] + '/upload/';
-              const partB = parts[1];
-              const buttonC = partA + 'so_0.2/l_play_muwwou/';
+              const partA = parts[0] + '/upload/'; // ① 前半部分A
+              const partB = parts[1];              // ① 後半部分B
+              
+              const partC = partA + 'so_0.2/';     // ② 箇所指定C
+              
+              // ③ 箇所指定Cに後半部分Bを連結し、末尾の拡張子をmp4からwebpに置換
               const webpPath = partB.replace(/\.[^.]+$/, '.webp');
-              video.poster = buttonC + webpPath;
+              video.poster = partC + webpPath;
             }
+            
+            video.src = m.url;
 
-            video.onclick = () => {
-              if (video.paused) { video.play(); } else { video.pause(); }
-            };
+            video.addEventListener('click', (e) => {
+              if (video.paused) {
+                video.play().catch(err => console.log("Play blocked:", err));
+              } else {
+                video.pause();
+              }
+            });
+
             itemWrap.appendChild(video);
           } else {
             const img = document.createElement('img');
@@ -278,7 +279,6 @@
         });
       }
 
-      // フッターナビゲーション
       const footerContainer = document.getElementById('detail-footer');
       footerContainer.innerHTML = '';
 

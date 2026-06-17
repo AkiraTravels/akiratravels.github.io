@@ -49,13 +49,11 @@
     // 著作権年動的設定
     document.getElementById('copyright-text').textContent = `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
 
-    // 管理者リンク制御
+    // 管理者リンク制御（データ取得とは非同期で並行処理し高速化）
     onAuthStateChanged(auth, (user) => {
       const linkText = document.getElementById('admin-link-text');
-      if (user) {
-        linkText.textContent = '管理画面';
-      } else {
-        linkText.textContent = '管理者';
+      if (linkText) {
+        linkText.textContent = user ? '管理画面' : '管理者';
       }
     });
 
@@ -143,6 +141,7 @@
       return td;
     }
 
+    // DOMContentLoadedを待たずに最速で実行
     init();
   </script>
 </body>
