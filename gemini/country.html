@@ -65,7 +65,6 @@
       }
 
       try {
-        // 1. Firestoreからのデータ並行取得
         const [countrySnap, postsSnap] = await Promise.all([
           getDoc(doc(db, 'countries', countryId)),
           getDocs(query(collection(db, 'posts'), where('countryId', '==', countryId), orderBy('date', 'asc')))
@@ -83,15 +82,13 @@
           allPosts.push({ id: d.id, ...d.data() });
         });
 
-        // 2. セッションストレージへの保存（容量オーバーやエラーで画面全体をクラッシュさせないよう完全隔離）
         try {
           sessionStorage.setItem(`country_${countryId}`, JSON.stringify(currentCountry));
           sessionStorage.setItem(`posts_${countryId}`, JSON.stringify(allPosts));
         } catch (e) {
-          console.warn("sessionStorageの書き込みをスキップしました（容量超過または制限環境）:", e);
+          console.warn("sessionStorage cache write bypassed:", e);
         }
 
-        // 3. タイトル・ヘッダー情報の割当
         document.title = `${currentCountry.name || '国別ページ'} — AKIRA travels`;
         document.getElementById('country-title').textContent = currentCountry.name || '';
         document.getElementById('country-description').textContent = currentCountry.description || '';
@@ -100,16 +97,13 @@
         document.getElementById('country-copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
         document.getElementById('detail-copyright').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
-        // 4. 各コンポーネントのレンダリング
         renderCoverPhoto();
         renderChain();
 
-        // 5. ルーティング初期化
         window.removeEventListener('hashchange', router);
         window.addEventListener('hashchange', router);
         router();
 
-        // 6. すべての処理が正常完了したら、ローディング画面を非表示にする
         document.getElementById('loading-msg').style.display = 'none';
 
       } catch (err) {
@@ -169,7 +163,6 @@
           const nextPost = allPosts[i + 1];
           let diffDays = 0;
           
-          // 修正点①: 日付の存在チェックと「Invalid Date (NaN)」に対する完全な安全弁
           if (post.date && nextPost.date) {
             const d1 = new Date(post.date);
             const d2 = new Date(nextPost.date);
@@ -245,34 +238,49 @@
           if (m.type === 'video') {
             const video = document.createElement('video');
             
-            video.playsInline = true;
-            video.webkitPlaysInline = true;
+            // iPhone対策①: WebKit向けのインライン再生・プリロード属性を100%定義
+            video.setAttribute('playsinline', 'true');
+            video.setAttribute('webkit-playsinline', 'true');
             video.controls = true;
             video.preload = "metadata";
             
+            // 指定通りの正常動作するパス変換仕様（/video/upload/を完全維持）
             if (m.url.includes('/upload/')) {
               const parts = m.url.split('/upload/');
-              const partA = parts[0] + '/upload/';
-              const partB = parts[1];
-              const partC = partA + 'so_0.2/';
+              const partA = parts[0] + '/upload/'; 
+              const partB = parts[1];              
+              const partC = partA + 'so_0.2/';     
+              
               const webpPath = partB.replace(/\.[^.]+$/, '.webp');
               video.poster = partC + webpPath;
             }
             
-            // iPhoneでのロード競合による斜線化を防ぐ遅延評価
-            setTimeout(() => {
-              video.src = m.url;
-            }, 50);
+            // iPhone対策②: srcは空の状態で遅延させず、最初から100%明示して割り当てる
+            video.src = m.url;
 
+            // DOMに要素を追加
             itemWrap.appendChild(video);
+            mediaListContainer.appendChild(itemWrap);
+
+            // iPhone対策③: DOMにマウントした直後に明示的に動画オブジェクトの「load()」をキックする
+            // これによりiPhone特有のバッファ待機によるロードエラー（三角形に斜線）を強制解除します
+            try {
+              video.load();
+            } catch(e) {
+              console.log("video.load() context bypassed:", e);
+            }
+
           } else {
+            // 画像の通常生成
             const img = document.createElement('img');
             img.src = m.url;
             img.alt = m.caption || post.title || 'Media';
             img.loading = "lazy";
             itemWrap.appendChild(img);
+            mediaListContainer.appendChild(itemWrap);
           }
 
+          // キャプション部分の追加
           const capDiv = document.createElement('div');
           if (m.caption && m.caption.trim() !== '') {
             capDiv.className = 'media-caption';
@@ -281,10 +289,10 @@
             capDiv.className = 'media-spacer-double';
           }
           itemWrap.appendChild(capDiv);
-          mediaListContainer.appendChild(itemWrap);
         });
       }
 
+      // フッターナビゲーション
       const footerContainer = document.getElementById('detail-footer');
       footerContainer.innerHTML = '';
 
@@ -317,7 +325,6 @@
       footerContainer.appendChild(backA);
     }
 
-    // 最速で初期化を実行
     init();
   </script>
 </body>
