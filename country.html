@@ -27,17 +27,15 @@
       <div class="footer-icons">
         <a href="index.html" title="AKIRA travels TOP">
           <img src="https://akiratravels.github.io/images/i_home.gif" alt="AKIRA travels"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';
-                        this.nextElementSibling.onclick=()=>location.href='index.html';">
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.onclick=()=>location.href='index.html';">
           <button class="footer-fallback-btn" style="display:none;">🏠 TOP</button>
         </a>
       </div>
-      <p class="copyright" id="copyright-text"></p>
+      <p class="copyright" id="country-copyright-text"></p>
     </footer>
   </div>
 
-  <div id="loading-msg" class="loading">データを読み込んでいます…</div>
-  
+  <div id="loading-msg" class="loading">読み込み中…</div>
   <div id="error-msg" class="error-msg" style="display: none;"></div>
 
   <div id="detail-view" class="detail-view" style="display: none;">
@@ -55,23 +53,25 @@
 
   <script type="module">
     import { db } from './js/firebase-config.js';
-    import { doc, getDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // モジュールレベル変数の管理
+    // モジュールレベルの状態管理変数
     let countryId = null;
+    let currentCountry = null;
+    let allPosts = [];
     let currentIdx = null;
     let ioInstance = null;
 
     // 初期化処理
     async function init() {
-      // 著作権年度の設定
+      // 著作権年の設定
       const currentYear = new Date().getFullYear();
       const copyrightString = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
-      document.getElementById('copyright-text').textContent = copyrightString;
+      document.getElementById('country-copyright-text').textContent = copyrightString;
       document.getElementById('detail-copyright').textContent = copyrightString;
 
-      // クエリパラメータの取得
-      const params = new URLSearchParams(window.location.search);
+      // クエリパラメータから国IDを取得
+      const params = new URLSearchParams(location.search);
       countryId = params.get('id');
       if (!countryId) {
         showError('国IDが指定されていません。');
@@ -79,62 +79,67 @@
       }
 
       try {
-        await loadData();
-        
-        // セッションからデータ展開
-        const country = JSON.parse(sessionStorage.getItem(`country_${countryId}`));
-        document.title = `${country.name} — AKIRA travels`;
-        document.getElementById('country-title').textContent = country.name;
-        document.getElementById('country-description').textContent = country.description || '';
+        // 1. 国データの取得（セッションキャッシュ優先）
+        const cacheCountryKey = `country_${countryId}`;
+        const cachedCountry = sessionStorage.getItem(cacheCountryKey);
+        if (cachedCountry) {
+          currentCountry = JSON.parse(cachedCountry);
+        } else {
+          const countryDoc = await getDoc(doc(db, 'countries', countryId));
+          if (!countryDoc.exists()) {
+            showError('指定された国データが見つかりません。');
+            return;
+          }
+          currentCountry = countryDoc.data();
+          sessionStorage.setItem(cacheCountryKey, JSON.stringify(currentCountry));
+        }
+
+        // 2. 投稿データの取得（セッションキャッシュ優先）
+        const cachePostsKey = `posts_${countryId}`;
+        const cachedPosts = sessionStorage.getItem(cachePostsKey);
+        if (cachedPosts) {
+          allPosts = JSON.parse(cachedPosts);
+        } else {
+          const postsQuery = query(collection(db, 'posts'), where('countryId', '==', countryId));
+          const querySnapshot = await getDocs(postsQuery);
+          const tempPosts = [];
+          querySnapshot.forEach((doc) => {
+            tempPosts.push({ id: doc.id, ...doc.data() });
+          });
+          // 日付の昇順でソート
+          tempPosts.sort((a, b) => a.date.localeCompare(b.date));
+          allPosts = tempPosts;
+          sessionStorage.setItem(cachePostsKey, JSON.stringify(allPosts));
+        }
+
+        // 3. 画面の初期レンダリング
+        document.title = `${currentCountry.name} — AKIRA travels`;
+        document.getElementById('country-title').textContent = currentCountry.name;
+        document.getElementById('country-description').textContent = currentCountry.description || '';
 
         document.getElementById('loading-msg').style.display = 'none';
         document.getElementById('country-wrap').style.display = 'block';
 
-        renderCoverPhoto(country);
+        renderCoverPhoto();
         renderChain();
-        
-        // 初回の履歴状態をセット（ブラウザバック制御用）
+
+        // 履歴スタックの初期状態を設定
         if (!history.state) {
-          history.replaceState({ detail: false }, '', window.location.href);
+          history.replaceState({ detail: false }, '', location.href);
         }
-      } catch (err) {
-        console.error(err);
-        showError('データの読み込みに失敗しました。');
+
+      } catch (error) {
+        console.error(error);
+        showError('データの取得中にエラーが発生しました。');
       }
     }
 
-    // データの取得とsessionStorage保存
-    async function loadData() {
-      const countryKey = `country_${countryId}`;
-      const postsKey = `posts_${countryId}`;
-
-      // 国データの取得
-      if (!sessionStorage.getItem(countryKey)) {
-        const countryDoc = await getDoc(doc(db, 'countries', countryId));
-        if (!countryDoc.exists()) {
-          throw new Error('Country not found');
-        }
-        sessionStorage.setItem(countryKey, JSON.stringify({ id: countryDoc.id, ...countryDoc.data() }));
-      }
-
-      // 投稿一覧の取得（date昇順）
-      if (!sessionStorage.getItem(postsKey)) {
-        const q = query(collection(db, 'posts'), where('countryId', '==', countryId), orderBy('date', 'asc'));
-        const querySnapshot = await getDocs(q);
-        const posts = [];
-        querySnapshot.forEach((doc) => {
-          posts.push({ id: doc.id, ...doc.data() });
-        });
-        sessionStorage.setItem(postsKey, JSON.stringify(posts));
-      }
-    }
-
-    // 代表写真の描画
-    function renderCoverPhoto(country) {
+    // 代表写真のレンダリング
+    function renderCoverPhoto() {
       const wrap = document.getElementById('cover-photo-wrap');
       const img = document.getElementById('cover-photo');
-      if (country.imgUrl) {
-        img.src = country.imgUrl;
+      if (currentCountry && currentCountry.imgUrl) {
+        img.src = currentCountry.imgUrl;
         wrap.style.display = 'block';
         img.onclick = () => openDetail(0);
       } else {
@@ -142,33 +147,32 @@
       }
     }
 
-    // 投稿チェーンの描画
+    // 投稿チェーン（タイムライン一覧）のレンダリング
     function renderChain() {
       const container = document.getElementById('post-chain');
       container.innerHTML = '';
-      const posts = JSON.parse(sessionStorage.getItem(`posts_${countryId}`)) || [];
 
-      if (posts.length === 0) {
+      if (allPosts.length === 0) {
         container.innerHTML = '<div class="loading">投稿がありません</div>';
         return;
       }
 
-      posts.forEach((post, i) => {
-        // 投稿要素の作成
+      allPosts.forEach((post, idx) => {
+        // 投稿リンクアイテムの生成
         const item = document.createElement('div');
         item.className = 'chain-item';
         
         const link = document.createElement('span');
         link.className = 'chain-link';
         link.textContent = post.title;
-        link.onclick = () => openDetail(i);
+        link.onclick = () => openDetail(idx);
         
         item.appendChild(link);
         container.appendChild(item);
 
-        // 隣接投稿とのセパレーター判定（最後の投稿を除く）
-        if (i < posts.length - 1) {
-          const nextPost = posts[i + 1];
+        // 次の投稿がある場合、日付差に応じたセパレーターを挿入
+        if (idx < allPosts.length - 1) {
+          const nextPost = allPosts[idx + 1];
           const dateA = new Date(post.date);
           const dateB = new Date(nextPost.date);
           const diffDays = Math.abs(dateB - dateA) / (1000 * 60 * 60 * 24);
@@ -191,17 +195,17 @@
       });
     }
 
-    // 詳細表示画面を開く
+    // 詳細画面を開く
     function openDetail(idx) {
       currentIdx = idx;
       renderDetail(idx);
       document.getElementById('country-wrap').style.display = 'none';
       document.getElementById('detail-view').style.display = 'block';
       window.scrollTo(0, 0);
-      history.pushState({ detail: true, idx }, '', window.location.href);
+      history.pushState({ detail: true, idx }, '', location.href);
     }
 
-    // 詳細表示画面を閉じる
+    // 詳細画面を閉じる（国別画面へ戻る）
     function closeDetail() {
       document.getElementById('detail-view').style.display = 'none';
       document.getElementById('country-wrap').style.display = '';
@@ -212,7 +216,7 @@
       }
     }
 
-    // 詳細画面内のページ遷移
+    // 詳細画面内でのページ切り替え
     function navigateDetail(idx) {
       stopAllVideos();
       if (ioInstance) {
@@ -222,35 +226,33 @@
       currentIdx = idx;
       renderDetail(idx);
       window.scrollTo(0, 0);
-      history.pushState({ detail: true, idx }, '', window.location.href);
+      history.pushState({ detail: true, idx }, '', location.href);
     }
 
-    // 該当インデックスの詳細データ描画
+    // 詳細画面の動的構築
     function renderDetail(idx) {
-      const posts = JSON.parse(sessionStorage.getItem(`posts_${countryId}`)) || [];
-      const post = posts[idx];
-      if (!post) return;
-
-      // スティッキーバー設定
+      const post = allPosts[idx];
+      
+      // スティッキーバーの設定
       document.getElementById('detail-title').textContent = post.title;
       const metaArray = [post.date, post.location].filter(Boolean);
       document.getElementById('detail-meta').textContent = metaArray.join(' · ');
 
-      // キャプション設定（末尾に2行分の改行を追加、横棒はなし）
-      const captionEl = document.getElementById('detail-caption');
+      // キャプションの設定
+      const captionContainer = document.getElementById('detail-caption');
       if (post.caption) {
-        captionEl.textContent = post.caption + '\n\n';
-        captionEl.style.display = 'block';
+        captionContainer.textContent = post.caption;
+        captionContainer.style.display = 'block';
       } else {
-        captionEl.textContent = '';
-        captionEl.style.display = 'none';
+        captionContainer.textContent = '';
+        captionContainer.style.display = 'none';
       }
 
-      // メディアリストの構築
-      const mediaContainer = document.getElementById('detail-media-list');
-      mediaContainer.innerHTML = '';
+      // メディアリストの生成
+      const mediaListContainer = document.getElementById('detail-media-list');
+      mediaListContainer.innerHTML = '';
 
-      if (post.media && post.media.length > 0) {
+      if (post.media && Array.isArray(post.media)) {
         post.media.forEach((m) => {
           const mediaItem = document.createElement('div');
           mediaItem.className = 'media-item';
@@ -261,13 +263,12 @@
             video.playsInline = true;
             video.preload = 'metadata';
             
-            // Cloudinary仕様に沿った動的poster変換ロジック
+            // Cloudinary動画の再生成ポスターURLルール適用
             if (m.url.includes('upload/')) {
               const parts = m.url.split('upload/');
               const partA = parts[0] + 'upload/';
-              const partB = parts[1];
-              const targetB = partB.replace(/\.[^.]+$/, '.webp');
-              video.poster = `${partA}so_0.1/l_play_muwwou/${targetB}`;
+              const partB = parts[1].replace(/\.[^/.]+$/, '.webp'); // 拡張子をwebpへ
+              video.poster = `${partA}so_0.1/l_play_muwwou/${partB}`;
             }
 
             // クリック時の一時停止・再生制御
@@ -280,7 +281,7 @@
               }
             };
 
-            // 終了時処理（完全リセット）
+            // 動画終了時は初期状態（ポスター表示）に巻き戻す
             video.onended = () => {
               video.pause();
               video.currentTime = 0;
@@ -291,32 +292,104 @@
           } else {
             const img = document.createElement('img');
             img.src = m.url;
-            img.alt = m.caption || '';
+            img.alt = m.caption || post.title;
             img.loading = 'lazy';
             mediaItem.appendChild(img);
           }
 
-          // 個別キャプションまたはスペーサーの配備
+          // メディア別個別キャプション、または下部スペーサーの配置
           if (m.caption) {
-            const capDiv = document.createElement('div');
-            capDiv.className = 'media-caption';
-            capDiv.textContent = m.caption;
-            mediaItem.appendChild(capDiv);
+            const medCap = document.createElement('div');
+            medCap.className = 'media-caption';
+            medCap.textContent = m.caption;
+            mediaItem.appendChild(medCap);
           } else {
             const spacer = document.createElement('div');
             spacer.style.height = '2em';
             mediaItem.appendChild(spacer);
           }
 
-          mediaContainer.appendChild(mediaItem);
+          mediaListContainer.appendChild(mediaItem);
         });
       }
 
+      // 動画の視界外監視を初期化・再設定
       setupVideoExitPause();
-      renderDetailFooter(idx, posts.length);
+
+      // ナビゲーションフッターボタンの生成
+      renderDetailFooter(idx);
     }
 
-    // 動画の視野外一時停止
+    // 詳細画面ナビゲーションボタン群の制御
+    function renderDetailFooter(idx) {
+      const footer = document.getElementById('detail-footer');
+      footer.innerHTML = '';
+
+      // 1. 「次へ」ボタン (インデックスが登録数未満の場合のみ)
+      if (idx < allPosts.length - 1) {
+        const aNext = document.createElement('a');
+        const imgNext = document.createElement('img');
+        imgNext.src = 'https://akiratravels.github.io/images/i_next.gif';
+        imgNext.alt = '次へ';
+        imgNext.onerror = () => {
+          imgNext.style.display = 'none';
+          const btn = document.createElement('button');
+          btn.className = 'detail-footer-btn';
+          btn.textContent = '次へ ▶';
+          btn.onclick = () => navigateDetail(idx + 1);
+          aNext.appendChild(btn);
+        };
+        imgNext.onclick = () => navigateDetail(idx + 1);
+        aNext.appendChild(imgNext);
+        footer.appendChild(aNext);
+      }
+
+      // 2. 「HOME」ボタン (常に配置)
+      const aHome = document.createElement('a');
+      const imgHome = document.createElement('img');
+      imgHome.src = 'https://akiratravels.github.io/images/i_home.gif';
+      imgHome.alt = 'HOME';
+      imgHome.onerror = () => {
+        imgHome.style.display = 'none';
+        const btn = document.createElement('button');
+        btn.className = 'detail-footer-btn';
+        btn.textContent = '🏠 TOP';
+        btn.onclick = () => location.href = 'index.html';
+        aHome.appendChild(btn);
+      };
+      imgHome.onclick = () => location.href = 'index.html';
+      aHome.appendChild(imgHome);
+      footer.appendChild(aHome);
+
+      // 3. 「戻る」ボタン (常に配置)
+      const aLast = document.createElement('a');
+      const imgLast = document.createElement('img');
+      imgLast.src = 'https://akiratravels.github.io/images/i_last.gif';
+      imgLast.alt = '戻る';
+      imgLast.onerror = () => {
+        imgLast.style.display = 'none';
+        const btn = document.createElement('button');
+        btn.className = 'detail-footer-btn';
+        btn.textContent = '◀ 戻る';
+        btn.onclick = () => closeDetail();
+        aLast.appendChild(btn);
+      };
+      imgLast.onclick = () => closeDetail();
+      aLast.appendChild(imgLast);
+      footer.appendChild(aLast);
+    }
+
+    // 全動画の一時停止および初期化（ポスター再表示）処理
+    function stopAllVideos() {
+      const videos = document.querySelectorAll('#detail-media-list video');
+      videos.forEach((vid) => {
+        vid.pause();
+        vid.currentTime = 0;
+        vid.load(); // 再生履歴をクリアしポスターを再表示させる
+      });
+    }
+
+    // IntersectionObserverを用いた動画の視野外一時停止制御
     function setupVideoExitPause() {
       if (ioInstance) {
         ioInstance.disconnect();
@@ -328,113 +401,46 @@
 
       ioInstance = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
+          // 60%未満の視界（スクロールアウト）になった場合
           if (!entry.isIntersecting) {
             const video = entry.target;
             if (!video.paused) {
               video.pause();
+              video.currentTime = 0;
+              video.load(); // 視野外に外れたら再生状態を完全解除してポスターに戻す
             }
           }
         });
       }, { threshold: 0.6 });
 
-      videos.forEach(v => ioInstance.observe(v));
+      videos.forEach((vid) => ioInstance.observe(vid));
     }
 
-    // 全動画の一時停止と完全初期状態リセット
-    function stopAllVideos() {
-      const videos = document.querySelectorAll('#detail-media-list video');
-      videos.forEach((vid) => {
-        vid.pause();
-        vid.currentTime = 0;
-        vid.load(); // posterサムネイルの再描画を担保
-      });
-    }
-
-    // 詳細フッターボタン群の動的生成
-    function renderDetailFooter(idx, totalCount) {
-      const footer = document.getElementById('detail-footer');
-      footer.innerHTML = '';
-
-      // 1. 次へ ボタン (インデックスが最後以外の場合のみ)
-      if (idx < totalCount - 1) {
-        const nextA = document.createElement('a');
-        nextA.title = '次へ';
-        const nextImg = document.createElement('img');
-        nextImg.src = 'https://akiratravels.github.io/images/i_next.gif';
-        nextImg.alt = '次へ';
-        nextImg.onerror = () => {
-          nextImg.style.display = 'none';
-          const btn = document.createElement('button');
-          btn.className = 'detail-footer-btn';
-          btn.textContent = '次へ ▶';
-          btn.onclick = () => navigateDetail(idx + 1);
-          nextA.appendChild(btn);
-        };
-        nextImg.onclick = () => navigateDetail(idx + 1);
-        nextA.appendChild(nextImg);
-        footer.appendChild(nextA);
-      }
-
-      // 2. HOME ボタン (常に表示)
-      const homeA = document.createElement('a');
-      homeA.title = 'HOME';
-      const homeImg = document.createElement('img');
-      homeImg.src = 'https://akiratravels.github.io/images/i_home.gif';
-      homeImg.alt = 'HOME';
-      homeImg.onerror = () => {
-        homeImg.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'detail-footer-btn';
-        btn.textContent = '🏠 HOME';
-        btn.onclick = () => location.href = 'index.html';
-        homeA.appendChild(btn);
-      };
-      homeImg.onclick = () => location.href = 'index.html';
-      homeA.appendChild(homeImg);
-      footer.appendChild(homeA);
-
-      // 3. 戻る ボタン (常に表示)
-      const backA = document.createElement('a');
-      backA.title = '戻る';
-      const backImg = document.createElement('img');
-      backImg.src = 'https://akiratravels.github.io/images/i_last.gif';
-      backImg.alt = '戻る';
-      backImg.onerror = () => {
-        backImg.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'detail-footer-btn';
-        btn.textContent = '◀ 戻る';
-        btn.onclick = () => closeDetail();
-        backA.appendChild(btn);
-      };
-      backImg.onclick = () => closeDetail();
-      backA.appendChild(backImg);
-      footer.appendChild(backA);
-    }
-
-    // エラーメッセージの描画
+    // エラー表示処理
     function showError(msg) {
       document.getElementById('loading-msg').style.display = 'none';
-      const errorEl = document.getElementById('error-msg');
-      errorEl.textContent = msg;
-      errorEl.style.display = 'block';
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = msg;
+      errorDiv.style.display = 'block';
     }
 
-    // ブラウザバック・履歴制御のイベント検知
+    // ブラウザバック・フォワード（popstate）対応
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.detail === true) {
-        // 詳細画面の復元とコンテンツ書き換え
+        // 詳細表示状態への移動
         document.getElementById('country-wrap').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
         currentIdx = event.state.idx;
         renderDetail(event.state.idx);
       } else {
-        // 国一覧・通常チェーン画面へ戻す
-        closeDetail();
+        // 国一覧・メイン表示状態への移動
+        if (document.getElementById('detail-view').style.display === 'block') {
+          closeDetail();
+        }
       }
     });
 
-    // 初期実行
+    // 起動
     init();
   </script>
 </body>
