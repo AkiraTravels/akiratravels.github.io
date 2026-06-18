@@ -4,44 +4,192 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AKIRA travels</title>
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    body { background-attachment: local; }
+    /* ===== CSS変数・body（style.css の内容をインライン埋め込み） ===== */
+    :root {
+      --brown:      #4a3000;
+      --orange:     #cc6600;
+      --gray:       #aaaaaa;
+      --bg-fallback:#f0e0c8;
+      --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-main);
+      font-size: 16px;
+      color: var(--brown);
+      background-color: var(--bg-fallback);
+      background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+      background-repeat: repeat;
+      background-attachment: local;
+    }
+
+    /* ===== 管理者リンク ===== */
+    #admin-link {
+      position: fixed; top: 10px; right: 12px; z-index: 100;
+      font-size: 11px; color: var(--gray);
+      background: rgba(255, 255, 255, 0.6);
+      padding: 3px 8px; border-radius: 10px;
+      backdrop-filter: blur(4px);
+    }
+    #admin-link a { color: var(--gray); text-decoration: none; }
+
+    /* ===== 国別ページレイアウト ===== */
+    .country-wrap { max-width: 600px; margin: 0 auto; }
+    .country-header {
+      background: transparent; padding: 24px 16px 12px;
+      border-bottom: 1px solid rgba(74, 48, 0, 0.15);
+    }
+    .country-title { text-align: center; font-size: 1.4em; font-weight: bold; color: var(--brown); }
+    .country-description {
+      margin-top: 12px; font-size: 15px; line-height: 1.75;
+      color: var(--brown); white-space: pre-wrap; padding: 0 4px;
+    }
+
+    /* ===== 代表写真 ===== */
+    .cover-photo-wrap { text-align: center; padding: 16px; }
+    #cover-photo { max-width: 60%; height: auto; display: inline-block; cursor: pointer; }
+    @media (max-width: 599px) { #cover-photo { max-width: 85%; } }
+    #cover-photo:hover { transform: scale(1.01); transition: transform 0.2s; }
+
+    /* ===== 投稿チェーン ===== */
+    .post-chain { padding: 16px; max-width: 480px; margin: 0 auto; }
+    .chain-item { text-align: center; padding: 4px 0; }
+    .chain-link { font-size: 1.1em; font-weight: bold; cursor: pointer; color: var(--orange); }
+    .chain-link:hover { text-decoration: underline; }
+    .chain-arrow { color: var(--brown); font-size: 14px; }
+    .chain-separator-wrap { text-align: center; padding: 8px 0; }
+    .chain-separator {
+      display: inline-block; width: 60%; border: none;
+      border-top: 1px solid var(--brown); margin: 0;
+    }
+    @media (max-width: 599px) { .chain-separator { width: 85%; } }
+
+    /* ===== 詳細画面 ===== */
+    .detail-view {
+      display: none;
+      background-color: var(--bg-fallback);
+      background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+      background-repeat: repeat; background-attachment: local;
+      min-height: 100vh;
+    }
+    @media (min-width: 900px) {
+      .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
+    }
+
+    /* スティッキーバー */
+    .detail-sticky-bar {
+      position: sticky; top: 0; z-index: 510;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(74, 48, 0, 0.15);
+    }
+    .detail-sticky-title { font-size: 18px; font-weight: bold; color: var(--brown); }
+    .detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
+
+    /* キャプション */
+    .detail-caption {
+      font-size: 17px; color: var(--brown); font-weight: normal;
+      line-height: 1.75; white-space: pre-wrap;
+      padding: 4px 16px 20px;
+    }
+
+    /* メディア */
+    .media-item img, .media-item video { width: 100%; display: block; }
+    .media-item video { background: #000; cursor: pointer; }
+    .media-caption {
+      font-size: 16px; color: #7a5a20; padding: 8px 16px 16px;
+      line-height: 1.6; white-space: pre-wrap;
+    }
+    .media-spacer { height: 2em; }
+
+    /* 詳細画面フッター */
+    .detail-footer {
+      padding: 24px 16px 40px;
+      display: flex; justify-content: center; align-items: center; gap: 16px;
+    }
+    .detail-footer img { height: 36px; cursor: pointer; }
+    .detail-footer-btn {
+      cursor: pointer; padding: 8px 20px; font-size: 13px;
+      color: var(--brown);
+      background: rgba(74, 48, 0, 0.08);
+      border: 1px solid rgba(74, 48, 0, 0.2);
+      border-radius: 4px; font-family: var(--font-main);
+    }
+    .detail-copyright { text-align: center; font-size: 13px; color: #7a5a20; padding: 0 16px 20px; }
+
+    /* ===== フッター共通 ===== */
+    .country-footer { padding: 20px 16px 0; text-align: center; }
+    .footer-icons  { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px 0; }
+    .footer-icons a { display: inline-flex; align-items: center; }
+    .footer-icons img { height: 32px; }
+    .copyright { font-size: 12px; color: #7a5a20; padding: 8px 0 0; }
+    .footer-fallback-btn {
+      cursor: pointer; padding: 6px 16px; font-size: 13px;
+      color: var(--brown);
+      background: rgba(74, 48, 0, 0.08);
+      border: 1px solid rgba(74, 48, 0, 0.2);
+      border-radius: 4px; font-family: var(--font-main);
+    }
+
+    /* ===== ユーティリティ ===== */
+    .loading   { text-align: center; padding: 40px 16px; color: var(--gray); font-size: 15px; }
+    .error-msg { text-align: center; padding: 40px 16px; color: #8b2020;   font-size: 15px; }
   </style>
 </head>
 <body class="country-page">
 
-  <div id="country-wrap" class="country-wrap" style="display: none;">
+  <!-- 管理者リンク -->
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理者</a>
+  </div>
+
+  <!-- 国別ページ本体（初期非表示） -->
+  <div id="country-wrap" class="country-wrap" style="display:none;">
     <div class="country-header">
       <h1 class="country-title" id="country-title"></h1>
       <p class="country-description" id="country-description"></p>
     </div>
-    
-    <div class="cover-photo-wrap" id="cover-photo-wrap" style="display: none;">
+
+    <!-- 代表写真（初期非表示） -->
+    <div class="cover-photo-wrap" id="cover-photo-wrap" style="display:none;">
       <img id="cover-photo" alt="代表写真">
     </div>
-    
+
+    <!-- 投稿チェーン -->
     <div class="post-chain" id="post-chain"></div>
-    
+
+    <!-- 国別ページフッター -->
     <footer class="country-footer">
       <div class="footer-icons">
         <a href="index.html" title="AKIRA travels TOP">
-          <img src="https://akiratravels.github.io/images/i_home.gif" alt="AKIRA travels"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.onclick=()=>location.href='index.html';">
+          <img
+            src="https://akiratravels.github.io/images/i_home.gif"
+            alt="AKIRA travels"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.onclick=()=>location.href='index.html';">
           <button class="footer-fallback-btn" style="display:none;">🏠 TOP</button>
         </a>
       </div>
-      <p class="copyright" id="country-copyright-text"></p>
+      <p class="copyright" id="copyright-text"></p>
     </footer>
   </div>
 
-  <div id="loading-msg" class="loading">読み込み中…</div>
-  <div id="error-msg" class="error-msg" style="display: none;"></div>
+  <!-- ローディング表示 -->
+  <p id="loading-msg" class="loading">読み込み中…</p>
 
-  <div id="detail-view" class="detail-view" style="display: none;">
+  <!-- エラー表示 -->
+  <p id="error-msg" class="error-msg" style="display:none;"></p>
+
+  <!-- 詳細画面（初期非表示） -->
+  <div id="detail-view" class="detail-view">
     <div class="detail-sticky-bar">
       <div class="detail-sticky-title" id="detail-title"></div>
-      <div class="detail-sticky-meta" id="detail-meta"></div>
+      <div class="detail-sticky-meta"  id="detail-meta"></div>
     </div>
     <div class="detail-body">
       <div class="detail-caption" id="detail-caption"></div>
@@ -52,162 +200,176 @@
   </div>
 
   <script type="module">
-    import { db } from './js/firebase-config.js';
-    import { doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, getDoc,
+      doc, query, orderBy, where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-    // モジュールレベルの状態管理変数
-    let countryId = null;
-    let currentCountry = null;
-    let allPosts = [];
-    let currentIdx = null;
-    let ioInstance = null;
+    // --- firebase-config.js の内容をインラインで参照（実際はimportに切り替え可） ---
+    import { db, auth } from './js/firebase-config.js';
 
-    // 初期化処理
+    // ================================================================
+    // 状態変数
+    // ================================================================
+    let allPosts   = [];
+    let currentIdx = 0;
+    let ioInstance = null;   // IntersectionObserver
+
+    // ================================================================
+    // 初期化
+    // ================================================================
+    const params    = new URLSearchParams(location.search);
+    const countryId = params.get('id');
+
+    if (!countryId) {
+      showError('国IDが指定されていません。');
+    } else {
+      init();
+    }
+
     async function init() {
-      // 著作権年の設定
-      const currentYear = new Date().getFullYear();
-      const copyrightString = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
-      document.getElementById('country-copyright-text').textContent = copyrightString;
-      document.getElementById('detail-copyright').textContent = copyrightString;
-
-      // クエリパラメータから国IDを取得
-      const params = new URLSearchParams(location.search);
-      countryId = params.get('id');
-      if (!countryId) {
-        showError('国IDが指定されていません。');
-        return;
-      }
-
       try {
-        // 1. 国データの取得（セッションキャッシュ優先）
-        const cacheCountryKey = `country_${countryId}`;
-        const cachedCountry = sessionStorage.getItem(cacheCountryKey);
+        // --- 国データ取得（sessionStorage キャッシュ優先） ---
+        let country;
+        const cachedCountry = sessionStorage.getItem(`country_${countryId}`);
         if (cachedCountry) {
-          currentCountry = JSON.parse(cachedCountry);
+          country = JSON.parse(cachedCountry);
         } else {
-          const countryDoc = await getDoc(doc(db, 'countries', countryId));
-          if (!countryDoc.exists()) {
-            showError('指定された国データが見つかりません。');
-            return;
-          }
-          currentCountry = countryDoc.data();
-          sessionStorage.setItem(cacheCountryKey, JSON.stringify(currentCountry));
+          const snap = await getDoc(doc(db, 'countries', countryId));
+          if (!snap.exists()) { showError('国データが見つかりません。'); return; }
+          country = { id: snap.id, ...snap.data() };
+          sessionStorage.setItem(`country_${countryId}`, JSON.stringify(country));
         }
 
-        // 2. 投稿データの取得（セッションキャッシュ優先）
-        const cachePostsKey = `posts_${countryId}`;
-        const cachedPosts = sessionStorage.getItem(cachePostsKey);
+        // --- 投稿データ取得（sessionStorage キャッシュ優先） ---
+        const cachedPosts = sessionStorage.getItem(`posts_${countryId}`);
         if (cachedPosts) {
           allPosts = JSON.parse(cachedPosts);
         } else {
-          const postsQuery = query(collection(db, 'posts'), where('countryId', '==', countryId));
-          const querySnapshot = await getDocs(postsQuery);
-          const tempPosts = [];
-          querySnapshot.forEach((doc) => {
-            tempPosts.push({ id: doc.id, ...doc.data() });
-          });
-          // 日付の昇順でソート
-          tempPosts.sort((a, b) => a.date.localeCompare(b.date));
-          allPosts = tempPosts;
-          sessionStorage.setItem(cachePostsKey, JSON.stringify(allPosts));
+          const q    = query(
+            collection(db, 'posts'),
+            where('countryId', '==', countryId),
+            orderBy('date', 'asc')
+          );
+          const snaps = await getDocs(q);
+          allPosts = snaps.docs.map(d => ({ id: d.id, ...d.data() }));
+          sessionStorage.setItem(`posts_${countryId}`, JSON.stringify(allPosts));
         }
 
-        // 3. 画面の初期レンダリング
-        document.title = `${currentCountry.name} — AKIRA travels`;
-        document.getElementById('country-title').textContent = currentCountry.name;
-        document.getElementById('country-description').textContent = currentCountry.description || '';
+        // --- タイトル設定 ---
+        document.title = `${country.name} — AKIRA travels`;
 
-        document.getElementById('loading-msg').style.display = 'none';
-        document.getElementById('country-wrap').style.display = 'block';
+        // --- UI 表示 ---
+        document.getElementById('country-title').textContent       = country.name;
+        document.getElementById('country-description').textContent = country.description || '';
 
-        renderCoverPhoto();
+        document.getElementById('loading-msg').style.display  = 'none';
+        document.getElementById('country-wrap').style.display = '';
+
+        // 著作権
+        document.getElementById('copyright-text').textContent =
+          `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
+
+        renderCoverPhoto(country);
         renderChain();
 
-        // 履歴スタックの初期状態を設定
-        if (!history.state) {
-          history.replaceState({ detail: false }, '', location.href);
-        }
-
-      } catch (error) {
-        console.error(error);
-        showError('データの取得中にエラーが発生しました。');
+      } catch (e) {
+        console.error(e);
+        showError('データの読み込みに失敗しました。');
       }
     }
 
-    // 代表写真のレンダリング
-    function renderCoverPhoto() {
-      const wrap = document.getElementById('cover-photo-wrap');
-      const img = document.getElementById('cover-photo');
-      if (currentCountry && currentCountry.imgUrl) {
-        img.src = currentCountry.imgUrl;
-        wrap.style.display = 'block';
-        img.onclick = () => openDetail(0);
-      } else {
-        wrap.style.display = 'none';
-      }
+    // ================================================================
+    // 認証状態（管理者リンクの切り替え）
+    // ================================================================
+    onAuthStateChanged(auth, user => {
+      document.getElementById('admin-link-text').textContent = user ? '管理画面' : '管理者';
+    });
+
+    // ================================================================
+    // 代表写真
+    // ================================================================
+    function renderCoverPhoto(country) {
+      if (!country.imgUrl) return;
+      const wrap  = document.getElementById('cover-photo-wrap');
+      const photo = document.getElementById('cover-photo');
+      photo.src = country.imgUrl;
+      wrap.style.display = '';
+      photo.addEventListener('click', () => openDetail(0));
     }
 
-    // 投稿チェーン（タイムライン一覧）のレンダリング
+    // ================================================================
+    // 投稿チェーン描画
+    // ================================================================
     function renderChain() {
-      const container = document.getElementById('post-chain');
-      container.innerHTML = '';
+      const chain = document.getElementById('post-chain');
+      chain.innerHTML = '';
 
       if (allPosts.length === 0) {
-        container.innerHTML = '<div class="loading">投稿がありません</div>';
+        chain.textContent = '投稿がありません';
         return;
       }
 
-      allPosts.forEach((post, idx) => {
-        // 投稿リンクアイテムの生成
+      allPosts.forEach((post, i) => {
+        // チェーンアイテム
         const item = document.createElement('div');
         item.className = 'chain-item';
-        
+
         const link = document.createElement('span');
         link.className = 'chain-link';
         link.textContent = post.title;
-        link.onclick = () => openDetail(idx);
-        
+        link.addEventListener('click', () => openDetail(i));
         item.appendChild(link);
-        container.appendChild(item);
+        chain.appendChild(item);
 
-        // 次の投稿がある場合、日付差に応じたセパレーターを挿入
-        if (idx < allPosts.length - 1) {
-          const nextPost = allPosts[idx + 1];
-          const dateA = new Date(post.date);
-          const dateB = new Date(nextPost.date);
-          const diffDays = Math.abs(dateB - dateA) / (1000 * 60 * 60 * 24);
+        // セパレーター（最後の投稿の後には挿入しない）
+        if (i < allPosts.length - 1) {
+          const nextPost  = allPosts[i + 1];
+          const diffDays  = Math.abs(
+            new Date(nextPost.date) - new Date(post.date)
+          ) / (1000 * 60 * 60 * 24);
 
-          const sepItem = document.createElement('div');
           if (diffDays < 7) {
-            sepItem.className = 'chain-item';
+            // 矢印セパレーター
+            const arrowItem = document.createElement('div');
+            arrowItem.className = 'chain-item';
             const arrow = document.createElement('span');
             arrow.className = 'chain-arrow';
             arrow.textContent = '▼';
-            sepItem.appendChild(arrow);
+            arrowItem.appendChild(arrow);
+            chain.appendChild(arrowItem);
           } else {
-            sepItem.className = 'chain-item chain-separator-wrap';
+            // 水平線セパレーター
+            const sepWrap = document.createElement('div');
+            sepWrap.className = 'chain-item chain-separator-wrap';
             const hr = document.createElement('hr');
             hr.className = 'chain-separator';
-            sepItem.appendChild(hr);
+            sepWrap.appendChild(hr);
+            chain.appendChild(sepWrap);
           }
-          container.appendChild(sepItem);
         }
       });
     }
 
-    // 詳細画面を開く
+    // ================================================================
+    // 詳細画面：開く
+    // ================================================================
     function openDetail(idx) {
       currentIdx = idx;
       renderDetail(idx);
       document.getElementById('country-wrap').style.display = 'none';
-      document.getElementById('detail-view').style.display = 'block';
+      document.getElementById('detail-view').style.display  = 'block';
       window.scrollTo(0, 0);
       history.pushState({ detail: true, idx }, '', location.href);
     }
 
-    // 詳細画面を閉じる（国別画面へ戻る）
+    // ================================================================
+    // 詳細画面：閉じる
+    // ================================================================
     function closeDetail() {
-      document.getElementById('detail-view').style.display = 'none';
+      document.getElementById('detail-view').style.display  = 'none';
       document.getElementById('country-wrap').style.display = '';
       stopAllVideos();
       if (ioInstance) {
@@ -216,7 +378,206 @@
       }
     }
 
-    // 詳細画面内でのページ切り替え
+    // ================================================================
+    // ブラウザバック対応
+    // ================================================================
+    window.addEventListener('popstate', (event) => {
+      if (event.state && event.state.detail === true) {
+        document.getElementById('detail-view').style.display  = 'block';
+        document.getElementById('country-wrap').style.display = 'none';
+        currentIdx = event.state.idx;
+        renderDetail(event.state.idx);
+      } else {
+        if (document.getElementById('detail-view').style.display !== 'none') {
+          closeDetail();
+        }
+      }
+    });
+
+    // ================================================================
+    // 詳細画面：描画
+    // ================================================================
+    function renderDetail(idx) {
+      const post = allPosts[idx];
+
+      // スティッキーバー
+      document.getElementById('detail-title').textContent = post.title;
+      document.getElementById('detail-meta').textContent  =
+        [post.date, post.location].filter(Boolean).join(' · ');
+
+      // キャプション
+      const captionEl = document.getElementById('detail-caption');
+      captionEl.textContent = (post.caption || '') + '\n\n';
+
+      // メディアリスト
+      const mediaList = document.getElementById('detail-media-list');
+      mediaList.innerHTML = '';
+
+      (post.media || []).forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'media-item';
+
+        if (m.type === 'video') {
+          const vid = document.createElement('video');
+          vid.src      = m.url;
+          vid.playsInline = true;
+          vid.preload  = 'none';
+          // poster生成
+          const uploadIdx = m.url.indexOf('upload/');
+          if (uploadIdx !== -1) {
+            const partA  = m.url.slice(0, uploadIdx + 'upload/'.length);
+            const partB  = m.url.slice(uploadIdx + 'upload/'.length);
+            const poster = partA + 'so_0.1/l_play_muwwou/' + partB.replace(/\.[^.]+$/, '.webp');
+            vid.poster = poster;
+          }
+
+          // クリックで再生/一時停止
+          vid.addEventListener('click', () => {
+            if (vid.paused) {
+              stopAllVideos();
+              vid.play();
+            } else {
+              vid.pause();
+              vid.currentTime = 0;
+              vid.load();
+            }
+          });
+
+          // 終了時に先頭へ戻す
+          vid.addEventListener('ended', () => {
+            vid.pause();
+            vid.currentTime = 0;
+            vid.load();
+          });
+
+          item.appendChild(vid);
+
+        } else {
+          // image
+          const img = document.createElement('img');
+          img.src     = m.url;
+          img.alt     = m.caption || '';
+          img.loading = 'lazy';
+          item.appendChild(img);
+        }
+
+        // キャプション or スペーサー
+        if (m.caption) {
+          const cap = document.createElement('div');
+          cap.className   = 'media-caption';
+          cap.textContent = m.caption;
+          item.appendChild(cap);
+        } else {
+          const spacer = document.createElement('div');
+          spacer.className = 'media-spacer';
+          item.appendChild(spacer);
+        }
+
+        mediaList.appendChild(item);
+      });
+
+      setupVideoExitPause();
+      renderDetailFooter(idx);
+
+      // 著作権
+      document.getElementById('detail-copyright').textContent =
+        `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
+    }
+
+    // ================================================================
+    // 動画の視野外一時停止
+    // ================================================================
+    function setupVideoExitPause() {
+      if (ioInstance) {
+        ioInstance.disconnect();
+        ioInstance = null;
+      }
+      const videos = document.querySelectorAll('#detail-media-list video');
+      if (videos.length === 0) return;
+
+      ioInstance = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            const vid = entry.target;
+            if (!vid.paused) {
+              vid.pause();
+              vid.currentTime = 0;
+              vid.load();
+            }
+          }
+          // 視野内に入った場合の自動再生は行わない
+        });
+      }, { threshold: 0.6 });
+
+      videos.forEach(vid => ioInstance.observe(vid));
+    }
+
+    // ================================================================
+    // 詳細画面フッター
+    // ================================================================
+    function renderDetailFooter(idx) {
+      const footer = document.getElementById('detail-footer');
+      footer.innerHTML = '';
+
+      const BASE = 'https://akiratravels.github.io/images/';
+
+      // 次へ（idx が最後でない場合のみ）
+      if (idx < allPosts.length - 1) {
+        const nextBtn = makeFooterImg(
+          BASE + 'i_next.gif', '次へ',
+          () => navigateDetail(idx + 1),
+          '▶ 次へ'
+        );
+        footer.appendChild(nextBtn);
+      }
+
+      // HOME（常に表示）
+      const homeBtn = makeFooterImg(
+        BASE + 'i_home.gif', 'HOME',
+        () => { location.href = 'index.html'; },
+        '🏠 HOME'
+      );
+      footer.appendChild(homeBtn);
+
+      // 戻る（常に表示）
+      const backBtn = makeFooterImg(
+        BASE + 'i_last.gif', '戻る',
+        () => closeDetail(),
+        '◀ 戻る'
+      );
+      footer.appendChild(backBtn);
+    }
+
+    /** フッター用画像ボタン生成（フォールバックあり） */
+    function makeFooterImg(src, alt, handler, fallbackLabel) {
+      const wrap = document.createElement('span');
+
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = alt;
+      img.style.cursor = 'pointer';
+
+      const btn = document.createElement('button');
+      btn.className   = 'detail-footer-btn';
+      btn.textContent = fallbackLabel;
+      btn.style.display = 'none';
+
+      img.addEventListener('click', handler);
+      btn.addEventListener('click', handler);
+
+      img.onerror = () => {
+        img.style.display = 'none';
+        btn.style.display = '';
+      };
+
+      wrap.appendChild(img);
+      wrap.appendChild(btn);
+      return wrap;
+    }
+
+    // ================================================================
+    // 詳細画面内ページ遷移
+    // ================================================================
     function navigateDetail(idx) {
       stopAllVideos();
       if (ioInstance) {
@@ -229,219 +590,26 @@
       history.pushState({ detail: true, idx }, '', location.href);
     }
 
-    // 詳細画面の動的構築
-    function renderDetail(idx) {
-      const post = allPosts[idx];
-      
-      // スティッキーバーの設定
-      document.getElementById('detail-title').textContent = post.title;
-      const metaArray = [post.date, post.location].filter(Boolean);
-      document.getElementById('detail-meta').textContent = metaArray.join(' · ');
-
-      // キャプションの設定
-      const captionContainer = document.getElementById('detail-caption');
-      if (post.caption) {
-        captionContainer.textContent = post.caption;
-        captionContainer.style.display = 'block';
-      } else {
-        captionContainer.textContent = '';
-        captionContainer.style.display = 'none';
-      }
-
-      // メディアリストの生成
-      const mediaListContainer = document.getElementById('detail-media-list');
-      mediaListContainer.innerHTML = '';
-
-      if (post.media && Array.isArray(post.media)) {
-        post.media.forEach((m) => {
-          const mediaItem = document.createElement('div');
-          mediaItem.className = 'media-item';
-
-          if (m.type === 'video') {
-            const video = document.createElement('video');
-            video.src = m.url;
-            video.playsInline = true;
-            video.preload = 'metadata';
-            
-            // Cloudinary動画の再生成ポスターURLルール適用
-            if (m.url.includes('upload/')) {
-              const parts = m.url.split('upload/');
-              const partA = parts[0] + 'upload/';
-              const partB = parts[1].replace(/\.[^/.]+$/, '.webp'); // 拡張子をwebpへ
-              video.poster = `${partA}so_0.1/l_play_muwwou/${partB}`;
-            }
-
-            // クリック時の一時停止・再生制御
-            video.onclick = () => {
-              if (video.paused) {
-                stopAllVideos();
-                video.play();
-              } else {
-                video.pause();
-              }
-            };
-
-            // 動画終了時は初期状態（ポスター表示）に巻き戻す
-            video.onended = () => {
-              video.pause();
-              video.currentTime = 0;
-              video.load();
-            };
-
-            mediaItem.appendChild(video);
-          } else {
-            const img = document.createElement('img');
-            img.src = m.url;
-            img.alt = m.caption || post.title;
-            img.loading = 'lazy';
-            mediaItem.appendChild(img);
-          }
-
-          // メディア別個別キャプション、または下部スペーサーの配置
-          if (m.caption) {
-            const medCap = document.createElement('div');
-            medCap.className = 'media-caption';
-            medCap.textContent = m.caption;
-            mediaItem.appendChild(medCap);
-          } else {
-            const spacer = document.createElement('div');
-            spacer.style.height = '2em';
-            mediaItem.appendChild(spacer);
-          }
-
-          mediaListContainer.appendChild(mediaItem);
-        });
-      }
-
-      // 動画の視界外監視を初期化・再設定
-      setupVideoExitPause();
-
-      // ナビゲーションフッターボタンの生成
-      renderDetailFooter(idx);
-    }
-
-    // 詳細画面ナビゲーションボタン群の制御
-    function renderDetailFooter(idx) {
-      const footer = document.getElementById('detail-footer');
-      footer.innerHTML = '';
-
-      // 1. 「次へ」ボタン (インデックスが登録数未満の場合のみ)
-      if (idx < allPosts.length - 1) {
-        const aNext = document.createElement('a');
-        const imgNext = document.createElement('img');
-        imgNext.src = 'https://akiratravels.github.io/images/i_next.gif';
-        imgNext.alt = '次へ';
-        imgNext.onerror = () => {
-          imgNext.style.display = 'none';
-          const btn = document.createElement('button');
-          btn.className = 'detail-footer-btn';
-          btn.textContent = '次へ ▶';
-          btn.onclick = () => navigateDetail(idx + 1);
-          aNext.appendChild(btn);
-        };
-        imgNext.onclick = () => navigateDetail(idx + 1);
-        aNext.appendChild(imgNext);
-        footer.appendChild(aNext);
-      }
-
-      // 2. 「HOME」ボタン (常に配置)
-      const aHome = document.createElement('a');
-      const imgHome = document.createElement('img');
-      imgHome.src = 'https://akiratravels.github.io/images/i_home.gif';
-      imgHome.alt = 'HOME';
-      imgHome.onerror = () => {
-        imgHome.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'detail-footer-btn';
-        btn.textContent = '🏠 TOP';
-        btn.onclick = () => location.href = 'index.html';
-        aHome.appendChild(btn);
-      };
-      imgHome.onclick = () => location.href = 'index.html';
-      aHome.appendChild(imgHome);
-      footer.appendChild(aHome);
-
-      // 3. 「戻る」ボタン (常に配置)
-      const aLast = document.createElement('a');
-      const imgLast = document.createElement('img');
-      imgLast.src = 'https://akiratravels.github.io/images/i_last.gif';
-      imgLast.alt = '戻る';
-      imgLast.onerror = () => {
-        imgLast.style.display = 'none';
-        const btn = document.createElement('button');
-        btn.className = 'detail-footer-btn';
-        btn.textContent = '◀ 戻る';
-        btn.onclick = () => closeDetail();
-        aLast.appendChild(btn);
-      };
-      imgLast.onclick = () => closeDetail();
-      aLast.appendChild(imgLast);
-      footer.appendChild(aLast);
-    }
-
-    // 全動画の一時停止および初期化（ポスター再表示）処理
+    // ================================================================
+    // 全動画停止
+    // ================================================================
     function stopAllVideos() {
-      const videos = document.querySelectorAll('#detail-media-list video');
-      videos.forEach((vid) => {
+      document.querySelectorAll('#detail-media-list video').forEach(vid => {
         vid.pause();
         vid.currentTime = 0;
-        vid.load(); // 再生履歴をクリアしポスターを再表示させる
+        vid.load();
       });
     }
 
-    // IntersectionObserverを用いた動画の視野外一時停止制御
-    function setupVideoExitPause() {
-      if (ioInstance) {
-        ioInstance.disconnect();
-        ioInstance = null;
-      }
-
-      const videos = document.querySelectorAll('#detail-media-list video');
-      if (videos.length === 0) return;
-
-      ioInstance = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          // 60%未満の視界（スクロールアウト）になった場合
-          if (!entry.isIntersecting) {
-            const video = entry.target;
-            if (!video.paused) {
-              video.pause();
-              video.currentTime = 0;
-              video.load(); // 視野外に外れたら再生状態を完全解除してポスターに戻す
-            }
-          }
-        });
-      }, { threshold: 0.6 });
-
-      videos.forEach((vid) => ioInstance.observe(vid));
-    }
-
-    // エラー表示処理
+    // ================================================================
+    // エラー表示
+    // ================================================================
     function showError(msg) {
       document.getElementById('loading-msg').style.display = 'none';
-      const errorDiv = document.getElementById('error-msg');
-      errorDiv.textContent = msg;
-      errorDiv.style.display = 'block';
+      const errEl = document.getElementById('error-msg');
+      errEl.textContent = msg;
+      errEl.style.display = '';
     }
-
-    // ブラウザバック・フォワード（popstate）対応
-    window.addEventListener('popstate', (event) => {
-      if (event.state && event.state.detail === true) {
-        // 詳細表示状態への移動
-        document.getElementById('country-wrap').style.display = 'none';
-        document.getElementById('detail-view').style.display = 'block';
-        currentIdx = event.state.idx;
-        renderDetail(event.state.idx);
-      } else {
-        // 国一覧・メイン表示状態への移動
-        if (document.getElementById('detail-view').style.display === 'block') {
-          closeDetail();
-        }
-      }
-    });
-
-    // 起動
-    init();
   </script>
 </body>
 </html>
