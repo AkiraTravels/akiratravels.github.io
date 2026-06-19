@@ -421,7 +421,7 @@
           const vid = document.createElement('video');
           vid.src      = m.url;
           vid.playsInline = true;
-          vid.preload  = 'none';
+          vid.preload  = 'metadata';
           // poster生成
           const uploadIdx = m.url.indexOf('upload/');
           if (uploadIdx !== -1) {
