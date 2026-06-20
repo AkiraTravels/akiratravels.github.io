@@ -6,20 +6,16 @@
   <meta name="description" CONTENT="湖も、絶壁も、遺跡もいいけどやっぱり人が面白い。人にフォーカスを当てて書き下ろした旅行記と旅日記です。">
   <meta name="keywords" CONTENT="旅行,旅行記,旅日記,一人旅,個人旅行">
   <title>AKIRA travels ～ だから一人旅はやめられない</title>
-  
   <meta property="og:url" content="https://akiratravels.github.io/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="AKIRA travels ～ だから一人旅はやめられない">
   <meta property="og:site_name" content="AKIRA travels">
-  <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
-  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
-  
+  <link rel="shortcut icon" href="favicon.ico">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
   <div id="admin-link">
     <a href="admin/" id="admin-link-text">管理</a>
   </div>
@@ -36,18 +32,15 @@
     <footer class="top-footer">
       <div class="footer-icons">
         <a href="#" title="PROFILE">
-          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">👤 PROFILE</button>
+          <img src="https://akiratravels.github.io/images/i_profile.gif" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">PROFILE</button>
         </a>
         <a href="https://www.facebook.com/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">FB</button>
+          <img src="https://akiratravels.github.io/images/facebook.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">Facebook</button>
         </a>
         <a href="https://www.messenger.com/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <img src="https://akiratravels.github.io/images/i_fb.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
           <button class="footer-fallback-btn" style="display:none;">Messenger</button>
         </a>
       </div>
@@ -56,82 +49,78 @@
   </div>
 
   <script type="module">
-    import { db } from "./js/firebase-config.js";
+    import { db } from './js/firebase-config.js';
     import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     async function init() {
-      // 著作権年度の動的設定
+      // Set copyright year
       const currentYear = new Date().getFullYear();
-      document.getElementById("copyright-text").textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
+      document.getElementById('copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
       let countries = [];
-      const cached = sessionStorage.getItem("countries_list");
-
+      const cached = sessionStorage.getItem('countries_list');
       if (cached) {
         countries = JSON.parse(cached);
       } else {
         try {
-          const q = query(collection(db, "countries"), orderBy("order", "asc"));
+          const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
           const snapshot = await getDocs(q);
           snapshot.forEach(doc => {
             countries.push({ id: doc.id, ...doc.data() });
           });
-          sessionStorage.setItem("countries_list", JSON.stringify(countries));
+          sessionStorage.setItem('countries_list', JSON.stringify(countries));
         } catch (err) {
-          console.error("データ取得エラー:", err);
+          console.error(err);
         }
       }
 
-      const wrap = document.getElementById("country-list-wrap");
+      const wrap = document.getElementById('country-list-wrap');
       if (countries.length === 0) {
-        wrap.innerHTML = '<p class="loading">国データがありません</p>';
+        wrap.textContent = '国データがありません';
         return;
       }
 
-      const table = document.createElement("table");
+      const table = document.createElement('table');
       let tr = null;
-
       countries.forEach((country, idx) => {
         if (idx % 2 === 0) {
-          tr = document.createElement("tr");
+          tr = document.createElement('tr');
           table.appendChild(tr);
         }
-
         const td = buildCountryCell(country);
         tr.appendChild(td);
       });
 
-      if (countries.length % 2 !== 0 && tr) {
-        const emptyTd = document.createElement("td");
+      if (countries.length % 2 !== 0) {
+        const emptyTd = document.createElement('td');
+        emptyTd.className = 'country-cell';
         tr.appendChild(emptyTd);
       }
-
       wrap.appendChild(table);
     }
 
     function buildCountryCell(country) {
-      const td = document.createElement("td");
-      td.className = "country-cell";
+      const td = document.createElement('td');
+      td.className = 'country-cell';
 
-      let linkUrl = "";
       let hasLink = false;
-
+      let url = '';
       if (country.imgUrl) {
-        linkUrl = `country.html?id=${country.id}`;
+        url = `country.html?id=${country.id}`;
         hasLink = true;
       } else if (country.docUrl) {
-        linkUrl = country.docUrl;
+        url = country.docUrl;
         hasLink = true;
       }
 
-      const nameSpan = document.createElement("span");
-      nameSpan.className = `country-name-text ${hasLink ? 'has-posts' : 'no-posts'}`;
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
       nameSpan.textContent = country.name;
 
       if (hasLink) {
-        const a = document.createElement("a");
-        a.href = linkUrl;
-        a.className = "country-link";
+        const a = document.createElement('a');
+        a.className = 'country-link';
+        a.href = url;
         a.appendChild(nameSpan);
         td.appendChild(a);
       } else {
@@ -139,16 +128,16 @@
       }
 
       if (country.subtitle) {
-        const subSpan = document.createElement("span");
-        subSpan.className = "country-subtitle";
-        subSpan.textContent = country.subtitle;
-        td.appendChild(subSpan);
+        const sub = document.createElement('span');
+        sub.className = 'country-subtitle';
+        sub.textContent = country.subtitle;
+        td.appendChild(sub);
       }
 
       return td;
     }
 
-    window.addEventListener("DOMContentLoaded", init);
+    init();
   </script>
 </body>
 </html>
