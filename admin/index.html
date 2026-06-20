@@ -10,29 +10,29 @@
 
   <header class="admin-header">
     <div class="admin-header-title">AKIRA travels <span>ADMIN</span></div>
-    <div id="header-user" style="display: none;">
+    <div id="header-user" style="display:none;">
       <span id="header-email"></span>
       <button id="btn-logout">ログアウト</button>
     </div>
   </header>
 
-  <div id="login-screen" style="display: none;">
+  <div id="login-screen" style="display:none;">
     <div class="login-card">
       <h2>管理者ログイン</h2>
       <div class="login-field">
         <label for="login-email">メールアドレス</label>
-        <input type="text" id="login-email">
+        <input type="text" id="login-email" autocomplete="username">
       </div>
       <div class="login-field">
         <label for="login-password">パスワード</label>
-        <input type="password" id="login-password">
+        <input type="password" id="login-password" autocomplete="current-password">
       </div>
       <button id="btn-login">ログイン</button>
       <p id="login-error"></p>
     </div>
   </div>
 
-  <div id="admin-main" style="display: none;">
+  <div id="admin-main" style="display:none;">
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="new-post">✏️ 新規投稿</button>
       <button class="tab-btn" data-tab="post-list">📋 投稿一覧</button>
