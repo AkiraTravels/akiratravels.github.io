@@ -10,68 +10,29 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="AKIRA travels ～ だから一人旅はやめられない">
   <meta property="og:site_name" content="AKIRA travels">
-  <link rel="shortcut icon" href="favicon.ico">
+  <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js">
   <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <div id="admin-link">
-    <a href="admin/" id="admin-link-text">管理</a>
-  </div>
-
-  <div class="top-wrap">
-    <div class="top-logo">
-      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
-    </div>
-
-    <div id="country-list-wrap"></div>
-
-    <footer class="top-footer">
-      <div class="footer-icons">
-        <a href="#" title="PROFILE">
-          <img src="https://akiratravels.github.io/images/i_profile.gif" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">PROFILE</button>
-        </a>
-        <a href="https://www.facebook.com/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/facebook.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">Facebook</button>
-        </a>
-        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/i_fb.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">Messenger</button>
-        </a>
-      </div>
-      <p class="copyright" id="copyright-text"></p>
-    </footer>
-  </div>
-
   <script type="module">
     import { db } from './js/firebase-config.js';
     import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    async function init() {
-      // Set copyright year
-      const currentYear = new Date().getFullYear();
-      document.getElementById('copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
+    // 著作権表示
+    document.getElementById('copyright-text').textContent =
+      `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
 
-      let countries = [];
+    async function loadCountries() {
+      let countries;
       const cached = sessionStorage.getItem('countries_list');
       if (cached) {
         countries = JSON.parse(cached);
       } else {
-        try {
-          const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
-          const snapshot = await getDocs(q);
-          snapshot.forEach(doc => {
-            countries.push({ id: doc.id, ...doc.data() });
-          });
-          sessionStorage.setItem('countries_list', JSON.stringify(countries));
-        } catch (err) {
-          console.error(err);
-        }
+        const q = query(collection(db, 'countries'), orderBy('order'));
+        const snap = await getDocs(q);
+        countries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        sessionStorage.setItem('countries_list', JSON.stringify(countries));
       }
 
       const wrap = document.getElementById('country-list-wrap');
@@ -81,20 +42,18 @@
       }
 
       const table = document.createElement('table');
-      let tr = null;
-      countries.forEach((country, idx) => {
-        if (idx % 2 === 0) {
-          tr = document.createElement('tr');
-          table.appendChild(tr);
-        }
-        const td = buildCountryCell(country);
-        tr.appendChild(td);
-      });
+      table.style.width = '100%';
+      table.style.tableLayout = 'fixed';
 
-      if (countries.length % 2 !== 0) {
-        const emptyTd = document.createElement('td');
-        emptyTd.className = 'country-cell';
-        tr.appendChild(emptyTd);
+      for (let i = 0; i < countries.length; i += 2) {
+        const tr = document.createElement('tr');
+        tr.appendChild(buildCountryCell(countries[i]));
+        if (countries[i + 1]) {
+          tr.appendChild(buildCountryCell(countries[i + 1]));
+        } else {
+          tr.appendChild(document.createElement('td'));
+        }
+        table.appendChild(tr);
       }
       wrap.appendChild(table);
     }
@@ -103,24 +62,22 @@
       const td = document.createElement('td');
       td.className = 'country-cell';
 
-      let hasLink = false;
-      let url = '';
-      if (country.imgUrl) {
-        url = `country.html?id=${country.id}`;
-        hasLink = true;
-      } else if (country.docUrl) {
-        url = country.docUrl;
-        hasLink = true;
-      }
+      const hasPosts = !!country.imgUrl || !!country.docUrl;
 
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
+      nameSpan.className = 'country-name-text ' + (hasPosts ? 'has-posts' : 'no-posts');
       nameSpan.textContent = country.name;
 
-      if (hasLink) {
+      if (hasPosts) {
         const a = document.createElement('a');
         a.className = 'country-link';
-        a.href = url;
+        if (country.imgUrl) {
+          a.href = `country.html?id=${country.id}`;
+        } else {
+          a.href = country.docUrl;
+          a.target = '_blank';
+          a.rel = 'noopener';
+        }
         a.appendChild(nameSpan);
         td.appendChild(a);
       } else {
@@ -137,7 +94,40 @@
       return td;
     }
 
-    init();
+    loadCountries();
   </script>
+</head>
+<body>
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理</a>
+  </div>
+  <div class="top-wrap">
+    <div class="top-logo">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+    </div>
+    <div id="country-list-wrap"></div>
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <a href="#" title="PROFILE">
+          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">PROFILE</button>
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">Facebook</button>
+        </a>
+        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">Messenger</button>
+        </a>
+      </div>
+      <p class="copyright" id="copyright-text"></p>
+    </footer>
+  </div>
 </body>
 </html>

@@ -1,250 +1,164 @@
-/* 閲覧ページ共通スタイル */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
-  background-color: #faf8f5;
-  color: #333;
-}
-#admin-link {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
-  padding: 5px 10px;
-  border-radius: 4px;
-  z-index: 1000;
-}
-#admin-link-text {
-  color: #aaaaaa;
-  text-decoration: none;
-  font-size: 14px;
-}
-.top-wrap {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  text-align: center;
-}
-.top-logo img {
-  max-width: 100%;
-  height: auto;
-}
-.top-logo-fallback {
-  font-size: 28px;
-  font-weight: bold;
-  color: #7a5a20;
-}
-#country-list-wrap {
-  margin-top: 40px;
-}
-table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-}
-.country-cell {
-  padding: 15px;
-  vertical-align: top;
-  text-align: left;
-}
-.country-link {
-  text-decoration: none;
-}
-.country-name-text {
-  font-size: 18px;
-  font-weight: bold;
-}
-.country-name-text.has-posts {
-  color: #cc6600;
-}
-.country-name-text.no-posts {
-  color: #aaaaaa;
-}
-.country-subtitle {
-  color: #7a5a20;
-  font-size: 15px;
-  font-weight: bold;
-  display: block;
-  margin-top: 2px;
-}
-.top-footer, .country-footer {
-  margin-top: 60px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
-}
-.footer-icons a {
-  margin: 0 10px;
-  text-decoration: none;
-}
-.footer-icons img {
-  width: 32px;
-  height: 32px;
-  vertical-align: middle;
-}
-.footer-fallback-btn, .detail-footer-btn {
-  background: #7a5a20;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.copyright {
-  font-size: 12px;
-  color: #999;
-  margin-top: 15px;
+:root {
+  --brown:      #4a3000;
+  --orange:     #cc6600;
+  --gray:       #aaaaaa;
+  --bg-fallback:#f0e0c8;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
-/* 国別ページ */
-.country-page {
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-main);
+  font-size: 16px;
+  color: var(--brown);
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+  background-repeat: repeat;
+}
+
+body.country-page {
   background-attachment: local;
 }
-.country-wrap {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 40px 20px;
+
+/* 管理者リンク */
+#admin-link {
+  position: fixed; top: 10px; right: 12px; z-index: 100;
+  font-size: 11px; color: var(--gray);
+  background: rgba(255, 255, 255, 0.6);
+  padding: 3px 8px; border-radius: 10px;
+  backdrop-filter: blur(4px);
 }
-.country-title {
-  font-size: 26px;
-  color: #cc6600;
-  margin-bottom: 10px;
-}
-.country-description {
-  font-size: 15px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  color: #555;
-  margin-bottom: 30px;
-}
-.cover-photo-wrap {
-  margin-bottom: 40px;
-  cursor: pointer;
-}
-.cover-photo-wrap img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-}
-.post-chain {
-  margin-top: 30px;
-  text-align: center;
-}
-.chain-item {
-  margin: 15px 0;
-}
-.chain-link {
-  font-size: 18px;
-  color: #cc6600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-.chain-arrow {
+#admin-link a { color: var(--gray); text-decoration: none; }
+
+/* トップページ */
+.top-wrap { max-width: 480px; margin: 0 auto; }
+.top-logo { text-align: center; padding: 24px 16px 16px; }
+.top-logo img { max-width: 280px; height: auto; }
+.top-logo-fallback { font-size: 28px; font-weight: bold; color: var(--brown); letter-spacing: 0.1em; }
+
+/* 国名リスト */
+#country-list-wrap { padding: 8px 16px; }
+#country-list-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+#country-list-wrap td { text-align: center; padding: 2px 0; vertical-align: middle; }
+.country-cell { padding: 6px 4px; }
+
+/* 国名テキスト */
+.country-name-text {
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  font-feature-settings: "palt";
+  font-weight: bold;
+  font-size: 22px;
   display: block;
-  color: #7a5a20;
-  margin: 10px 0;
-  font-size: 14px;
 }
-.chain-separator-wrap {
-  margin: 25px 0;
+@media (min-width: 600px) {
+  .country-name-text { font-size: 26px; }
 }
+.country-subtitle {
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  font-size: 15px; font-weight: bold; color: #7a5a20; display: block; margin-top: 2px;
+}
+.country-name-text.has-posts { color: #cc6600; }
+.country-name-text.no-posts  { color: #aaaaaa; }
+a.country-link { text-decoration: none; color: inherit; }
+
+/* 国別ページ */
+.country-wrap { max-width: 600px; margin: 0 auto; }
+.country-header {
+  background: transparent; padding: 24px 16px 12px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
+}
+.country-title { text-align: center; font-size: 1.4em; font-weight: bold; color: var(--brown); }
+.country-description {
+  margin-top: 12px; font-size: 15px; line-height: 1.75;
+  color: var(--brown); white-space: pre-wrap; padding: 0 4px;
+}
+
+/* 代表写真 */
+.cover-photo-wrap { text-align: center; padding: 16px; }
+#cover-photo { max-width: 60%; height: auto; display: inline-block; cursor: pointer; }
+@media (max-width: 599px) { #cover-photo { max-width: 85%; } }
+#cover-photo:hover { transform: scale(1.01); transition: transform 0.2s; }
+
+/* 投稿チェーン */
+.post-chain { padding: 16px; max-width: 480px; margin: 0 auto; }
+.chain-item { text-align: center; padding: 4px 0; }
+.chain-link { font-size: 1.1em; font-weight: bold; cursor: pointer; color: var(--orange); }
+.chain-link:hover { text-decoration: underline; }
+.chain-arrow { color: var(--brown); font-size: 14px; }
+.chain-separator-wrap { text-align: center; padding: 8px 0; }
 .chain-separator {
-  border: 0;
-  border-top: 1px dashed #aaaaaa;
-  width: 50%;
-  margin: 0 auto;
+  display: inline-block; width: 60%; border: none;
+  border-top: 1px solid var(--brown); margin: 0;
 }
-.loading, .error-msg {
-  text-align: center;
-  padding: 50px;
-  font-size: 16px;
-}
-.error-msg {
-  color: red;
-}
+@media (max-width: 599px) { .chain-separator { width: 85%; } }
 
 /* 詳細画面 */
 .detail-view {
-  background: #faf8f5;
+  display: none;
+  background-color: var(--bg-fallback);
+  background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
+  background-repeat: repeat; background-attachment: local;
   min-height: 100vh;
-  box-sizing: border-box;
-  padding-bottom: 60px;
 }
+
+@media (min-width: 900px) {
+  .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
+}
+
+/* スティッキーバー */
 .detail-sticky-bar {
-  position: sticky;
-  top: 0;
-  background: rgba(250, 248, 245, 0.95);
-  backdrop-filter: blur(4px);
-  padding: 15px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  z-index: 900;
-  max-width: 700px;
-  margin: 0 auto;
+  position: sticky; top: 0; z-index: 510;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.detail-sticky-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #cc6600;
-}
-.detail-sticky-meta {
-  font-size: 13px;
-  color: #777;
-  margin-top: 4px;
-}
-.detail-body {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 20px;
-}
+.detail-sticky-title { font-size: 18px; font-weight: bold; color: var(--brown); }
+.detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
+
+/* キャプション */
 .detail-caption {
-  font-size: 16px;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  margin-bottom: 20px;
+  font-size: 17px; color: var(--brown); font-weight: normal;
+  line-height: 1.75; white-space: pre-wrap;
+  padding: 4px 16px 20px;
 }
-.media-item {
-  position: relative;
-  margin-bottom: 30px;
-  width: 100%;
-}
-.media-item img, .media-item video {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 4px;
-}
-.video-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-size: cover;
-  background-position: center;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.media-caption {
-  font-size: 14px;
-  color: #555;
-  margin-top: 8px;
-  padding: 0 5px;
-}
+
+/* メディア */
+.media-item img, .media-item video { width: 100%; display: block; }
+.media-item video { background: #000; cursor: pointer; }
+.media-caption { font-size: 16px; color: #7a5a20; padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; }
+
+/* 詳細画面フッター */
 .detail-footer {
-  max-width: 700px;
-  margin: 40px auto 20px auto;
-  text-align: center;
+  padding: 24px 16px 40px;
+  display: flex; justify-content: center; align-items: center; gap: 16px;
 }
-.detail-footer img {
-  height: 40px;
-  margin: 0 15px;
-  cursor: pointer;
-  vertical-align: middle;
+.detail-footer img { height: 36px; cursor: pointer; }
+.detail-footer-btn {
+  cursor: pointer; padding: 8px 20px; font-size: 13px;
+  color: var(--brown);
+  background: rgba(74, 48, 0, 0.08);
+  border: 1px solid rgba(74, 48, 0, 0.2);
+  border-radius: 4px; font-family: var(--font-main);
 }
-.detail-copyright {
-  text-align: center;
-  font-size: 12px;
-  color: #999;
-  margin-top: 30px;
+.detail-copyright { text-align: center; font-size: 13px; color: #7a5a20; padding: 0 16px 20px; }
+
+/* フッター共通 */
+.top-footer    { padding-top: 20px; text-align: center; }
+.country-footer{ padding: 20px 16px 0; text-align: center; }
+.footer-icons  { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px 0; }
+.footer-icons a { display: inline-flex; align-items: center; }
+.footer-icons img { height: 32px; }
+.copyright     { font-size: 12px; color: #7a5a20; padding: 8px 0 0; }
+.footer-fallback-btn {
+  cursor: pointer; padding: 6px 16px; font-size: 13px;
+  color: var(--brown);
+  background: rgba(74, 48, 0, 0.08);
+  border: 1px solid rgba(74, 48, 0, 0.2);
+  border-radius: 4px; font-family: var(--font-main);
 }
+
+/* ユーティリティ */
+.loading   { text-align: center; padding: 40px 16px; color: var(--gray); font-size: 15px; }
+.error-msg { text-align: center; padding: 40px 16px; color: #8b2020;   font-size: 15px; }
