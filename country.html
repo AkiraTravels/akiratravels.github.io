@@ -244,7 +244,7 @@
             // Poster URL生成変換ロジック
             if (m.url.includes("upload/")) {
               const parts = m.url.split("upload/");
-              let posterUrl = parts[0] + "upload/l_play_muwwou/" + parts[1];
+              let posterUrl = parts[0] + "upload/so_0/l_play_muwwou/" + parts[1];
               posterUrl = posterUrl.replace(/\.mp4$/i, ".webp");
               video.poster = posterUrl;
             }
