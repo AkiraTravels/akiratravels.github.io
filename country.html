@@ -4,30 +4,36 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AKIRA travels</title>
+  <meta property="og:url"       content="https://akiratravels.github.io/country.html">
+  <meta property="og:type"      content="website">
+  <meta property="og:title"     content="AKIRA travels ～ だから一人旅はやめられない">
+  <meta property="og:site_name" content="AKIRA travels">
+  <meta property="og:image"     content="https://akiratravels.github.io/images/ogp.jpg">
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js">
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    body { background-attachment: local; }
-  </style>
+  <style>body { background-attachment: local; }</style>
 </head>
 <body class="country-page">
 
+  <!-- 国別メイン -->
   <div id="country-wrap" class="country-wrap" style="display:none;">
     <div class="country-header">
       <h1 class="country-title" id="country-title"></h1>
       <p class="country-description" id="country-description"></p>
     </div>
     <div class="cover-photo-wrap" id="cover-photo-wrap" style="display:none;">
-      <img id="cover-photo" src="" alt="">
+      <img id="cover-photo" alt="">
     </div>
     <div class="post-chain" id="post-chain"></div>
     <footer class="country-footer">
       <div class="footer-icons">
         <a href="index.html" title="AKIRA travels TOP">
-          <img src="https://akiratravels.github.io/images/i_home.gif" alt="AKIRA travels"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';
-                        this.nextElementSibling.onclick=()=>location.href='index.html';">
+          <img
+            src="https://akiratravels.github.io/images/i_home.gif"
+            alt="AKIRA travels"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline'; this.nextElementSibling.onclick=()=>location.href='index.html';">
           <button class="footer-fallback-btn" style="display:none;">🏠 TOP</button>
         </a>
       </div>
@@ -35,13 +41,17 @@
     </footer>
   </div>
 
-  <div id="loading-msg" class="loading">読み込み中...</div>
+  <!-- ローディング -->
+  <div id="loading-msg" class="loading">読み込み中…</div>
+
+  <!-- エラー -->
   <div id="error-msg" class="error-msg" style="display:none;"></div>
 
+  <!-- 詳細画面 -->
   <div id="detail-view" class="detail-view" style="display:none;">
     <div class="detail-sticky-bar">
       <div class="detail-sticky-title" id="detail-title"></div>
-      <div class="detail-sticky-meta" id="detail-meta"></div>
+      <div class="detail-sticky-meta"  id="detail-meta"></div>
     </div>
     <div class="detail-body">
       <div class="detail-caption" id="detail-caption"></div>
@@ -55,19 +65,15 @@
     import { db } from './js/firebase-config.js';
     import {
       collection, getDocs, getDoc,
-      doc, query, orderBy, where
+      doc, query, orderBy
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // -------------------------------------------------------
-    // 状態変数
-    // -------------------------------------------------------
+    /* ─── 状態変数 ─── */
     let allPosts   = [];
     let currentIdx = 0;
     let ioInstance = null;
 
-    // -------------------------------------------------------
-    // 初期化処理
-    // -------------------------------------------------------
+    /* ─── 初期化 ─── */
     const params     = new URLSearchParams(location.search);
     const countryId  = params.get('id');
 
@@ -79,64 +85,55 @@
 
     async function init() {
       try {
-        // 国データの取得（sessionStorage キャッシュ優先）
+        /* country データ取得（sessionStorage キャッシュ） */
         let country;
         const cachedCountry = sessionStorage.getItem(`country_${countryId}`);
         if (cachedCountry) {
           country = JSON.parse(cachedCountry);
         } else {
           const snap = await getDoc(doc(db, 'countries', countryId));
-          if (!snap.exists()) {
-            showError('国データが見つかりません。');
-            return;
-          }
+          if (!snap.exists()) { showError('指定された国が見つかりません。'); return; }
           country = { id: snap.id, ...snap.data() };
           sessionStorage.setItem(`country_${countryId}`, JSON.stringify(country));
         }
 
-        // 投稿データの取得（sessionStorage キャッシュ優先）
+        /* posts データ取得（sessionStorage キャッシュ） */
         const cachedPosts = sessionStorage.getItem(`posts_${countryId}`);
         if (cachedPosts) {
           allPosts = JSON.parse(cachedPosts);
         } else {
-          const q    = query(
-            collection(db, 'posts'),
-            where('countryId', '==', countryId),
-            orderBy('date', 'asc')
-          );
+          const q    = query(collection(db, 'posts'), orderBy('date', 'asc'));
           const snap = await getDocs(q);
-          allPosts   = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          allPosts   = snap.docs
+            .filter(d => d.data().countryId === countryId)
+            .map(d => ({ id: d.id, ...d.data() }));
           sessionStorage.setItem(`posts_${countryId}`, JSON.stringify(allPosts));
         }
 
-        // ページタイトル
+        /* タイトル設定 */
         document.title = `${country.name} — AKIRA travels`;
-
-        // 国ヘッダー描画
         document.getElementById('country-title').textContent       = country.name;
         document.getElementById('country-description').textContent = country.description || '';
         document.getElementById('country-description').style.whiteSpace = 'pre-wrap';
 
-        // 著作権
+        /* 著作権表示 */
         document.getElementById('copyright-text').textContent =
           `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
 
-        // ローディング非表示、国ラップ表示
+        /* 表示切り替え */
         document.getElementById('loading-msg').style.display  = 'none';
         document.getElementById('country-wrap').style.display = '';
 
         renderCoverPhoto(country);
         renderChain();
 
-      } catch (e) {
+      } catch (err) {
+        console.error(err);
         showError('データの読み込みに失敗しました。');
-        console.error(e);
       }
     }
 
-    // -------------------------------------------------------
-    // 8-3. 代表写真（renderCoverPhoto）
-    // -------------------------------------------------------
+    /* ─── 代表写真 ─── */
     function renderCoverPhoto(country) {
       if (!country.imgUrl) return;
       const wrap  = document.getElementById('cover-photo-wrap');
@@ -144,23 +141,24 @@
       img.src     = country.imgUrl;
       img.alt     = country.name;
       wrap.style.display = '';
+      wrap.style.cursor  = 'pointer';
       wrap.addEventListener('click', () => openDetail(0));
     }
 
-    // -------------------------------------------------------
-    // 8-4. 投稿チェーン描画（renderChain）
-    // -------------------------------------------------------
+    /* ─── 投稿チェーン ─── */
     function renderChain() {
       const chain = document.getElementById('post-chain');
       chain.innerHTML = '';
 
-      if (allPosts.length === 0) {
-        chain.textContent = '投稿がありません';
+      if (!allPosts.length) {
+        const p = document.createElement('p');
+        p.textContent = '投稿がありません';
+        chain.appendChild(p);
         return;
       }
 
       allPosts.forEach((post, i) => {
-        // 投稿アイテム
+        /* チェーンアイテム */
         const item = document.createElement('div');
         item.className = 'chain-item';
         const link = document.createElement('span');
@@ -170,35 +168,35 @@
         item.appendChild(link);
         chain.appendChild(item);
 
-        // セパレーター（最後の投稿の後には挿入しない）
+        /* セパレーター（最後の投稿の後には挿入しない） */
         if (i < allPosts.length - 1) {
           const diff = Math.abs(
             new Date(allPosts[i + 1].date) - new Date(post.date)
           ) / (1000 * 60 * 60 * 24);
 
           if (diff < 7) {
-            const sep = document.createElement('div');
-            sep.className = 'chain-item';
+            /* 7日未満 → ▼ */
+            const sepItem = document.createElement('div');
+            sepItem.className = 'chain-item';
             const arrow = document.createElement('span');
             arrow.className   = 'chain-arrow';
             arrow.textContent = '▼';
-            sep.appendChild(arrow);
-            chain.appendChild(sep);
+            sepItem.appendChild(arrow);
+            chain.appendChild(sepItem);
           } else {
-            const sep = document.createElement('div');
-            sep.className = 'chain-item chain-separator-wrap';
+            /* 7日以上 → hr */
+            const sepWrap = document.createElement('div');
+            sepWrap.className = 'chain-item chain-separator-wrap';
             const hr = document.createElement('hr');
             hr.className = 'chain-separator';
-            sep.appendChild(hr);
-            chain.appendChild(sep);
+            sepWrap.appendChild(hr);
+            chain.appendChild(sepWrap);
           }
         }
       });
     }
 
-    // -------------------------------------------------------
-    // 8-5. 詳細画面の表示・非表示
-    // -------------------------------------------------------
+    /* ─── 詳細画面 開く ─── */
     function openDetail(idx) {
       currentIdx = idx;
       renderDetail(idx);
@@ -208,17 +206,15 @@
       history.pushState({ detail: true, idx }, '', location.href);
     }
 
+    /* ─── 詳細画面 閉じる ─── */
     function closeDetail() {
       document.getElementById('detail-view').style.display  = 'none';
       document.getElementById('country-wrap').style.display = '';
       stopAllVideos();
-      if (ioInstance) {
-        ioInstance.disconnect();
-        ioInstance = null;
-      }
+      if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
     }
 
-    // ブラウザバック対応
+    /* ─── ブラウザバック ─── */
     window.addEventListener('popstate', (event) => {
       if (event.state && event.state.detail === true) {
         document.getElementById('detail-view').style.display  = 'block';
@@ -232,44 +228,50 @@
       }
     });
 
-    // -------------------------------------------------------
-    // 8-6. 詳細画面描画（renderDetail）
-    // -------------------------------------------------------
+    /* ─── 詳細画面 描画 ─── */
     function renderDetail(idx) {
       const post = allPosts[idx];
 
-      // スティッキーバー
+      /* スティッキーバー */
       document.getElementById('detail-title').textContent = post.title;
       document.getElementById('detail-meta').textContent  =
         [post.date, post.location].filter(Boolean).join(' · ');
 
-      // キャプション
+      /* キャプション */
       const captionEl = document.getElementById('detail-caption');
-      captionEl.textContent = (post.caption || '') + '\n\n';
+      captionEl.innerHTML = '';
+      if (post.caption) {
+        captionEl.textContent = post.caption;
+      }
+      captionEl.appendChild(document.createElement('br'));
+      captionEl.appendChild(document.createElement('br'));
 
-      // メディアリスト
+      /* メディアリスト */
       const mediaList = document.getElementById('detail-media-list');
       mediaList.innerHTML = '';
+
+      let imgIndex = 0; // 画像のみのカウンタ（動画を除く）
 
       (post.media || []).forEach(m => {
         const item = document.createElement('div');
         item.className = 'media-item';
 
         if (m.type === 'video') {
+          /* ── 動画 ── */
           const vid = document.createElement('video');
           vid.src         = m.url;
           vid.playsInline = true;
           vid.preload     = 'metadata';
 
-          // poster URL 生成
+          /* poster URL生成 */
           const uploadIdx = m.url.indexOf('upload/');
           if (uploadIdx !== -1) {
-            const partA  = m.url.slice(0, uploadIdx + 'upload/'.length);
-            const partB  = m.url.slice(uploadIdx + 'upload/'.length);
-            vid.poster   = partA + 'so_0/l_play_muwwou/' + partB.replace(/\.mp4$/i, '.webp');
+            const partA = m.url.slice(0, uploadIdx + 'upload/'.length);
+            const partB = m.url.slice(uploadIdx + 'upload/'.length);
+            vid.poster = partA + 'so_0/l_play_muwwou/' + partB.replace(/\.[^.]+$/, '.webp');
           }
 
-          // クリックで再生・一時停止
+          /* クリックで再生 / 一時停止 */
           vid.addEventListener('click', () => {
             if (vid.paused) {
               pauseOtherVideos(vid);
@@ -279,7 +281,7 @@
             }
           });
 
-          // 再生終了で先頭に戻す
+          /* 再生終了で先頭に戻す */
           vid.addEventListener('ended', () => {
             vid.pause();
             vid.currentTime = 0;
@@ -289,15 +291,17 @@
           item.appendChild(vid);
 
         } else {
-          // image
-          const img    = document.createElement('img');
-          img.src      = m.url;
-          img.alt      = m.caption || '';
-          img.loading  = 'lazy';
+          /* ── 画像 ── */
+          const img = document.createElement('img');
+          img.src = m.url;
+          img.alt = m.caption || '';
+          if (imgIndex >= 2) img.loading = 'lazy';
+          imgIndex++;
+
           item.appendChild(img);
         }
 
-        // キャプション or スペーサー
+        /* キャプション or スペーサー */
         if (m.caption) {
           const cap = document.createElement('div');
           cap.className   = 'media-caption';
@@ -315,124 +319,105 @@
       setupVideoExitPause();
       renderDetailFooter(idx);
 
-      // 著作権
+      /* 著作権 */
       document.getElementById('detail-copyright').textContent =
         `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
     }
 
-    // -------------------------------------------------------
-    // 8-7. 動画の視野外一時停止（setupVideoExitPause）
-    // -------------------------------------------------------
+    /* ─── 動画の視野外一時停止 ─── */
     function setupVideoExitPause() {
-      if (ioInstance) {
-        ioInstance.disconnect();
-        ioInstance = null;
-      }
-
+      if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
       const videos = document.querySelectorAll('#detail-media-list video');
-      if (videos.length === 0) return;
+      if (!videos.length) return;
 
       ioInstance = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (!entry.isIntersecting) {
-            const vid = entry.target;
-            if (!vid.paused) {
-              vid.pause();
-            }
+          const vid = entry.target;
+          if (!entry.isIntersecting && !vid.paused) {
+            vid.pause();
           }
-          // 視野内に入った場合は何もしない（自動再生しない）
         });
       }, { threshold: 0.6 });
 
       videos.forEach(v => ioInstance.observe(v));
     }
 
-    // -------------------------------------------------------
-    // 8-8. 詳細画面フッター（renderDetailFooter）
-    // -------------------------------------------------------
+    /* ─── 詳細フッター ─── */
     function renderDetailFooter(idx) {
-      const footer  = document.getElementById('detail-footer');
+      const footer = document.getElementById('detail-footer');
       footer.innerHTML = '';
-      const baseUrl = 'https://akiratravels.github.io/images/';
 
-      // 次へ
+      /* 次へ */
       if (idx < allPosts.length - 1) {
-        const a   = document.createElement('a');
+        const a = document.createElement('a');
+        a.href  = '#';
+        a.title = '次へ';
+        a.addEventListener('click', e => { e.preventDefault(); navigateDetail(idx + 1); });
         const img = document.createElement('img');
-        img.src = baseUrl + 'i_next.gif';
+        img.src = 'https://akiratravels.github.io/images/i_next.gif';
         img.alt = '次へ';
-        img.onerror = function () {
+        img.onerror = function() {
           this.style.display = 'none';
-          const btn = this.nextElementSibling;
-          btn.style.display = 'inline';
+          const btn = document.createElement('button');
+          btn.className   = 'detail-footer-btn';
+          btn.textContent = '次へ ▶';
+          btn.addEventListener('click', () => navigateDetail(idx + 1));
+          a.appendChild(btn);
         };
-        const btn = document.createElement('button');
-        btn.className   = 'detail-footer-btn';
-        btn.textContent = '次へ ▶';
-        btn.style.display = 'none';
         a.appendChild(img);
-        a.appendChild(btn);
-        a.addEventListener('click', (e) => { e.preventDefault(); navigateDetail(idx + 1); });
         footer.appendChild(a);
       }
 
-      // HOME
-      const aHome   = document.createElement('a');
+      /* HOME */
+      const aHome = document.createElement('a');
+      aHome.href  = '#';
+      aHome.title = 'HOME';
+      aHome.addEventListener('click', e => { e.preventDefault(); location.href = 'index.html'; });
       const imgHome = document.createElement('img');
-      imgHome.src = baseUrl + 'i_home.gif';
+      imgHome.src = 'https://akiratravels.github.io/images/i_home.gif';
       imgHome.alt = 'HOME';
-      imgHome.onerror = function () {
+      imgHome.onerror = function() {
         this.style.display = 'none';
-        const btn = this.nextElementSibling;
-        btn.style.display = 'inline';
+        const btn = document.createElement('button');
+        btn.className   = 'detail-footer-btn';
+        btn.textContent = '🏠 HOME';
+        btn.addEventListener('click', () => { location.href = 'index.html'; });
+        aHome.appendChild(btn);
       };
-      const btnHome = document.createElement('button');
-      btnHome.className   = 'detail-footer-btn';
-      btnHome.textContent = '🏠 HOME';
-      btnHome.style.display = 'none';
       aHome.appendChild(imgHome);
-      aHome.appendChild(btnHome);
-      aHome.addEventListener('click', (e) => { e.preventDefault(); location.href = 'index.html'; });
       footer.appendChild(aHome);
 
-      // 戻る
-      const aBack   = document.createElement('a');
+      /* 戻る */
+      const aBack = document.createElement('a');
+      aBack.href  = '#';
+      aBack.title = '戻る';
+      aBack.addEventListener('click', e => { e.preventDefault(); closeDetail(); });
       const imgBack = document.createElement('img');
-      imgBack.src = baseUrl + 'i_last.gif';
+      imgBack.src = 'https://akiratravels.github.io/images/i_last.gif';
       imgBack.alt = '戻る';
-      imgBack.onerror = function () {
+      imgBack.onerror = function() {
         this.style.display = 'none';
-        const btn = this.nextElementSibling;
-        btn.style.display = 'inline';
+        const btn = document.createElement('button');
+        btn.className   = 'detail-footer-btn';
+        btn.textContent = '◀ 戻る';
+        btn.addEventListener('click', () => closeDetail());
+        aBack.appendChild(btn);
       };
-      const btnBack = document.createElement('button');
-      btnBack.className   = 'detail-footer-btn';
-      btnBack.textContent = '◀ 戻る';
-      btnBack.style.display = 'none';
       aBack.appendChild(imgBack);
-      aBack.appendChild(btnBack);
-      aBack.addEventListener('click', (e) => { e.preventDefault(); closeDetail(); });
       footer.appendChild(aBack);
     }
 
-    // -------------------------------------------------------
-    // 8-9. 詳細画面内ページ遷移（navigateDetail）
-    // -------------------------------------------------------
+    /* ─── 詳細画面ページ遷移 ─── */
     function navigateDetail(idx) {
       stopAllVideos();
-      if (ioInstance) {
-        ioInstance.disconnect();
-        ioInstance = null;
-      }
+      if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
       currentIdx = idx;
       renderDetail(idx);
       window.scrollTo(0, 0);
       history.pushState({ detail: true, idx }, '', location.href);
     }
 
-    // -------------------------------------------------------
-    // 8-10. stopAllVideos()
-    // -------------------------------------------------------
+    /* ─── 全動画停止・初期化 ─── */
     function stopAllVideos() {
       document.querySelectorAll('#detail-media-list video').forEach(v => {
         v.pause();
@@ -441,9 +426,7 @@
       });
     }
 
-    // -------------------------------------------------------
-    // 8-10b. pauseOtherVideos(targetVid)
-    // -------------------------------------------------------
+    /* ─── 他動画一時停止 ─── */
     function pauseOtherVideos(targetVid) {
       document.querySelectorAll('#detail-media-list video').forEach(v => {
         if (v === targetVid) return;
@@ -451,16 +434,13 @@
       });
     }
 
-    // -------------------------------------------------------
-    // 8-11. showError
-    // -------------------------------------------------------
+    /* ─── エラー表示 ─── */
     function showError(msg) {
       document.getElementById('loading-msg').style.display = 'none';
-      const el = document.getElementById('error-msg');
-      el.textContent    = msg;
-      el.style.display  = '';
+      const errEl = document.getElementById('error-msg');
+      errEl.textContent    = msg;
+      errEl.style.display  = '';
     }
-
   </script>
 </body>
 </html>
