@@ -3,78 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" CONTENT="湖も、絶壁も、遺跡もいいけどやっぱり人が面白い。人にフォーカスを当てて書き下ろした旅行記と旅日記です。">
-  <meta name="keywords" CONTENT="旅行,旅行記,旅日記,一人旅,個人旅行">
+  <meta name="description" content="湖も、絶壁も、遺跡もいいけどやっぱり人が面白い。人にフォーカスを当てて書き下ろした旅行記と旅日記です。">
+  <meta name="keywords" content="旅行,旅行記,旅日記,一人旅,個人旅行">
   <title>AKIRA travels ～ だから一人旅はやめられない</title>
+  
   <meta property="og:url" content="https://akiratravels.github.io/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="AKIRA travels ～ だから一人旅はやめられない">
   <meta property="og:site_name" content="AKIRA travels">
   <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
+  
   <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
+  
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js">
+  
   <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div id="admin-link">
+    <a href="admin/" id="admin-link-text">管理</a>
+  </div>
+
+  <div class="top-wrap">
+    <div class="top-logo">
+      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+    </div>
+
+    <div id="country-list-wrap">
+      <div class="loading">読み込み中…</div>
+    </div>
+
+    <hr class="footer-rule">
+    <footer class="top-footer">
+      <div class="footer-icons">
+        <a href="#" title="PROFILE">
+          <img src="https://akiratravels.github.io/images/i_profile.gif" alt="PROFILE" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">👤 PROFILE</button>
+        </a>
+        <a href="https://www.facebook.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">FB</button>
+        </a>
+        <a href="https://www.messenger.com/" target="_blank" rel="noopener">
+          <img src="https://akiratravels.github.io/images/i_fb.png" alt="Messenger" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+          <button class="footer-fallback-btn" style="display:none;">💬 MSG</button>
+        </a>
+      </div>
+      <p class="copyright" id="copyright-text"></p>
+    </footer>
+  </div>
+
   <script type="module">
     import { db } from './js/firebase-config.js';
     import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    // 著作権表示
-    document.getElementById('copyright-text').textContent =
-      `© 1998–${new Date().getFullYear()} AKIRA travels. All rights reserved.`;
-
-    async function loadCountries() {
-      let countries;
-      const cached = sessionStorage.getItem('countries_list');
-      if (cached) {
-        countries = JSON.parse(cached);
-      } else {
-        const q = query(collection(db, 'countries'), orderBy('order'));
-        const snap = await getDocs(q);
-        countries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        sessionStorage.setItem('countries_list', JSON.stringify(countries));
-      }
+    async function init() {
+      // 著作権年の動的挿入
+      const currentYear = new Date().getFullYear();
+      document.getElementById('copyright-text').textContent = `© 1998–${currentYear} AKIRA travels. All rights reserved.`;
 
       const wrap = document.getElementById('country-list-wrap');
-      if (countries.length === 0) {
-        wrap.textContent = '国データがありません';
-        return;
-      }
+      let countries = [];
 
-      const table = document.createElement('table');
-      table.style.width = '100%';
-      table.style.tableLayout = 'fixed';
-
-      for (let i = 0; i < countries.length; i += 2) {
-        const tr = document.createElement('tr');
-        tr.appendChild(buildCountryCell(countries[i]));
-        if (countries[i + 1]) {
-          tr.appendChild(buildCountryCell(countries[i + 1]));
+      try {
+        // 1. sessionStorage の確認
+        const cached = sessionStorage.getItem('countries_list');
+        if (cached) {
+          countries = JSON.parse(cached);
         } else {
-          tr.appendChild(document.createElement('td'));
+          // 2. 存在しない場合のみ Firestore から取得
+          const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
+          const querySnapshot = await getDocs(q);
+          querySnapshot.forEach((doc) => {
+            countries.push({ id: doc.id, ...doc.data() });
+          });
+          sessionStorage.setItem('countries_list', JSON.stringify(countries));
         }
-        table.appendChild(tr);
+
+        if (countries.length === 0) {
+          wrap.innerHTML = '<div class="loading">国データがありません</div>';
+          return;
+        }
+
+        // 3. 2カラムのテーブル生成
+        const table = document.createElement('table');
+        const tbody = document.createElement('tbody');
+
+        for (let i = 0; i < countries.length; i += 2) {
+          const tr = document.createElement('tr');
+          
+          // 左カラム
+          const td1 = buildCountryCell(countries[i]);
+          tr.appendChild(td1);
+
+          // 右カラム
+          const td2 = countries[i + 1] ? buildCountryCell(countries[i + 1]) : document.createElement('td');
+          tr.appendChild(td2);
+
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        wrap.innerHTML = '';
+        wrap.appendChild(table);
+
+      } catch (error) {
+        console.error("Error loading countries:", error);
+        wrap.innerHTML = '<div class="error-msg">データの取得に失敗しました。</div>';
       }
-      wrap.appendChild(table);
     }
 
     function buildCountryCell(country) {
       const td = document.createElement('td');
       td.className = 'country-cell';
 
-      const hasPosts = !!country.imgUrl || !!country.docUrl;
+      let linkUrl = '';
+      let hasLink = false;
+
+      // リンク先の決定ロジック
+      if (country.imgUrl) {
+        linkUrl = `country.html?id=${country.id}`;
+        hasLink = true;
+      } else if (country.docUrl) {
+        linkUrl = country.docUrl;
+        hasLink = true;
+      }
 
       const nameSpan = document.createElement('span');
-      nameSpan.className = 'country-name-text ' + (hasPosts ? 'has-posts' : 'no-posts');
+      nameSpan.className = `country-name-text ${hasLink ? 'has-posts' : 'no-posts'}`;
       nameSpan.textContent = country.name;
 
-      if (hasPosts) {
+      if (hasLink) {
         const a = document.createElement('a');
         a.className = 'country-link';
-        if (country.imgUrl) {
-          a.href = `country.html?id=${country.id}`;
-        } else {
-          a.href = country.docUrl;
+        a.href = linkUrl;
+        // 外部リンクの場合は別タブ
+        if (country.docUrl && !country.imgUrl) {
           a.target = '_blank';
           a.rel = 'noopener';
         }
@@ -85,39 +152,16 @@
       }
 
       if (country.subtitle) {
-        const sub = document.createElement('span');
-        sub.className = 'country-subtitle';
-        sub.textContent = country.subtitle;
-        td.appendChild(sub);
+        const subSpan = document.createElement('span');
+        subSpan.className = 'country-subtitle';
+        subSpan.textContent = country.subtitle;
+        td.appendChild(subSpan);
       }
 
       return td;
     }
 
-    loadCountries();
+    window.addEventListener('DOMContentLoaded', init);
   </script>
-</head>
-<body>
-  <div id="admin-link">
-    <a href="admin/" id="admin-link-text">管理</a>
-  </div>
-  <div class="top-wrap">
-    <div class="top-logo">
-      <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
-           onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
-    </div>
-    <div id="country-list-wrap"></div>
-    <footer class="top-footer">
-      <div class="footer-icons">
-        <a href="https://www.instagram.com/well.water/" target="_blank" rel="noopener">
-          <img src="https://akiratravels.github.io/images/instagram.png" alt="Instagram"
-               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;">Instagram</button>
-        </a>
-      </div>
-      <p class="copyright" id="copyright-text"></p>
-    </footer>
-  </div>
 </body>
 </html>
