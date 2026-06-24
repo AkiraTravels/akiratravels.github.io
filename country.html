@@ -193,7 +193,7 @@
           const vid = document.createElement('video');
           vid.src = m.url;
           vid.playsInline = true;
-          vid.preload = 'metadata';
+          vid.preload = 'none';
           vid.poster = buildPosterUrl(m.url);
           vid.onclick = () => {
             if (vid.paused) {
