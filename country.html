@@ -210,7 +210,11 @@
           const img = document.createElement('img');
           img.src = m.url;
           img.alt = m.caption || '';
-          if (imgIndex >= 2) img.loading = 'lazy';
+          if (imgIndex < 2) {
+            img.fetchPriority = 'high';  // SPEC24: 1・2枚目は優先取得
+          } else {
+            img.loading = 'lazy';        // 3枚目以降は遅延読み込み
+          }
           imgIndex++;
           item.appendChild(img);
         }
