@@ -247,9 +247,9 @@
       renderDetail(idx);
       document.getElementById('country-wrap').style.display = 'none';
       document.getElementById('detail-view').style.display = 'block';
-      isDetailOpen = true;   // SPEC20
+      isDetailOpen = true;
       window.scrollTo(0, 0);
-      history.replaceState({ detail: true, idx }, '', location.href);  // SPEC21: pushState → replaceState
+      history.pushState({ detail: true, idx }, '', location.href);  // SPEC22: pushState で詳細エントリーを1件積む
     }
 
     // ─── 詳細画面を閉じる ────────────────────────────────────
@@ -268,7 +268,7 @@
       currentIdx = idx;
       renderDetail(idx);
       window.scrollTo(0, 0);
-      history.replaceState({ detail: true, idx }, '', location.href);  // SPEC21: pushState → replaceState
+      history.replaceState({ detail: true, idx }, '', location.href);  // SPEC22: replaceState で詳細エントリーを上書き（スタック増やさない）
     }
 
     // ─── 代表写真 ────────────────────────────────────────────
