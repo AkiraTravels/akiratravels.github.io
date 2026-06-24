@@ -12,8 +12,13 @@
   --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
 }
 
+/* ----- リセット ----- */
+*, *::before, *::after { box-sizing: border-box; }
+
 /* ----- 12-2. body ----- */
 body {
+  margin: 0;
+  padding: 0;
   font-family: var(--font-main);
   font-size: 16px;
   color: var(--brown);
