@@ -9,7 +9,7 @@
   --orange:     #cc6600;
   --gray:       #aaaaaa;
   --bg-fallback:#f0e0c8;
-  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  --font-main:  "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo UI, sans-serif;
 }
 
 /* ----- リセット ----- */
@@ -55,7 +55,7 @@ body.country-page {
 
 /* 国名テキスト */
 .country-name-text {
-  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo UI, sans-serif;
   font-feature-settings: "palt";
   font-weight: bold;
   font-size: 22px;
@@ -65,7 +65,7 @@ body.country-page {
   .country-name-text { font-size: 26px; }
 }
 .country-subtitle {
-  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo, sans-serif;
+  font-family: "Hiragino Kaku Gothic Pro", "ヒラギノ角ゴ Pro W3", Meiryo UI, sans-serif;
   font-size: 15px; font-weight: bold; color: #7a5a20; display: block; margin-top: 2px;
 }
 .country-name-text.has-posts { color: #cc6600; }
