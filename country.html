@@ -249,7 +249,7 @@
       document.getElementById('detail-view').style.display = 'block';
       isDetailOpen = true;   // SPEC20
       window.scrollTo(0, 0);
-      history.pushState({ detail: true, idx }, '', location.href);
+      history.replaceState({ detail: true, idx }, '', location.href);  // SPEC21: pushState → replaceState
     }
 
     // ─── 詳細画面を閉じる ────────────────────────────────────
@@ -268,7 +268,7 @@
       currentIdx = idx;
       renderDetail(idx);
       window.scrollTo(0, 0);
-      history.pushState({ detail: true, idx }, '', location.href);
+      history.replaceState({ detail: true, idx }, '', location.href);  // SPEC21: pushState → replaceState
     }
 
     // ─── 代表写真 ────────────────────────────────────────────
