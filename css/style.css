@@ -137,7 +137,7 @@ a.country-link { text-decoration: none; color: inherit; }
 /* メディア */
 .media-item img, .media-item video { width: 100%; display: block; }
 .media-item video { background: #000; cursor: pointer; }
-.media-caption { font-size: 16px; color: #7a5a20; padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; }
+.media-caption { font-size: 17px; color: var(--brown); padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; }
 
 /* 詳細画面フッター */
 .detail-footer {
