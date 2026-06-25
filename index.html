@@ -6,173 +6,136 @@
   <meta name="description" CONTENT="湖も、絶壁も、遺跡もいいけどやっぱり人が面白い。人にフォーカスを当てて書き下ろした旅行記と旅日記です。">
   <meta name="keywords" CONTENT="旅行,旅行記,旅日記,一人旅,個人旅行">
   <title>AKIRA travels ～ だから一人旅はやめられない</title>
-
-  <!-- OGP -->
-  <meta property="og:url"       content="https://akiratravels.github.io/">
-  <meta property="og:type"      content="website">
-  <meta property="og:title"     content="AKIRA travels ～ だから一人旅はやめられない">
+  <meta property="og:url" content="https://akiratravels.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AKIRA travels ～ だから一人旅はやめられない">
   <meta property="og:site_name" content="AKIRA travels">
-  <meta property="og:image"     content="https://akiratravels.github.io/images/ogp.jpg">
-
+  <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
   <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
-
-  <!-- Firebase SDK 先読み -->
-  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js">
-  <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js">
-
   <link rel="stylesheet" href="css/style.css">
-
-  <script type="module">
-    import { db } from './js/firebase-config.js';
-    import {
-      collection, getDocs, query, orderBy
-    } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-    // ─── 著作権表示 ───────────────────────────────────────────
-    document.getElementById('copyright-text').textContent =
-      `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
-
-    // ─── データ取得 ───────────────────────────────────────────
-    async function loadCountries() {
-      const cached = sessionStorage.getItem('countries_list');
-      if (cached) {
-        return JSON.parse(cached);
-      }
-      const q = query(collection(db, 'countries'), orderBy('order', 'asc'));
-      const snap = await getDocs(q);
-      const countries = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      sessionStorage.setItem('countries_list', JSON.stringify(countries));
-      return countries;
-    }
-
-    // ─── 国セル構築 ──────────────────────────────────────────
-    function buildCountryCell(country) {
-      const td = document.createElement('td');
-      td.className = 'country-cell';
-
-      const hasPosts = !!country.imgUrl;
-      const hasDoc   = !!country.docUrl;
-      const hasLink  = hasPosts || hasDoc;
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
-      nameSpan.textContent = country.name;
-
-      if (hasLink) {
-        const a = document.createElement('a');
-        a.className = 'country-link';
-        a.href = hasPosts
-          ? `country.html?id=${country.id}`
-          : country.docUrl;
-        a.appendChild(nameSpan);
-        td.appendChild(a);
-      } else {
-        td.appendChild(nameSpan);
-      }
-
-      if (country.subtitle) {
-        const sub = document.createElement('span');
-        sub.className = 'country-subtitle';
-        sub.textContent = country.subtitle;
-        td.appendChild(sub);
-      }
-
-      return td;
-    }
-
-    // ─── テーブル描画 ─────────────────────────────────────────
-    function renderCountryList(countries) {
-      const wrap = document.getElementById('country-list-wrap');
-
-      if (countries.length === 0) {
-        wrap.textContent = '国データがありません';
-        return;
-      }
-
-      const table = document.createElement('table');
-      table.style.width = '100%';
-      table.style.tableLayout = 'fixed';
-
-      for (let i = 0; i < countries.length; i += 2) {
-        const tr = document.createElement('tr');
-        tr.appendChild(buildCountryCell(countries[i]));
-
-        if (i + 1 < countries.length) {
-          tr.appendChild(buildCountryCell(countries[i + 1]));
-        } else {
-          // 奇数の場合：空セル
-          const empty = document.createElement('td');
-          empty.className = 'country-cell';
-          tr.appendChild(empty);
-        }
-
-        table.appendChild(tr);
-      }
-
-      wrap.appendChild(table);
-    }
-
-    // ─── エントリーポイント ───────────────────────────────────
-    (async () => {
-      try {
-        const countries = await loadCountries();
-        renderCountryList(countries);
-      } catch (err) {
-        console.error(err);
-        document.getElementById('country-list-wrap').textContent =
-          'データの読み込みに失敗しました。';
-      }
-    })();
-  </script>
 </head>
 <body>
 
-  <!-- 管理者リンク -->
-  <div id="admin-link">
-    <a href="admin/" id="admin-link-text">管理</a>
+<div id="admin-link">
+  <a href="admin/" id="admin-link-text">管理</a>
+</div>
+
+<div class="top-wrap">
+  <div class="top-logo">
+    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
   </div>
 
-  <div class="top-wrap">
+  <div id="country-list-wrap">
+    <p class="loading" id="loading-msg">読み込み中…</p>
+  </div>
 
-    <!-- ロゴ -->
-    <div class="top-logo">
-      <img
-        src="https://akiratravels.github.io/images/home.gif"
-        alt="AKIRA travels"
-        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-      <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+  <hr class="footer-rule">
+  <footer class="top-footer">
+    <div class="footer-icons">
+      <a href="https://www.facebook.com/akiratravels">
+        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="footer-fallback-btn" style="display:none;"
+                onclick="location.href='https://www.facebook.com/akiratravels'">Facebook</button>
+      </a>
+      <a href="https://www.instagram.com/well.water/">
+        <img src="https://akiratravels.github.io/images/instagram.png" alt="Instagram"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="footer-fallback-btn" style="display:none;"
+                onclick="location.href='https://www.instagram.com/well.water/'">Instagram</button>
+      </a>
     </div>
+    <p class="copyright" id="copyright-text"></p>
+  </footer>
+</div>
 
-    <!-- 国一覧 -->
-    <div id="country-list-wrap"></div>
+<script type="module">
+import { API_BASE } from './js/config.js';
 
-    <!-- フッター前横棒 -->
-    <hr class="footer-rule">
+// 著作権テキスト
+document.getElementById('copyright-text').textContent =
+  `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
 
-    <!-- フッター -->
-    <footer class="top-footer">
-      <div class="footer-icons">
-        <a href="https://www.facebook.com/akiratravels">
-          <img
-            src="https://akiratravels.github.io/images/facebook.png"
-            alt="Facebook"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;"
-                  onclick="location.href='https://www.facebook.com/akiratravels'">Facebook</button>
-        </a>
-        <a href="https://www.instagram.com/well.water/">
-          <img
-            src="https://akiratravels.github.io/images/instagram.png"
-            alt="Instagram"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-          <button class="footer-fallback-btn" style="display:none;"
-                  onclick="location.href='https://www.instagram.com/well.water/'">Instagram</button>
-        </a>
-      </div>
-      <p class="copyright" id="copyright-text"></p>
-    </footer>
+async function loadCountries() {
+  let countries;
+  const cached = sessionStorage.getItem('countries_list');
+  if (cached) {
+    countries = JSON.parse(cached);
+  } else {
+    const res = await fetch(`${API_BASE}/countries`);
+    if (!res.ok) throw new Error('Failed to load countries');
+    countries = await res.json();
+    sessionStorage.setItem('countries_list', JSON.stringify(countries));
+  }
+  return countries;
+}
 
-  </div><!-- /.top-wrap -->
+function buildCountryCell(country) {
+  const td = document.createElement('td');
+  td.className = 'country-cell';
 
+  const hasLink = country.imgUrl || country.docUrl;
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
+  nameSpan.textContent = country.name;
+
+  if (hasLink) {
+    const a = document.createElement('a');
+    a.className = 'country-link';
+    if (country.imgUrl) {
+      a.href = `country.html?id=${country.id}`;
+    } else {
+      a.href = country.docUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+    a.appendChild(nameSpan);
+    td.appendChild(a);
+  } else {
+    td.appendChild(nameSpan);
+  }
+
+  if (country.subtitle) {
+    const sub = document.createElement('span');
+    sub.className = 'country-subtitle';
+    sub.textContent = country.subtitle;
+    td.appendChild(sub);
+  }
+
+  return td;
+}
+
+async function main() {
+  const wrap = document.getElementById('country-list-wrap');
+  try {
+    const countries = await loadCountries();
+    wrap.innerHTML = '';
+
+    if (countries.length === 0) {
+      wrap.innerHTML = '<p class="loading">国データがありません</p>';
+      return;
+    }
+
+    const table = document.createElement('table');
+    for (let i = 0; i < countries.length; i += 2) {
+      const tr = document.createElement('tr');
+      tr.appendChild(buildCountryCell(countries[i]));
+      if (i + 1 < countries.length) {
+        tr.appendChild(buildCountryCell(countries[i + 1]));
+      } else {
+        tr.appendChild(document.createElement('td'));
+      }
+      table.appendChild(tr);
+    }
+    wrap.appendChild(table);
+  } catch (e) {
+    wrap.innerHTML = `<p class="error-msg">読み込みに失敗しました。</p>`;
+  }
+}
+
+main();
+</script>
 </body>
 </html>
