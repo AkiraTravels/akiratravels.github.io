@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" CONTENT="湖も、絶壁も、遺跡もいいけどやっぱり人が面白い。人にフォーカスを当てて書き下ろした旅行記と旅日記です。">
+  <meta name="keywords" CONTENT="旅行,旅行記,旅日記,一人旅,個人旅行">
+  <title>AKIRA travels ～ だから一人旅はやめられない</title>
+  <meta property="og:url" content="https://akiratravels.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AKIRA travels ～ だから一人旅はやめられない">
+  <meta property="og:site_name" content="AKIRA travels">
+  <meta property="og:image" content="https://akiratravels.github.io/images/ogp.jpg">
+  <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="admin-link">
+  <a href="admin/" id="admin-link-text">管理</a>
+</div>
+
+<div class="top-wrap">
+  <div class="top-logo">
+    <img src="https://akiratravels.github.io/images/home.gif" alt="AKIRA travels"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+    <span class="top-logo-fallback" style="display:none;">AKIRA travels</span>
+  </div>
+
+  <div id="country-list-wrap">
+    <p class="loading" id="loading-msg">読み込み中…</p>
+  </div>
+
+  <hr class="footer-rule">
+  <footer class="top-footer">
+    <div class="footer-icons">
+      <a href="https://www.facebook.com/akiratravels">
+        <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="footer-fallback-btn" style="display:none;"
+                onclick="location.href='https://www.facebook.com/akiratravels'">Facebook</button>
+      </a>
+      <a href="https://www.instagram.com/well.water/">
+        <img src="https://akiratravels.github.io/images/instagram.png" alt="Instagram"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+        <button class="footer-fallback-btn" style="display:none;"
+                onclick="location.href='https://www.instagram.com/well.water/'">Instagram</button>
+      </a>
+    </div>
+    <p class="copyright" id="copyright-text"></p>
+  </footer>
+</div>
+
+<script type="module">
+import { API_BASE } from './js/config.js';
+
+// 著作権テキスト
+document.getElementById('copyright-text').textContent =
+  `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
+
+async function loadCountries() {
+  let countries;
+  const cached = sessionStorage.getItem('countries_list');
+  if (cached) {
+    countries = JSON.parse(cached);
+  } else {
+    const res = await fetch(`${API_BASE}/countries`);
+    if (!res.ok) throw new Error('Failed to load countries');
+    countries = await res.json();
+    sessionStorage.setItem('countries_list', JSON.stringify(countries));
+  }
+  return countries;
+}
+
+function buildCountryCell(country) {
+  const td = document.createElement('td');
+  td.className = 'country-cell';
+
+  const hasLink = country.imgUrl || country.docUrl;
+  const nameSpan = document.createElement('span');
+  nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
+  nameSpan.textContent = country.name;
+
+  if (hasLink) {
+    const a = document.createElement('a');
+    a.className = 'country-link';
+    if (country.imgUrl) {
+      a.href = `country.html?id=${country.id}`;
+    } else {
+      a.href = country.docUrl;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+    a.appendChild(nameSpan);
+    td.appendChild(a);
+  } else {
+    td.appendChild(nameSpan);
+  }
+
+  if (country.subtitle) {
+    const sub = document.createElement('span');
+    sub.className = 'country-subtitle';
+    sub.textContent = country.subtitle;
+    td.appendChild(sub);
+  }
+
+  return td;
+}
+
+async function main() {
+  const wrap = document.getElementById('country-list-wrap');
+  try {
+    const countries = await loadCountries();
+    wrap.innerHTML = '';
+
+    if (countries.length === 0) {
+      wrap.innerHTML = '<p class="loading">国データがありません</p>';
+      return;
+    }
+
+    const table = document.createElement('table');
+    for (let i = 0; i < countries.length; i += 2) {
+      const tr = document.createElement('tr');
+      tr.appendChild(buildCountryCell(countries[i]));
+      if (i + 1 < countries.length) {
+        tr.appendChild(buildCountryCell(countries[i + 1]));
+      } else {
+        tr.appendChild(document.createElement('td'));
+      }
+      table.appendChild(tr);
+    }
+    wrap.appendChild(table);
+  } catch (e) {
+    wrap.innerHTML = `<p class="error-msg">読み込みに失敗しました。</p>`;
+  }
+}
+
+main();
+</script>
+</body>
+</html>
