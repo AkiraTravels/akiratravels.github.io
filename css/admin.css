@@ -10,10 +10,8 @@
   --shadow:  0 2px 20px rgba(0,0,0,0.08);
   --radius:  2px;
   --font-serif: "Cormorant Garamond", "Noto Serif JP", serif;
-  --font-sans:  "Montserrat", "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+  --font-sans:  "Montserrat", "Hiragino Kaku Gothic Pro", "Noto Sans JP", "ヒラギノ角ゴ Pro W3", "Meiryo UI", sans-serif;
 }
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: var(--font-sans);
@@ -21,9 +19,11 @@ body {
   color: var(--ink);
   font-size: 14px;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-/* ヘッダー */
+/* ---- ヘッダー ---- */
 .admin-header {
   background: var(--ink); color: #fff;
   padding: 14px 24px;
@@ -45,7 +45,7 @@ body {
 }
 #btn-logout:hover { background: rgba(255,255,255,0.22); }
 
-/* ログイン画面 */
+/* ---- ログイン画面 ---- */
 #login-screen {
   display: flex; align-items: center; justify-content: center;
   min-height: calc(100vh - 60px); padding: 24px;
@@ -62,6 +62,7 @@ body {
   width: 100%; padding: 10px 12px; border: 1px solid var(--border);
   border-radius: var(--radius); font-family: var(--font-sans); font-size: 14px;
   color: var(--ink); background: var(--paper); transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 .login-field input:focus { outline: none; border-color: var(--accent); }
 #btn-login {
@@ -73,7 +74,7 @@ body {
 #btn-login:hover { background: #2d2520; }
 #login-error { color: #8b2020; font-size: 13px; margin-top: 12px; text-align: center; min-height: 20px; }
 
-/* メインコンテンツ・タブバー */
+/* ---- メインコンテンツ・タブバー ---- */
 #admin-main { max-width: 900px; margin: 0 auto; padding: 0 16px 40px; }
 
 .tab-bar {
@@ -92,7 +93,7 @@ body {
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* カード・フォーム */
+/* ---- カード・フォーム要素 ---- */
 .form-card, .country-form-card {
   background: var(--card-bg); border: 1px solid var(--border);
   box-shadow: var(--shadow); border-radius: var(--radius);
@@ -109,6 +110,7 @@ body {
   width: 100%; padding: 9px 12px; border: 1px solid var(--border);
   border-radius: var(--radius); font-family: var(--font-sans);
   font-size: 14px; color: var(--ink); background: var(--paper); transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
   outline: none; border-color: var(--accent);
@@ -116,73 +118,55 @@ body {
 .form-row textarea { resize: vertical; line-height: 1.6; }
 .form-actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 
-/* ボタン */
+/* ---- ボタン ---- */
 .btn-primary {
   padding: 10px 24px; background: var(--ink); color: #fff;
-  border: none; border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.08em;
-  cursor: pointer; transition: background 0.2s;
+  border: none; border-radius: var(--radius); font-family: var(--font-sans);
+  font-size: 13px; letter-spacing: 0.05em; cursor: pointer; transition: background 0.2s;
 }
 .btn-primary:hover { background: #2d2520; }
-
 .btn-secondary {
-  padding: 10px 24px; background: transparent; color: var(--muted);
+  padding: 10px 20px; background: transparent; color: var(--muted);
   border: 1px solid var(--border); border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.05em;
-  cursor: pointer; transition: border-color 0.2s;
+  font-family: var(--font-sans); font-size: 13px; cursor: pointer;
 }
-.btn-secondary:hover { border-color: var(--muted); }
-
 .btn-danger {
-  padding: 7px 14px; background: transparent; color: #8b2020;
+  padding: 6px 14px; background: transparent; color: #8b2020;
   border: 1px solid #d0a0a0; border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 12px; cursor: pointer;
-  transition: background 0.2s;
 }
-.btn-danger:hover:not(:disabled) { background: rgba(139, 32, 32, 0.06); }
 .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .btn-edit {
-  padding: 7px 14px; background: transparent; color: var(--ink);
+  padding: 6px 14px; background: transparent; color: var(--ink);
   border: 1px solid var(--border); border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 12px; cursor: pointer;
-  transition: border-color 0.2s;
 }
-.btn-edit:hover { border-color: var(--ink); }
-
 .btn-upload {
-  padding: 7px 14px; background: var(--accent); color: #fff;
+  padding: 6px 14px; background: var(--accent); color: #fff;
   border: none; border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 12px; cursor: pointer;
-  transition: background 0.2s;
 }
-.btn-upload:hover { background: #b07530; }
-
 .btn-move {
-  padding: 5px 10px; background: transparent; color: var(--muted);
+  padding: 4px 10px; background: transparent; color: var(--muted);
   border: 1px solid var(--border); border-radius: var(--radius);
   font-family: var(--font-sans); font-size: 12px; cursor: pointer;
 }
-.btn-move:hover { border-color: var(--muted); }
-
 .btn-add-media {
-  display: block; width: 100%; margin-top: 8px;
-  padding: 10px; background: transparent; color: var(--muted);
-  border: 1px dashed var(--border); border-radius: var(--radius);
-  font-family: var(--font-sans); font-size: 13px; cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  width: 100%; padding: 10px; background: transparent;
+  border: 2px dashed var(--border); border-radius: var(--radius);
+  font-family: var(--font-sans); font-size: 13px; color: var(--muted);
+  cursor: pointer; margin-top: 8px; transition: border-color 0.2s, color 0.2s;
 }
 .btn-add-media:hover { border-color: var(--accent); color: var(--accent); }
-
 .btn-insert {
-  padding: 4px 16px; background: transparent; color: var(--muted);
+  padding: 4px 16px; background: transparent;
   border: 1px dashed var(--border); border-radius: 10px;
-  font-family: var(--font-sans); font-size: 11px; cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  font-family: var(--font-sans); font-size: 11px; color: var(--muted);
+  cursor: pointer; transition: border-color 0.2s, color 0.2s;
 }
 .btn-insert:hover { border-color: var(--accent); color: var(--accent); }
 
-/* メディアリスト */
+/* ---- メディアリスト ---- */
 .media-row {
   position: relative; background: var(--paper);
   border: 1px solid var(--border); border-radius: var(--radius);
@@ -209,7 +193,7 @@ body {
 .upload-progress.error   { color: #8b2020; }
 .insert-btn-wrap { text-align: center; margin: 4px 0; }
 
-/* 投稿一覧 */
+/* ---- 投稿一覧 ---- */
 .list-filter-bar { margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
 .post-list-item {
   background: var(--card-bg); border: 1px solid var(--border);
@@ -228,7 +212,7 @@ body {
 .post-meta-text { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .post-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-/* 国管理 */
+/* ---- 国管理 ---- */
 .country-list-item {
   background: var(--card-bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 14px;
@@ -241,7 +225,7 @@ body {
 .country-item-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
 .country-item-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
-/* トースト */
+/* ---- トースト通知 ---- */
 .toast {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(20px);
@@ -255,7 +239,7 @@ body {
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.error { background: #8b2020; }
 
-/* レスポンシブ */
+/* ---- レスポンシブ ---- */
 @media (max-width: 600px) {
   .admin-header { padding: 12px 16px; }
   #admin-main { padding: 0 10px 40px; }
