@@ -121,7 +121,7 @@ a.country-link { text-decoration: none; color: inherit; }
 .detail-caption {
   font-feature-settings: "palt"; font-size: 17px; color: var(--brown); font-weight: bold;
   line-height: 1.75; white-space: pre-wrap;
-  padding: 4px 16px 20px;
+  padding: 4px 16px 10px;
 }
 
 /* メディア */
