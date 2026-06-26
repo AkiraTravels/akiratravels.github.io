@@ -68,7 +68,7 @@ a.country-link { text-decoration: none; color: inherit; }
   background: transparent; padding: 24px 16px 12px;
   border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
-.country-title { text-align: center; font-size: 1.4em; font-weight: bold; color: var(--brown); }
+.country-title { text-align: center; font-size: 1.8em; font-weight: bold; color: var(--brown); }
 .country-description {
   margin-top: 12px; font-size: 15px; line-height: 1.75;
   color: var(--brown); white-space: pre-wrap; padding: 0 4px;
