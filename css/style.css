@@ -119,7 +119,7 @@ a.country-link { text-decoration: none; color: inherit; }
 
 /* キャプション */
 .detail-caption {
-  font-feature-settings: "palt"; font-size: 17px; color: var(--brown); font-weight: normal;
+  font-feature-settings: "palt"; font-size: 17px; color: var(--brown); font-weight: bold;
   line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 20px;
 }
@@ -129,7 +129,7 @@ a.country-link { text-decoration: none; color: inherit; }
 .media-item video { background: #000; cursor: pointer; }
 .media-caption {
   font-feature-settings: "palt"; font-size: 17px; color: var(--brown);
-  padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap;
+  padding: 8px 16px 16px; line-height: 1.6; white-space: pre-wrap; font-weight: normal;
 }
 
 /* 詳細画面フッター */
