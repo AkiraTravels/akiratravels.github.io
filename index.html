@@ -29,22 +29,21 @@
 
   <div id="country-list-wrap">
     <p class="loading" id="loading-msg">読み込み中…</p>
+    <p class="error-msg" id="error-msg" style="display:none;"></p>
   </div>
 
   <hr class="footer-rule">
   <footer class="top-footer">
     <div class="footer-icons">
-      <a href="https://www.facebook.com/akiratravels">
+      <a href="https://www.facebook.com/akiratravels" title="Facebook">
         <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="footer-fallback-btn" style="display:none;"
-                onclick="location.href='https://www.facebook.com/akiratravels'">Facebook</button>
+        <button class="footer-fallback-btn" style="display:none;">Facebook</button>
       </a>
-      <a href="https://www.instagram.com/well.water/">
+      <a href="https://www.instagram.com/well.water/" title="Instagram">
         <img src="https://akiratravels.github.io/images/instagram.png" alt="Instagram"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-        <button class="footer-fallback-btn" style="display:none;"
-                onclick="location.href='https://www.instagram.com/well.water/'">Instagram</button>
+        <button class="footer-fallback-btn" style="display:none;">Instagram</button>
       </a>
     </div>
     <p class="copyright" id="copyright-text"></p>
@@ -54,29 +53,58 @@
 <script type="module">
 import { API_BASE } from './js/config.js';
 
-// 著作権テキスト
-document.getElementById('copyright-text').textContent =
-  `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
+(async () => {
+  const loadingEl = document.getElementById('loading-msg');
+  const errorEl   = document.getElementById('error-msg');
+  const wrapEl    = document.getElementById('country-list-wrap');
 
-async function loadCountries() {
+  // 著作権表示
+  document.getElementById('copyright-text').textContent =
+    `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
+
   let countries;
-  const cached = sessionStorage.getItem('countries_list');
-  if (cached) {
-    countries = JSON.parse(cached);
-  } else {
-    const res = await fetch(`${API_BASE}/countries`);
-    if (!res.ok) throw new Error('Failed to load countries');
-    countries = await res.json();
-    sessionStorage.setItem('countries_list', JSON.stringify(countries));
+  try {
+    // sessionStorage キャッシュ確認
+    const cached = sessionStorage.getItem('countries_list');
+    if (cached) {
+      countries = JSON.parse(cached);
+    } else {
+      const res = await fetch(`${API_BASE}/countries`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      countries = await res.json();
+      sessionStorage.setItem('countries_list', JSON.stringify(countries));
+    }
+  } catch (e) {
+    loadingEl.style.display = 'none';
+    errorEl.textContent = 'データの取得に失敗しました。';
+    errorEl.style.display = '';
+    return;
   }
-  return countries;
-}
+
+  loadingEl.style.display = 'none';
+
+  if (!countries || countries.length === 0) {
+    errorEl.textContent = '国データがありません';
+    errorEl.style.display = '';
+    return;
+  }
+
+  // テーブル生成
+  const table = document.createElement('table');
+  for (let i = 0; i < countries.length; i += 2) {
+    const tr = document.createElement('tr');
+    tr.appendChild(buildCountryCell(countries[i]));
+    tr.appendChild(countries[i + 1] ? buildCountryCell(countries[i + 1]) : document.createElement('td'));
+    table.appendChild(tr);
+  }
+  wrapEl.appendChild(table);
+})();
 
 function buildCountryCell(country) {
   const td = document.createElement('td');
   td.className = 'country-cell';
 
-  const hasLink = country.imgUrl || country.docUrl;
+  const hasLink = !!(country.imgUrl || country.docUrl);
   const nameSpan = document.createElement('span');
   nameSpan.className = 'country-name-text ' + (hasLink ? 'has-posts' : 'no-posts');
   nameSpan.textContent = country.name;
@@ -106,36 +134,6 @@ function buildCountryCell(country) {
 
   return td;
 }
-
-async function main() {
-  const wrap = document.getElementById('country-list-wrap');
-  try {
-    const countries = await loadCountries();
-    wrap.innerHTML = '';
-
-    if (countries.length === 0) {
-      wrap.innerHTML = '<p class="loading">国データがありません</p>';
-      return;
-    }
-
-    const table = document.createElement('table');
-    for (let i = 0; i < countries.length; i += 2) {
-      const tr = document.createElement('tr');
-      tr.appendChild(buildCountryCell(countries[i]));
-      if (i + 1 < countries.length) {
-        tr.appendChild(buildCountryCell(countries[i + 1]));
-      } else {
-        tr.appendChild(document.createElement('td'));
-      }
-      table.appendChild(tr);
-    }
-    wrap.appendChild(table);
-  } catch (e) {
-    wrap.innerHTML = `<p class="error-msg">読み込みに失敗しました。</p>`;
-  }
-}
-
-main();
 </script>
 </body>
 </html>
