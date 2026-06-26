@@ -112,8 +112,6 @@ function buildCountryCell(country) {
       a.href = `country.html?id=${country.id}`;
     } else {
       a.href = country.docUrl;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
     }
     a.appendChild(nameSpan);
     td.appendChild(a);
