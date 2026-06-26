@@ -156,7 +156,7 @@ a.country-link { text-decoration: none; color: inherit; }
 .country-footer{ padding: 20px 16px 0; text-align: center; }
 .footer-icons  { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 8px 0; }
 .footer-icons a { display: inline-flex; align-items: center; }
-.footer-icons img { height: 32px; }
+.footer-icons img { height: 36px; }
 .copyright     { font-size: 12px; color: #7a5a20; padding: 8px 0 0; }
 .footer-fallback-btn {
   cursor: pointer; padding: 6px 16px; font-size: 13px;
