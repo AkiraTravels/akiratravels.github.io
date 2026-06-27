@@ -38,7 +38,7 @@ body.country-page {
 .top-logo { text-align: center; padding: 24px 16px 0px; }
 .top-logo img { max-width: 280px; height: auto; }
 .top-logo-fallback { font-size: 28px; font-weight: bold; color: var(--brown); letter-spacing: 0.1em; }
-.top-description { text-align: center; font-size: 15px; font-weight: bold; font-feature-settings: palt; color: var(--brown); }
+.top-description { text-align: center; font-size: 15px; font-weight: bold; font-feature-settings: palt; color: #7a5a20; }
 
 #country-list-wrap { padding: 8px 16px; }
 #country-list-wrap table { width: 100%; border-collapse: collapse; table-layout: fixed; }
