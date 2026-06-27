@@ -71,8 +71,8 @@ a.country-link { text-decoration: none; color: inherit; }
 }
 .country-title { text-align: center; font-size: 1.8em; font-weight: bold; color: var(--brown); }
 .country-description {
-  margin-top: 12px; font-size: 15px; line-height: 1.75;
-  color: var(--brown); white-space: pre-wrap; padding: 0 4px;
+  margin-top: 6px; font-size: 15px; line-height: 1.75;
+  color: #7a5a20; white-space: pre-wrap; padding: 0 4px;
 }
 
 /* 代表写真 */
