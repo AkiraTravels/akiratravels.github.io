@@ -120,7 +120,7 @@ a.country-link { text-decoration: none; color: inherit; }
 
 /* キャプション */
 .detail-caption {
-  font-feature-settings: "palt"; font-size: 17px; color: var(--brown); font-weight: bold;
+  font-feature-settings: "palt"; font-size: 17px; color: #7a5a20; font-weight: bold;
   line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 16px;
 }
