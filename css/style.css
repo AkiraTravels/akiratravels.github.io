@@ -87,7 +87,7 @@ a.country-link { text-decoration: none; color: inherit; }
 .chain-link { font-size: 1.1em; font-weight: bold; cursor: pointer; color: var(--orange); font-family: var(--font-main); }
 .chain-link:hover { text-decoration: underline; }
 .chain-arrow { color: var(--brown); font-size: 14px; }
-.chain-separator-wrap { text-align: center; padding: 2px 0; }
+.chain-separator-wrap { text-align: center; padding: 0px 0; }
 .chain-separator {
   display: inline-block; width: 60%; border: none;
   border-top: 1px solid var(--brown); margin: 0;
@@ -113,14 +113,13 @@ a.country-link { text-decoration: none; color: inherit; }
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   padding: 10px 16px;
-  border-bottom: 1px solid rgba(74, 48, 0, 0.15);
 }
 .detail-sticky-title { font-size: 19px; font-weight: bold; color: var(--brown); }
 .detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
 
 /* キャプション */
 .detail-caption {
-  font-feature-settings: "palt"; font-size: 17px; color: #7a5a20; font-weight: bold;
+  font-feature-settings: "palt"; font-size: 17px; color: #7a5a20; font-weight: normal;
   line-height: 1.75; white-space: pre-wrap;
   padding: 4px 16px 16px;
   background-color: rgba(255, 255, 255, 0.92);
