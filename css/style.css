@@ -104,7 +104,7 @@ a.country-link { text-decoration: none; color: inherit; }
 }
 
 @media (min-width: 900px) {
-  .detail-body { max-width: 65%; margin-left: auto; margin-right: auto; }
+  .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
 }
 
 /* スティッキーバー */
