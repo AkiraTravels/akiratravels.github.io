@@ -24,7 +24,7 @@
   <footer class="country-footer">
     <div class="footer-icons">
       <a href="index.html" title="AKIRA travels TOP">
-        <img src="https://akiratravels.github.io/images/i_home.gif" alt="AKIRA travels"
+        <img src="https://akiratravels.github.io/images/i_home.png" alt="AKIRA travels"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';
                       this.nextElementSibling.onclick=()=>location.href='index.html';">
         <button class="footer-fallback-btn" style="display:none;">🏠 TOP</button>
@@ -287,20 +287,20 @@ function renderDetailFooter(idx) {
   // 次へ
   if (idx < allPosts.length - 1) {
     footerEl.appendChild(makeFooterBtn(
-      'https://akiratravels.github.io/images/i_next.gif', '次へ',
+      'https://akiratravels.github.io/images/i_next.png', '次へ',
       () => navigateDetail(idx + 1)
     ));
   }
 
   // HOME
   footerEl.appendChild(makeFooterBtn(
-    'https://akiratravels.github.io/images/i_home.gif', 'HOME',
+    'https://akiratravels.github.io/images/i_home.png', 'HOME',
     () => { location.href = 'index.html'; }
   ));
 
   // 戻る
   footerEl.appendChild(makeFooterBtn(
-    'https://akiratravels.github.io/images/i_last.gif', '◀ 戻る',
+    'https://akiratravels.github.io/images/i_last.png', '◀ 戻る',
     () => closeDetail()
   ));
 }
