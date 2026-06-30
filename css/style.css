@@ -83,7 +83,7 @@ a.country-link { text-decoration: none; color: inherit; }
 
 /* 投稿チェーン */
 .post-chain { padding: 16px; max-width: 480px; margin: 0 auto; }
-.chain-item { text-align: center; padding: 4px 0; }
+.chain-item { text-align: center; padding: 0px 0; }
 .chain-link { font-size: 1.1em; font-weight: bold; cursor: pointer; color: var(--orange); font-family: var(--font-main); }
 .chain-link:hover { text-decoration: underline; }
 .chain-arrow { color: var(--brown); font-size: 14px; }
