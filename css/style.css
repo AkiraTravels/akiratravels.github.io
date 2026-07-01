@@ -17,8 +17,8 @@ body {
   background-color: var(--bg-fallback);
   background-image: url("https://akiratravels.github.io/images/w_brown.jpg");
   background-repeat: repeat;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100% !important;
+  text-size-adjust: 100% !important;
 }
 
 body.country-page {
