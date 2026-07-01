@@ -163,5 +163,12 @@ function buildCountryCell(country) {
     }, 1500);
   });
 </script>
+<script>
+  // Facebook等のアプリ内ブラウザが文字を強制拡大するのを、ロード完了後にJSで再固定する
+  window.addEventListener('DOMContentLoaded', () => {
+    document.documentElement.style.webkitTextSizeAdjust = '100%';
+    document.documentElement.style.textSizeAdjust = '100%';
+  });
+</script>
 </body>
 </html>
