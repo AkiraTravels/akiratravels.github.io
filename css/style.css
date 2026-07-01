@@ -116,7 +116,7 @@ a.country-link { text-decoration: none; color: inherit; }
   backdrop-filter: blur(8px);
   padding: 10px 16px;
 }
-.detail-sticky-title { font-size: 19px; font-weight: bold; color: var(--brown); }
+.detail-sticky-title { font-size: 19px; font-weight: bold; color: #7a5a20; }
 .detail-sticky-meta  { font-size: 14px; color: #7a5a20; }
 
 /* キャプション */
