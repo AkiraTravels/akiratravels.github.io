@@ -6,6 +6,14 @@
   <title>AKIRA travels</title>
   <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7HEL5MSGXV"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7HEL5MSGXV');
+  </script>
 </head>
 <body class="country-page">
 
@@ -187,6 +195,13 @@ function openDetail(idx) {
   isDetailOpen = true;
   window.scrollTo(0, 0);
   history.pushState({ detail: true, idx }, '', location.href);
+  if (typeof gtag === 'function') {
+      gtag('event', 'page_view', {
+          page_title: allPosts[idx].title,
+          page_path: '/detail/' + allPosts[idx].id,
+          page_location: location.href
+      });
+  }
 }
 
 function closeDetail() {
@@ -329,6 +344,13 @@ function navigateDetail(idx) {
   renderDetail(idx);
   window.scrollTo(0, 0);
   history.replaceState({ detail: true, idx }, '', location.href);
+  if (typeof gtag === 'function') {
+      gtag('event', 'page_view', {
+          page_title: allPosts[idx].title,
+          page_path: '/detail/' + allPosts[idx].id,
+          page_location: location.href
+      });
+  }
 }
 
 // ── 動画制御 ──
