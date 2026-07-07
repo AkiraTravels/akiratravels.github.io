@@ -138,11 +138,11 @@ a.country-link { text-decoration: none; color: inherit; }
 /* 詳細画面フッター */
 .detail-footer {
   padding: 24px 16px 40px;
-  display: flex; justify-content: center; align-items: center; gap: 16px;
+  display: flex; justify-content: center; align-items: center; gap: 32px;
 }
 .detail-footer img { height: 36px; cursor: pointer; }
 .detail-footer-btn {
-  cursor: pointer; padding: 8px 40px; font-size: 13px;
+  cursor: pointer; padding: 8px 20px; font-size: 13px;
   color: var(--brown);
   background: rgba(74, 48, 0, 0.08);
   border: 1px solid rgba(74, 48, 0, 0.2);
