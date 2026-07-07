@@ -67,6 +67,7 @@ let allPosts = [];
 let currentIdx = 0;
 let ioInstance = null;
 let isDetailOpen = false;
+let country = null;
 
 // ── 初期化 ──
 history.replaceState({ detail: false }, '', location.href);
@@ -93,7 +94,6 @@ window.addEventListener('popstate', () => {
   document.getElementById('copyright-text').textContent =
     `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
 
-  let country, posts;
   try {
     // 国データ
     const cachedCountry = sessionStorage.getItem(`country_${countryId}`);
