@@ -7,7 +7,7 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-7HEL5MSGXV');
+    gtag('config', 'G-7HEL5MSGXV', { send_page_view: false });
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,6 +71,8 @@ import { API_BASE } from './js/config.js';
   // 著作権表示
   document.getElementById('copyright-text').textContent =
     `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
+
+  gtag('event', 'page_view', { page_title: document.title, page_location: location.href });
 
   let countries;
   try {

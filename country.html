@@ -7,11 +7,11 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-7HEL5MSGXV');
+    gtag('config', 'G-7HEL5MSGXV', { send_page_view: false });
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AKIRA travels</title>
+  <title>AKIRA travels ～ だから一人旅はやめられない</title>
   <link rel="shortcut icon" href="https://akiratravels.github.io/images/at.ico">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -123,6 +123,9 @@ window.addEventListener('popstate', () => {
 
   document.title = `${country.name} — AKIRA travels`;
   document.getElementById('country-title').textContent = country.name;
+
+  gtag('event', 'page_view', { page_title: document.title, page_location: location.href });
+
   document.getElementById('country-description').textContent = country.description || '';
 
   document.getElementById('loading-msg').style.display = 'none';
@@ -189,6 +192,7 @@ function renderChain() {
 // ── 詳細画面 開閉 ──
 function openDetail(idx) {
   currentIdx = idx;
+  document.title = `${post.title} — AKIRA travels`;
   renderDetail(idx);
   document.getElementById('country-wrap').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
@@ -197,7 +201,7 @@ function openDetail(idx) {
   history.pushState({ detail: true, idx }, '', location.href);
   if (typeof gtag === 'function') {
       gtag('event', 'page_view', {
-          page_title: allPosts[idx].title,
+          page_title: document.title,
           page_path: '/detail/' + allPosts[idx].id,
           page_location: location.href
       });
@@ -341,12 +345,13 @@ function navigateDetail(idx) {
   stopAllVideos();
   if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
   currentIdx = idx;
+  document.title = `${post.title} — AKIRA travels`;
   renderDetail(idx);
   window.scrollTo(0, 0);
   history.replaceState({ detail: true, idx }, '', location.href);
   if (typeof gtag === 'function') {
       gtag('event', 'page_view', {
-          page_title: allPosts[idx].title,
+          page_title: document.title,
           page_path: '/detail/' + allPosts[idx].id,
           page_location: location.href
       });
