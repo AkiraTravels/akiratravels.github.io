@@ -192,18 +192,21 @@ function renderChain() {
 // ── 詳細画面 開閉 ──
 function openDetail(idx) {
   currentIdx = idx;
-  document.title = `${allPosts[idx].title} — AKIRA travels`;
+  const post = allPosts[idx];
+  document.title = `${post.title} — AKIRA travels`;
   renderDetail(idx);
   document.getElementById('country-wrap').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
   isDetailOpen = true;
   window.scrollTo(0, 0);
-  history.pushState({ detail: true, idx }, '', location.href);
+  
+  const url = new URL(location.href);
+  url.searchParams.set('post', post.id);
+  history.pushState({ detail: true, idx }, '', url);
   if (typeof gtag === 'function') {
       gtag('event', 'page_view', {
           page_title: document.title,
-          page_path: '/detail/' + allPosts[idx].id,
-          page_location: location.href
+          page_location: url.href
       });
   }
 }
@@ -345,15 +348,18 @@ function navigateDetail(idx) {
   stopAllVideos();
   if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
   currentIdx = idx;
-  document.title = `${allPosts[idx].title} — AKIRA travels`;
+  const post = allPosts[idx];
+  document.title = `${post.title} — AKIRA travels`;
   renderDetail(idx);
   window.scrollTo(0, 0);
-  history.replaceState({ detail: true, idx }, '', location.href);
+
+  const url = new URL(location.href);
+  url.searchParams.set('post', post.id);
+  history.replaceState({ detail: true, idx }, '', url);
   if (typeof gtag === 'function') {
       gtag('event', 'page_view', {
           page_title: document.title,
-          page_path: '/detail/' + allPosts[idx].id,
-          page_location: location.href
+          page_location: url.href
       });
   }
 }
