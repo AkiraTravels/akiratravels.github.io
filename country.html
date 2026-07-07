@@ -121,7 +121,7 @@ window.addEventListener('popstate', () => {
     return;
   }
 
-  document.title = `${country.name} — AKIRA travels`;
+  document.title = `AKIRA travels — ${country.name}`;
   document.getElementById('country-title').textContent = country.name;
 
   gtag('event', 'page_view', { page_title: document.title, page_location: location.href });
@@ -193,7 +193,7 @@ function renderChain() {
 function openDetail(idx) {
   currentIdx = idx;
   const post = allPosts[idx];
-  document.title = `${post.title} — AKIRA travels`;
+  document.title = `${country.name} — ${post.title}`;
   renderDetail(idx);
   document.getElementById('country-wrap').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
@@ -349,7 +349,7 @@ function navigateDetail(idx) {
   if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
   currentIdx = idx;
   const post = allPosts[idx];
-  document.title = `${post.title} — AKIRA travels`;
+  document.title = `${country.name} — ${post.title}`;
   renderDetail(idx);
   window.scrollTo(0, 0);
 
