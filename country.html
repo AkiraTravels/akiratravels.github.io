@@ -192,7 +192,7 @@ function renderChain() {
 // ── 詳細画面 開閉 ──
 function openDetail(idx) {
   currentIdx = idx;
-  document.title = `${post.title} — AKIRA travels`;
+  document.title = `${allPosts[idx].title} — AKIRA travels`;
   renderDetail(idx);
   document.getElementById('country-wrap').style.display = 'none';
   document.getElementById('detail-view').style.display = 'block';
@@ -345,7 +345,7 @@ function navigateDetail(idx) {
   stopAllVideos();
   if (ioInstance) { ioInstance.disconnect(); ioInstance = null; }
   currentIdx = idx;
-  document.title = `${post.title} — AKIRA travels`;
+  document.title = `${allPosts[idx].title} — AKIRA travels`;
   renderDetail(idx);
   window.scrollTo(0, 0);
   history.replaceState({ detail: true, idx }, '', location.href);
