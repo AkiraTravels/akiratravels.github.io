@@ -68,6 +68,13 @@ import { API_BASE } from './js/config.js';
   const errorEl   = document.getElementById('error-msg');
   const wrapEl    = document.getElementById('country-list-wrap');
 
+  // 【追加】トップページ読み込み時、不要なキャッシュ（国別ページの詳細データなど）を削除
+  Object.keys(sessionStorage).forEach(key => {
+    if (key !== 'countries_list' && key !== 'admin_token') {
+      sessionStorage.removeItem(key);
+    }
+  });
+
   // 著作権表示
   document.getElementById('copyright-text').textContent =
     `© 1998–${new Date().getFullYear()} A.Mizui. All rights reserved.`;
