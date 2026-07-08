@@ -45,7 +45,7 @@
   <hr class="footer-rule">
   <footer class="top-footer">
     <div class="footer-icons">
-      <a href="https://m.facebook.com/akiratravels" title="Facebook" id="fb-link">
+      <a href="https://www.facebook.com/share/1CmYLNMtso/" title="Facebook">
         <img src="https://akiratravels.github.io/images/facebook.png" alt="Facebook"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
         <button class="footer-fallback-btn" style="display:none;">Facebook</button>
@@ -151,34 +151,6 @@ function buildCountryCell(country) {
 
   return td;
 }
-</script>
-<script>
-  document.getElementById('fb-link').addEventListener('click', function(e) {
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) return; // PCはそのまま
-
-    e.preventDefault();
-    const appUrl = 'fb://profile/100022736892941';
-    const fallbackUrl = 'https://www.facebook.com/akiratravels';
-
-    // アプリが開いたらページが非表示になるのを検知
-    let appOpened = false;
-    document.addEventListener('visibilitychange', function handler() {
-      if (document.hidden) {
-        appOpened = true; // アプリが開いた
-      }
-      document.removeEventListener('visibilitychange', handler);
-    });
-
-    window.location = appUrl;
-
-    setTimeout(() => {
-      if (!appOpened) {
-        // アプリが開かなかった＝未インストール → ブラウザへ
-        window.location = fallbackUrl;
-      }
-    }, 1500);
-  });
 </script>
 </body>
 </html>
