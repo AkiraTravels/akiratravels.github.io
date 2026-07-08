@@ -108,7 +108,7 @@ a.country-link { text-decoration: none; color: inherit; }
 @media (min-width: 500px) {
   /* 横並びによりスペースが必要になるため、要素の幅を少し広めに確保します */
   .detail-body { 
-    width: 95%; 
+    width: 90%; 
     max-width: 1920px; 
     margin-left: auto; 
     margin-right: auto; 
@@ -118,8 +118,8 @@ a.country-link { text-decoration: none; color: inherit; }
   .media-item {
     display: grid;
     grid-template-columns: 2fr 1fr; /* メディアとキャプションの幅の比率 (2:1) */
-    gap: 20px; /* メディアとキャプションの隙間 */
-    margin-bottom: 48px; /* 各メディア間の余白 */
+    gap: 15px; /* メディアとキャプションの隙間 */
+    margin-bottom: 30px; /* 各メディア間の余白 */
     align-items: start; /* 上端で揃える */
   }
 
