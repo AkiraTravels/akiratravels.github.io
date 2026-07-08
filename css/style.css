@@ -106,7 +106,27 @@ a.country-link { text-decoration: none; color: inherit; }
 }
 
 @media (min-width: 900px) {
-  .detail-body { width: 65%; margin-left: auto; margin-right: auto; }
+  /* 横並びによりスペースが必要になるため、要素の幅を少し広めに確保します */
+  .detail-body { 
+    width: 85%; 
+    max-width: 1000px; 
+    margin-left: auto; 
+    margin-right: auto; 
+  }
+
+  /* Gridレイアウトを使用してメディアとキャプションを横並びに配置 */
+  .media-item {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* メディアとキャプションの幅の比率 (2:1) */
+    gap: 32px; /* メディアとキャプションの隙間 */
+    margin-bottom: 48px; /* 各メディア間の余白 */
+    align-items: start; /* 上端で揃える */
+  }
+
+  /* PC版ではモバイル用で設定されていたパディングをリセット */
+  .media-caption {
+    padding: 0;
+  }
 }
 
 /* スティッキーバー */
