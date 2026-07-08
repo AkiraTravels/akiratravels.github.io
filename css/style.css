@@ -108,7 +108,7 @@ a.country-link { text-decoration: none; color: inherit; }
 @media (min-width: 500px) {
   /* 横並びによりスペースが必要になるため、要素の幅を少し広めに確保します */
   .detail-body { 
-    width: 90%; 
+    width: 95%; 
     max-width: 1920px; 
     margin-left: auto; 
     margin-right: auto; 
